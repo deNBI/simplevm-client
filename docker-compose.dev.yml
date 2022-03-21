@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  portal-client:
+    container_name: client
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${CLIENT_PORT}:9090
+    env_file:
+      - .env
+    volumes:
+      - ./simple_vm_client/config/config_local.yml:/code/simple_vm_client/config.yml
+      - ./simple_vm_client/keys/localhost/server.pem:/code/simple_vm_client/keys/server.pem
+    command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
+    networks:
+      - portal
+
+  client_redis:
+    container_name: client_redis
+    image: redis:6.2.6
+    expose:
+      - "6379"
+    networks:
+      - portal
+
+networks:
+  portal:
+    name: portal_default
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440

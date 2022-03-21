@@ -1,0 +1,63 @@
+version: '3.5'
+services:
+  portal-client:
+    container_name: client
+    image: denbicloud/cloud-portal-client:${CLOUD_PORTAL_CLIENT_TAG}
+    ports:
+      - ${CLIENT_PORT}:9090
+    env_file:
+      - .env
+    volumes:
+      -  ${client_PERSISTENT_PATH}/config.yml:/code/simple_vm_client/config.yml
+      -  ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/server.pem
+      - ./logs/client:/code/simple_vm_client/log:rw
+    command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
+    networks:
+      - portal
+
+  client_redis:
+    container_name: client_redis
+    image: redis:6.2.6
+    expose:
+      - "6379"
+    networks:
+      - portal
+
+  bibigrid:
+    container_name: bibigrid
+    image: bibiserv/bibigrid:bibigrid-rest-2.3
+    volumes:
+      - ./scripts/bibigrid/clear_keys_cron:/etc/crontabs/root
+    env_file:
+      - .env
+    environment:
+      - server.enableHttps=false
+      - server.enableHttp=true
+    expose:
+      - "8080"
+    networks:
+      - portal
+
+  # filebeat
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.16.3
+    env_file:
+      - .env
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs:/usr/share/filebeat/log:ro
+      - ./filebeat/data:/usr/share/filebeat/data:rw
+    command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
+    networks:
+      - portal
+
+networks:
+  portal:
+    name: portal_default
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440

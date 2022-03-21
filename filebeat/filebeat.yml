@@ -1,0 +1,26 @@
+fields_under_root: true
+fields:
+  region: '${REGION}'
+
+output.elasticsearch:
+    hosts:
+      - 'https://${HOST}:443'
+    path: /elasticsearch/
+    username: '${ELASTIC_USER}'
+    password: '${ELASTIC_PASSWORD}'
+    ssl:
+      verification_mode: none
+    timeout: 15
+    headers:
+      HOST: '${HOST}'
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    exclude_files: ['\.swp$']
+    paths:
+      - /usr/share/filebeat/log/client/*.log
+    multiline:
+      pattern: '^\d{4}-\d{2}-\d{2}'
+      negate: true
+      match: after
