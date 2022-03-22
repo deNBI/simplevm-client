@@ -430,7 +430,7 @@ service VirtualMachineService {
 
     /** Create a backend*/
     Backend create_backend(
-    1:string username,
+    1:string owner,
     2:string user_path,
     3:string template,
     4:string upstream_url
@@ -441,7 +441,7 @@ service VirtualMachineService {
 
     /** Get all backends by owner*/
     list<Backend> get_backends_by_owner(
-    1:string username
+    1:string owner
     )  throws(1:DefaultException d)
 
     /** Get all backends by template*/

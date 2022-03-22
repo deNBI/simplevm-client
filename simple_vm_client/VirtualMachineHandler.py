@@ -211,10 +211,10 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.get_limits()
 
     def create_backend(
-        self, username: str, user_key_url: str, template: str, upstream_url: str
+        self, owner: str, user_key_url: str, template: str, upstream_url: str
     ) -> Backend:
         return self.forc_connector.create_backend(
-            owner=username,
+            owner=owner,
             user_key_url=user_key_url,
             template=template,
             upstream_url=upstream_url,
@@ -226,8 +226,8 @@ class VirtualMachineHandler(Iface):
     def get_backends(self) -> list[Backend]:
         return self.forc_connector.get_backends()
 
-    def get_backends_by_owner(self, username: str) -> list[Backend]:
-        return self.forc_connector.get_backends_by_owner(owner=username)
+    def get_backends_by_owner(self, owner: str) -> list[Backend]:
+        return self.forc_connector.get_backends_by_owner(owner=owner)
 
     def get_backends_by_template(self, template: str) -> list[Backend]:
         return self.forc_connector.get_backends_by_template(template=template)
