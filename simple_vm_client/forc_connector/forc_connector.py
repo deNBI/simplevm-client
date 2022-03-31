@@ -453,6 +453,7 @@ class ForcConnector:
         research_environment_template: str,
         create_only_backend: bool,
         conda_packages: list[CondaPackage],
+        apt_packages: list[str],
         openstack_id: str,
         port: int,
         ip: str,
@@ -473,6 +474,7 @@ class ForcConnector:
             public_key=public_key,
             pool=self.redis_pool,
             conda_packages=conda_packages,
+            apt_packages=apt_packages,
             loaded_metadata_keys=list(
                 self.template.get_loaded_resenv_metadata().keys()
             ),

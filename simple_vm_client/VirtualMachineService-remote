@@ -30,6 +30,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('   get_calculation_values()')
     print('  string import_keypair(string keyname, string public_key)')
     print('   get_vm_ports(string openstack_id)')
+    print('  void add_udp_security_group(string server_id)')
     print('   get_flavors()')
     print('   get_images()')
     print('   get_public_images()')
@@ -44,7 +45,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void detach_ip_from_server(string server_id, string floating_ip)')
     print('  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach)')
     print('  bool exist_server(string name)')
-    print('  int create_and_deploy_playbook(string public_key, string openstack_id,  conda_packages, string research_environment_template, bool create_only_backend)')
+    print('  int create_and_deploy_playbook(string public_key, string openstack_id,  conda_packages, string research_environment_template,  apt_packages, bool create_only_backend)')
     print('  PlaybookResult get_playbook_logs(string openstack_id)')
     print('  bool has_forc()')
     print('  string get_forc_url()')
@@ -194,6 +195,12 @@ elif cmd == 'get_vm_ports':
         sys.exit(1)
     pp.pprint(client.get_vm_ports(args[0],))
 
+elif cmd == 'add_udp_security_group':
+    if len(args) != 1:
+        print('add_udp_security_group requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.add_udp_security_group(args[0],))
+
 elif cmd == 'get_flavors':
     if len(args) != 0:
         print('get_flavors requires 0 args')
@@ -279,10 +286,10 @@ elif cmd == 'exist_server':
     pp.pprint(client.exist_server(args[0],))
 
 elif cmd == 'create_and_deploy_playbook':
-    if len(args) != 5:
-        print('create_and_deploy_playbook requires 5 args')
+    if len(args) != 6:
+        print('create_and_deploy_playbook requires 6 args')
         sys.exit(1)
-    pp.pprint(client.create_and_deploy_playbook(args[0], args[1], eval(args[2]), args[3], eval(args[4]),))
+    pp.pprint(client.create_and_deploy_playbook(args[0], args[1], eval(args[2]), args[3], eval(args[4]), eval(args[5]),))
 
 elif cmd == 'get_playbook_logs':
     if len(args) != 1:
