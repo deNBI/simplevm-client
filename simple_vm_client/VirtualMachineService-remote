@@ -44,7 +44,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void detach_ip_from_server(string server_id, string floating_ip)')
     print('  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach)')
     print('  bool exist_server(string name)')
-    print('  int create_and_deploy_playbook(string public_key, string openstack_id,  conda_packages, string research_environment_template, bool create_only_backend)')
+    print('  int create_and_deploy_playbook(string public_key, string openstack_id,  conda_packages, string research_environment_template,  apt_packages, bool create_only_backend)')
     print('  PlaybookResult get_playbook_logs(string openstack_id)')
     print('  bool has_forc()')
     print('  string get_forc_url()')
@@ -279,10 +279,10 @@ elif cmd == 'exist_server':
     pp.pprint(client.exist_server(args[0],))
 
 elif cmd == 'create_and_deploy_playbook':
-    if len(args) != 5:
-        print('create_and_deploy_playbook requires 5 args')
+    if len(args) != 6:
+        print('create_and_deploy_playbook requires 6 args')
         sys.exit(1)
-    pp.pprint(client.create_and_deploy_playbook(args[0], args[1], eval(args[2]), args[3], eval(args[4]),))
+    pp.pprint(client.create_and_deploy_playbook(args[0], args[1], eval(args[2]), args[3], eval(args[4]), eval(args[5]),))
 
 elif cmd == 'get_playbook_logs':
     if len(args) != 1:
