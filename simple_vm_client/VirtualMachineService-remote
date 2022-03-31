@@ -30,6 +30,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('   get_calculation_values()')
     print('  string import_keypair(string keyname, string public_key)')
     print('   get_vm_ports(string openstack_id)')
+    print('  void add_udp_security_group(string server_id)')
     print('   get_flavors()')
     print('   get_images()')
     print('   get_public_images()')
@@ -193,6 +194,12 @@ elif cmd == 'get_vm_ports':
         print('get_vm_ports requires 1 args')
         sys.exit(1)
     pp.pprint(client.get_vm_ports(args[0],))
+
+elif cmd == 'add_udp_security_group':
+    if len(args) != 1:
+        print('add_udp_security_group requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.add_udp_security_group(args[0],))
 
 elif cmd == 'get_flavors':
     if len(args) != 0:

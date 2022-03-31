@@ -129,7 +129,7 @@ class Playbook(object):
 
     def copy_and_init_research_environment(self) -> None:
         if not self.research_environment_template:
-            pass
+            return
         site_specific_yml = (
             f"/{self.research_environment_template}{'-' + self.cloud_site}.yml"
         )
@@ -175,7 +175,7 @@ class Playbook(object):
 
     def copy_and_init_apt_packages(self) -> None:
         if not self.apt_packages:
-            pass
+            return
         site_specific_yml = f"/{OPTIONAL}{'-' + self.cloud_site}.yml"
         playbook_name_local = OPTIONAL
         if os.path.isfile(self.playbooks_dir + site_specific_yml):
@@ -195,7 +195,7 @@ class Playbook(object):
                             self.directory.name + playbook_var_yml, mode="w"
                     ) as variables:
                         self.yaml_exec.dump(data, variables)
-                    self.add_to_playbook_lists(playbook_name_local, BIOCONDA)
+                    self.add_to_playbook_lists(playbook_name_local, OPTIONAL)
             except shutil.Error as e:
                 logger.exception(e)
                 self.add_tasks_only(playbook_name_local)
@@ -209,7 +209,7 @@ class Playbook(object):
 
     def copy_and_init_conda_packages(self) -> None:
         if not self.conda_packages:
-            pass
+            return
         site_specific_yml = f"/{BIOCONDA}{'-' + self.cloud_site}.yml"
         playbook_name_local = BIOCONDA
         if os.path.isfile(self.playbooks_dir + site_specific_yml):

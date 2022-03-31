@@ -291,6 +291,18 @@ service VirtualMachineService {
     1: string openstack_id) throws(1:ServerNotFoundException s)
 
 
+     /**
+    * Adds udp security group to a server
+    */
+    void add_udp_security_group(
+    /** OpenStack id of the server*/
+    1:string server_id)
+
+    throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
+
+
 	 /**
 	 * Get Flavors.
 	 * Returns: List of flavor instances.
@@ -363,10 +375,9 @@ service VirtualMachineService {
     /** Metadata for the new instance*/
     5:map<string,string> metadata,
 
-    7:string research_environment,
-     8:list<map<string,string>> volume_ids_path_new,
-     9:list<map<string,string>> volume_ids_path_attach,
-     10:list <string> additional_keys
+     7:list<map<string,string>> volume_ids_path_new,
+     8:list<map<string,string>> volume_ids_path_attach,
+     9:list <string> additional_keys
 )
 
     throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,5:ImageNotFoundException i,6:FlavorNotFoundException f,7:DefaultException o)

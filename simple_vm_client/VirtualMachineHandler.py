@@ -255,6 +255,10 @@ class VirtualMachineHandler(Iface):
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
 
+    def add_udp_security_group(self, server_id:str)-> None:
+        return self.openstack_connector.add_udp_security_group(server_id=server_id)
+
+
     def start_server(
         self,
         flavor_name: str,
