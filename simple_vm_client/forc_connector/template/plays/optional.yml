@@ -1,11 +1,4 @@
-- name: Wait for automatic system updates 1
-  shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
-
-- name: Wait for automatic system updates 2
-  shell: while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 1; done;
-
-- name: Installing MOSH
+- name: Installing Specific APT Packages
   apt:
-    name: mosh
+    name: "{{ apt_packages }}"
     state: present
-  when: optional_defined.mosh is defined
