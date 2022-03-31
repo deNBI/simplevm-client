@@ -27,9 +27,9 @@
 
 
   tasks:
-    - name: Checkout cloud-portal-client repository
+    - name: Checkout simplevm-client repository
       git:
-        repo: "git@github.com:deNBI/cloud-portal-client.git"
+        repo: "git@github.com:deNBI/simplevm-client.git"
         dest: "{{ client.REPO_PATH }}"
         accept_hostkey: yes
         force: yes
