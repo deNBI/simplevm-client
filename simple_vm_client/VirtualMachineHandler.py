@@ -255,6 +255,10 @@ class VirtualMachineHandler(Iface):
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
 
+    def add_udp_security_group(self, server_id:str)-> None:
+        return self.openstack_connector.add_udp_security_group(server_id=server_id)
+
+
     def start_server(
         self,
         flavor_name: str,
@@ -325,6 +329,7 @@ class VirtualMachineHandler(Iface):
         openstack_id: str,
         conda_packages: list[CondaPackage],
         research_environment_template: str,
+        apt_packages:list[str],
         create_only_backend: bool,
     ) -> int:
         port = int(
@@ -337,6 +342,7 @@ class VirtualMachineHandler(Iface):
             research_environment_template=research_environment_template,
             create_only_backend=create_only_backend,
             conda_packages=conda_packages,
+            apt_packages=apt_packages,
             openstack_id=openstack_id,
             port=port,
             ip=gateway_ip,

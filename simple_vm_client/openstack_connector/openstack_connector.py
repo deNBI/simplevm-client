@@ -993,6 +993,49 @@ class OpenStackConnector:
             )
         return deactivate_update_script
 
+    def add_udp_security_group(self, server_id):
+        logger.info(f"Setting up UDP security group for {server_id}")
+        server = self.get_server(openstack_id=server_id)
+        sec = self.openstack_connection.get_security_group(name_or_id=server.name + "_udp")
+        if sec:
+            logger.info(
+                f"UDP Security group with name {server.name + '_udp'} already exists."
+            )
+            server_security_groups = self.openstack_connection.list_server_security_groups(server)
+            for sg in server_security_groups:
+                if sg["name"] == server.name + "_udp":
+                    logger.info(
+                        "UDP Security group with name {} already added to server.".format(
+                            server.name + "_udp"
+                        )
+                    )
+                    return
+
+            self.openstack_connection.compute.add_security_group_to_server(
+                server=server_id, security_group=sec
+            )
+
+            return
+        vm_ports=self.get_vm_ports(openstack_id=server_id)
+        udp_port=vm_ports['udp']
+
+
+        security_group = self.create_security_group(
+            name=server.name + "_udp",
+            udp_port_start=int(udp_port),
+            udp=True,
+            ssh=False,
+            description="UDP",
+        )
+        logger.info(security_group)
+        logger.info(f"Add security group {security_group.id} to server {server_id} ")
+        self.openstack_connection.compute.add_security_group_to_server(
+            server=server_id, security_group=security_group
+        )
+
+        return
+
+
     def add_cluster_machine(
         self,
         cluster_id: str,

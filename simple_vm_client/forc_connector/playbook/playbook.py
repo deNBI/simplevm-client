@@ -11,26 +11,26 @@ from util.logger import setup_custom_logger
 from util.state_enums import VmTaskStates
 
 BIOCONDA = "bioconda"
-OPTIONAL = "optional"
 MOSH = "mosh"
-
+OPTIONAL = "optional"
 logger = setup_custom_logger(__name__)
 
 
 class Playbook(object):
     def __init__(
-        self,
-        ip: str,
-        port: int,
-        research_environment_template: str,
-        research_environment_template_version: str,
-        create_only_backend: bool,
-        conda_packages: list[CondaPackage],
-        osi_private_key: str,
-        public_key: str,
-        pool: redis.ConnectionPool,
-        loaded_metadata_keys: list[str],
-        cloud_site: str,
+            self,
+            ip: str,
+            port: int,
+            research_environment_template: str,
+            research_environment_template_version: str,
+            create_only_backend: bool,
+            conda_packages: list[CondaPackage],
+            apt_packages: list[str],
+            osi_private_key: str,
+            public_key: str,
+            pool: redis.ConnectionPool,
+            loaded_metadata_keys: list[str],
+            cloud_site: str,
     ):
         self.loaded_metadata_keys = loaded_metadata_keys
         self.cloud_site: str = cloud_site
@@ -40,6 +40,7 @@ class Playbook(object):
         self.tasks: list[dict[str, str]] = []  # task list
         self.always_tasks: list[dict[str, str]] = []
         self.conda_packages = conda_packages
+        self.apt_packages = apt_packages
         self.process: subprocess.Popen = None  # type: ignore
         self.research_environment_template_version = (
             research_environment_template_version
@@ -86,57 +87,56 @@ class Playbook(object):
         self.inventory.write(inventory_string)
         self.inventory.close()
 
-    def copy_playbooks_and_init(self, public_key: str) -> None:
-        # go through every wanted playbook
-        # start with conda packages
-        self.copy_and_init_conda_packages()
-        self.copy_and_init_research_environment()
-
-        # for k, v in playbooks_information.items():
-        #    self.copy_and_init(k, v)
-
-        # init yml to change public keys as last task
+    def copy_and_init_change_keys(self, public_key) -> None:
         shutil.copy(self.playbooks_dir + "/change_key.yml", self.directory.name)
         shutil.copy(
             self.playbooks_dir + "/change_key_vars_file.yml", self.directory.name
         )
         with open(
-            self.directory.name + "/change_key_vars_file.yml", mode="r"
+                self.directory.name + "/change_key_vars_file.yml", mode="r"
         ) as key_file:
             data_ck = self.yaml_exec.load(key_file)
             data_ck["change_key_vars"]["key"] = public_key.strip('"')
         with open(
-            self.directory.name + "/change_key_vars_file.yml", mode="w"
+                self.directory.name + "/change_key_vars_file.yml", mode="w"
         ) as key_file:
             self.yaml_exec.dump(data_ck, key_file)
         self.add_to_playbook_always_lists("change_key")
+
+    def copy_playbooks_and_init(self, public_key: str) -> None:
+        # go through every wanted playbook
+        # start with conda packages
+        self.copy_and_init_conda_packages()
+        self.copy_and_init_apt_packages()
+        self.copy_and_init_research_environment()
+        self.copy_and_init_change_keys(public_key=public_key)
 
         # write all vars_files and tasks in generic_playbook
         shutil.copy(
             self.playbooks_dir + "/" + self.playbook_exec_name, self.directory.name
         )
         with open(
-            self.directory.name + "/" + self.playbook_exec_name, mode="r"
+                self.directory.name + "/" + self.playbook_exec_name, mode="r"
         ) as generic_playbook:
             data_gp = self.yaml_exec.load(generic_playbook)
             data_gp[0]["vars_files"] = self.vars_files
             data_gp[0]["tasks"][0]["block"] = self.tasks
             data_gp[0]["tasks"][0]["always"] = self.always_tasks
         with open(
-            self.directory.name + "/" + self.playbook_exec_name, mode="w"
+                self.directory.name + "/" + self.playbook_exec_name, mode="w"
         ) as generic_playbook:
             self.yaml_exec.dump(data_gp, generic_playbook)
 
     def copy_and_init_research_environment(self) -> None:
         if not self.research_environment_template:
-            pass
+            return
         site_specific_yml = (
             f"/{self.research_environment_template}{'-' + self.cloud_site}.yml"
         )
         playbook_name_local = self.research_environment_template
         if os.path.isfile(self.playbooks_dir + site_specific_yml):
             playbook_name_local = (
-                self.research_environment_template + "-" + self.cloud_site
+                    self.research_environment_template + "-" + self.cloud_site
             )
         playbook_yml = f"/{playbook_name_local}.yml"
         playbook_var_yml = f"/{self.research_environment_template}_vars_file.yml"
@@ -145,7 +145,7 @@ class Playbook(object):
             try:
                 shutil.copy(self.playbooks_dir + playbook_var_yml, self.directory.name)
                 with open(
-                    self.directory.name + playbook_var_yml, mode="r"
+                        self.directory.name + playbook_var_yml, mode="r"
                 ) as variables:
                     data = self.yaml_exec.load(variables)
 
@@ -156,7 +156,7 @@ class Playbook(object):
                         "create_only_backend"
                     ] = str(self.create_only_backend).lower()
                     with open(
-                        self.directory.name + playbook_var_yml, mode="w"
+                            self.directory.name + playbook_var_yml, mode="w"
                     ) as variables:
                         self.yaml_exec.dump(data, variables)
                     self.add_to_playbook_lists(
@@ -173,9 +173,43 @@ class Playbook(object):
         except IOError as e:
             logger.exception(e)
 
+    def copy_and_init_apt_packages(self) -> None:
+        if not self.apt_packages:
+            return
+        site_specific_yml = f"/{OPTIONAL}{'-' + self.cloud_site}.yml"
+        playbook_name_local = OPTIONAL
+        if os.path.isfile(self.playbooks_dir + site_specific_yml):
+            playbook_name_local = OPTIONAL + "-" + self.cloud_site
+        playbook_yml = f"/{playbook_name_local}.yml"
+        playbook_var_yml = f"/{OPTIONAL}_vars_file.yml"
+        try:
+            shutil.copy(self.playbooks_dir + playbook_yml, self.directory.name)
+            try:
+                shutil.copy(self.playbooks_dir + playbook_var_yml, self.directory.name)
+                with open(
+                        self.directory.name + playbook_var_yml, mode="r"
+                ) as variables:
+                    data = self.yaml_exec.load(variables)
+                    data["apt_packages"] = self.apt_packages
+                    with open(
+                            self.directory.name + playbook_var_yml, mode="w"
+                    ) as variables:
+                        self.yaml_exec.dump(data, variables)
+                    self.add_to_playbook_lists(playbook_name_local, OPTIONAL)
+            except shutil.Error as e:
+                logger.exception(e)
+                self.add_tasks_only(playbook_name_local)
+            except IOError as e:
+                logger.exception(e)
+                self.add_tasks_only(playbook_name_local)
+        except shutil.Error as e:
+            logger.exception(e)
+        except IOError as e:
+            logger.exception(e)
+
     def copy_and_init_conda_packages(self) -> None:
         if not self.conda_packages:
-            pass
+            return
         site_specific_yml = f"/{BIOCONDA}{'-' + self.cloud_site}.yml"
         playbook_name_local = BIOCONDA
         if os.path.isfile(self.playbooks_dir + site_specific_yml):
@@ -187,7 +221,7 @@ class Playbook(object):
             try:
                 shutil.copy(self.playbooks_dir + playbook_var_yml, self.directory.name)
                 with open(
-                    self.directory.name + playbook_var_yml, mode="r"
+                        self.directory.name + playbook_var_yml, mode="r"
                 ) as variables:
                     data = self.yaml_exec.load(variables)
                     p_dict = {}
@@ -201,12 +235,12 @@ class Playbook(object):
                                 }
                             }
                         )
-                        data[BIOCONDA + "_tools"]["packages"] = p_dict
-                        with open(
+                    data[BIOCONDA + "_tools"]["packages"] = p_dict
+                    with open(
                             self.directory.name + playbook_var_yml, mode="w"
-                        ) as variables:
-                            self.yaml_exec.dump(data, variables)
-                        self.add_to_playbook_lists(playbook_name_local, BIOCONDA)
+                    ) as variables:
+                        self.yaml_exec.dump(data, variables)
+                    self.add_to_playbook_lists(playbook_name_local, BIOCONDA)
             except shutil.Error as e:
                 logger.exception(e)
                 self.add_tasks_only(playbook_name_local)
@@ -219,7 +253,7 @@ class Playbook(object):
             logger.exception(e)
 
     def add_to_playbook_lists(
-        self, playbook_name_local: str, playbook_name: str
+            self, playbook_name_local: str, playbook_name: str
     ) -> None:
         self.vars_files.append(playbook_name + "_vars_file.yml")
         self.tasks.append(
