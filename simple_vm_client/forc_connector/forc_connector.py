@@ -433,8 +433,8 @@ class ForcConnector:
         self, research_environment: str
     ) -> ResearchEnvironmentMetadata:
         logger.info(f"Get Metadata Research environment: {research_environment}")
-        if research_environment in self.template.get_loaded_resenv_metadata():
-            resenv_metadata = self.template.get_loaded_resenv_metadata()[
+        if research_environment in self.template.loaded_research_env_metadata:
+            resenv_metadata = self.template.loaded_research_env_metadata[
                 research_environment
             ]
             return resenv_metadata
@@ -476,7 +476,7 @@ class ForcConnector:
             conda_packages=conda_packages,
             apt_packages=apt_packages,
             loaded_metadata_keys=list(
-                self.template.get_loaded_resenv_metadata().keys()
+                self.template.loaded_research_env_metadata().keys()
             ),
             cloud_site=cloud_site,
         )
