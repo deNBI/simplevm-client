@@ -29,10 +29,8 @@ class Playbook(object):
             osi_private_key: str,
             public_key: str,
             pool: redis.ConnectionPool,
-            loaded_metadata_keys: list[str],
             cloud_site: str,
     ):
-        self.loaded_metadata_keys = loaded_metadata_keys
         self.cloud_site: str = cloud_site
         self.redis: redis.Redis = redis.Redis(connection_pool=pool)  # redis connection
         self.yaml_exec = ruamel.yaml.YAML()  # yaml writer/reader

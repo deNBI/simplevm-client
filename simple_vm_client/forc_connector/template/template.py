@@ -163,7 +163,7 @@ class Template(object):
         return dir_path
 
     def add_forc_allowed_template(self, metadata: dict) -> None:
-        if metadata.get("forc_allowed", False):
+        if metadata.get("needs_forc_support", False):
             logger.info(f"Add {metadata} - to allowed templates")
             template = ResearchEnvironmentTemplate(
                 template_name=metadata["template_name"],
@@ -181,7 +181,6 @@ class Template(object):
                 ],
             )
             self._allowed_forc_templates.append(template)
-            self._allowed_forc_templates = set(self._forc_allowed)
 
     def load_resenv_metadata(self) -> list[dict[str, str]]:
         templates_metada = []
@@ -212,6 +211,7 @@ class Template(object):
         return ""
 
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
+        logger.info(f"Allowed templates -> {self._allowed_forc_templates}")
         return self._allowed_forc_templates
 
     def update_forc_allowed(self, template_metadata: dict[str, str]) -> None:

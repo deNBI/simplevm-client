@@ -475,9 +475,6 @@ class ForcConnector:
             pool=self.redis_pool,
             conda_packages=conda_packages,
             apt_packages=apt_packages,
-            loaded_metadata_keys=list(
-                self.template.loaded_research_env_metadata().keys()
-            ),
             cloud_site=cloud_site,
         )
         self.redis_connection.hset(
