@@ -3,7 +3,7 @@ production: False
 
 
 redis:
-  host: client_redis
+  host: simplevm_client_redis
   port: 6379
   password: ""
 
