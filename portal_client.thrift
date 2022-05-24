@@ -124,35 +124,31 @@ struct VM {
 	/** The image of the VM*/
 	2: required Image image,
 
-	/** The status of the VM*/
-	3: required string status
-
 	/** The metadata of the VM*/
-	4: optional map<string,string> metadata
+	3: optional map<string,string> metadata
 
 	/** The project_id of the VM*/
-	5: optional string project_id
+	4: optional string project_id
 
 	/** The keyname from the public key of the VM*/
-	6: required string keyname
+	5: required string keyname
 
 	/** The openstack_id of the VM*/
-	7: required string openstack_id
+	6: required string openstack_id
 
 	/** The name of the VM*/
-	8: required string name
+	7: required string name
 
 	/** The the creation time of the VM*/
-	9: required string created_at
+	8: required string created_at
 
 	/** The floating ip of the VM*/
-	10: optional string floating_ip
+	9: optional string floating_ip
 
 	/** The fixed ips of the VM*/
-	11: required string fixed_ip
-	12:optional string task_state
-	13:optional i32 power_state
-	14:optional string vm_state
+	10: required string fixed_ip
+	11:optional string task_state
+	12:required string vm_state
 }
 
 struct ClusterInstance{
