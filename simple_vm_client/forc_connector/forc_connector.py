@@ -191,7 +191,7 @@ class ForcConnector:
                 template=template,
             )
         try:
-            post_url = f"{self.FORC_URL}/backends/"
+            post_url = f"{self.FORC_URL}/backends"
             backend_info = {
                 "owner": owner,
                 "user_key_url": user_key_url,
@@ -235,7 +235,7 @@ class ForcConnector:
 
     def get_backends(self) -> list[Backend]:
         logger.info("Get Backends")
-        get_url = f"{self.FORC_URL}/backends/"
+        get_url = f"{self.FORC_URL}/backends"
         try:
             response = requests.get(
                 get_url,
