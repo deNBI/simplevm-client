@@ -92,7 +92,6 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     server = VM(
         flavor=flavor,
         image=image,
-        status=openstack_server.status,
         metadata=openstack_server.metadata,
         project_id=openstack_server.project_id,
         keyname=openstack_server.key_name,
@@ -101,7 +100,6 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         created_at=openstack_server.created_at,
         task_state=openstack_server.task_state or "",
         vm_state=openstack_server.vm_state,
-        power_state=openstack_server.power_state,
         fixed_ip=fixed_ip,
         floating_ip=floating_ip,
     )

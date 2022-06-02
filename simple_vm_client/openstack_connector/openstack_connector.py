@@ -685,7 +685,7 @@ class OpenStackConnector:
                     message=f"Instance {openstack_id} not found",
                     name_or_id=openstack_id,
                 )
-            if server.status == VmStates.ACTIVE.value:
+            if server.vm_state == VmStates.ACTIVE.value:
                 server_base = int(server.private_v4.split(".")[-1])
                 port = self.BASE_GATEWAY_PORT + (
                     server_base * self.SSH_MULTIPLICATION_PORT
@@ -875,6 +875,7 @@ class OpenStackConnector:
                 try:
                     volumes.append(self.get_volume(name_or_id=volume_id))
                 except VolumeNotFoundException:
+                    logger.error(f"Could not find volume: {volume_id} - attaching to server {servername} won't work!")
                     pass
             init_script = self.create_userdata(
                 volume_ids_path_new=volume_ids_path_new,
