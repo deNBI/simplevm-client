@@ -5,7 +5,6 @@ import redis
 import requests
 import yaml
 from openstack.compute.v2.server import Server
-from requests import Timeout
 from ttypes import (
     Backend,
     BackendNotFoundException,
@@ -83,7 +82,7 @@ class ForcConnector:
                 return ["Error: 401"]
             else:
                 return [response.json()]
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.info(msg=f"Get users for backend timed out. {e}")
             return []
 
@@ -106,7 +105,7 @@ class ForcConnector:
             )
             data: dict[str, str] = response.json()
             return data
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.info(msg=f"Delete user from backend timed out. {e}")
             return {"Error": "Timeout."}
         except Exception as e:
@@ -137,7 +136,7 @@ class ForcConnector:
                         message=str(response.content), name_or_id=backend_id
                     )
 
-        except Timeout:
+        except requests.Timeout:
             logger.exception(msg="delete_backend timed out")
             raise DefaultException(message="delete_backend timed out")
 
@@ -168,7 +167,7 @@ class ForcConnector:
                 logger.exception(e)
                 raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
             return data
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.info(msg=f"add user to backend timed out. {e}")
             return {"Error": "Timeout."}
         except Exception as e:
@@ -225,7 +224,7 @@ class ForcConnector:
             )
             return new_backend
 
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.info(msg=f"create_backend timed out. {e}")
             raise DefaultException(message=e)
 
@@ -258,7 +257,7 @@ class ForcConnector:
                         )
                     )
                 return backends
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.exception(msg=f"create_backend timed out. {e}")
             raise DefaultException(message=str(e))
 
@@ -288,7 +287,7 @@ class ForcConnector:
                         )
                     )
                 return backends
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.exception(msg=f"create_backend timed out. {e}")
             raise DefaultException(message=str(e))
 
@@ -315,7 +314,7 @@ class ForcConnector:
                 template=data["template"],
                 template_version=data["template_version"],
             )
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.exception(msg=f"create_backend timed out. {e}")
             raise DefaultException(message=str(e))
 
@@ -345,7 +344,7 @@ class ForcConnector:
                         )
                     )
                 return backends
-        except Timeout as e:
+        except requests.Timeout as e:
             logger.exception(msg=f"create_backend timed out. {e}")
             raise DefaultException(message=str(e))
 

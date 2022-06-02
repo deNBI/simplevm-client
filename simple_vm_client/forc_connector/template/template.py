@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import shutil
 import zipfile
@@ -8,7 +7,6 @@ from pathlib import Path
 
 import requests
 import yaml
-from requests import Timeout
 from ttypes import ResearchEnvironmentTemplate
 from util.logger import setup_custom_logger
 
@@ -231,7 +229,7 @@ class Template(object):
                     logger.info(response.content)
                     if response.status_code == 200:
                         allowed_versions.append(forc_version)
-                except Timeout as e:
+                except requests.Timeout as e:
                     logger.info(f"checking template/version timed out. {e}")
             allowed_versions.sort(key=LooseVersion)
             allowed_versions.reverse()

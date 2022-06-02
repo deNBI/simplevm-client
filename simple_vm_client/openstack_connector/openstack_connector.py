@@ -875,6 +875,7 @@ class OpenStackConnector:
                 try:
                     volumes.append(self.get_volume(name_or_id=volume_id))
                 except VolumeNotFoundException:
+                    logger.error(f"Could not find volume: {volume_id} - attaching to server {servername} won't work!")
                     pass
             init_script = self.create_userdata(
                 volume_ids_path_new=volume_ids_path_new,

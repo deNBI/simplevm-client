@@ -64,15 +64,15 @@ class BibigridConnector:
         try:
             json_resp["log"] = str(json_resp["log"])
         except Exception:
-            pass
+            logger.info(f"No Logs for Cluster - {cluster_id}")
         try:
             json_resp["msg"] = str(json_resp["msg"])
         except Exception:
-            pass
+            logger.info(f"No msg for Cluster - {cluster_id}")
 
         return json_resp
 
-    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
+    def get_cluster_info(self, cluster_id: str) -> ClusterInfo|None:
         logger.info(f"Get Cluster info from {cluster_id}")
         infos: list[dict[str, str]] = self.get_clusters_info()
         for info in infos:
@@ -149,7 +149,6 @@ class BibigridConnector:
         logger.info(
             f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n\tuser:{user}"
         )
-        master_instance = master_instance
         wI = []
         for wk in worker_instances:
             logger.info(wk)
