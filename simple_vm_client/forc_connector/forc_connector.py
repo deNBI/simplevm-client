@@ -70,7 +70,7 @@ class ForcConnector:
 
     def get_users_from_backend(self, backend_id: str) -> list[str]:
         logger.info(f"Get users from backend {backend_id}")
-        get_url = f"{self.FORC_URL}/users/{backend_id}"
+        get_url = f"{self.FORC_URL}users/{backend_id}"
         try:
             response = requests.get(
                 get_url,
@@ -90,7 +90,7 @@ class ForcConnector:
         self, user_id: str, backend_id: str, owner: str
     ) -> dict[str, str]:
         logger.info(f"Delete user {user_id} from backend {backend_id}")
-        delete_url = f"{self.FORC_URL}/users/{backend_id}"
+        delete_url = f"{self.FORC_URL}users/{backend_id}"
         user_info = {
             "owner": owner,
             "user": user_id,
@@ -114,7 +114,7 @@ class ForcConnector:
 
     def delete_backend(self, backend_id: str) -> None:
         logger.info(f"Delete Backend {backend_id}")
-        delete_url = f"{self.FORC_URL}/backends/{backend_id}"
+        delete_url = f"{self.FORC_URL}backends/{backend_id}"
         try:
             response = requests.delete(
                 delete_url,
@@ -145,7 +145,7 @@ class ForcConnector:
     ) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
         try:
-            post_url = f"{self.FORC_URL}/users/{backend_id}"
+            post_url = f"{self.FORC_URL}users/{backend_id}"
             user_info = {
                 "owner": owner,
                 "user": user_id,
@@ -190,7 +190,7 @@ class ForcConnector:
                 template=template,
             )
         try:
-            post_url = f"{self.FORC_URL}/backends"
+            post_url = f"{self.FORC_URL}backends"
             backend_info = {
                 "owner": owner,
                 "user_key_url": user_key_url,
@@ -234,7 +234,7 @@ class ForcConnector:
 
     def get_backends(self) -> list[Backend]:
         logger.info("Get Backends")
-        get_url = f"{self.FORC_URL}/backends"
+        get_url = f"{self.FORC_URL}backends"
         try:
             response = requests.get(
                 get_url,
@@ -263,7 +263,7 @@ class ForcConnector:
 
     def get_backends_by_template(self, template: str) -> list[Backend]:
         logger.info(f"Get Backends by template: {template}")
-        get_url = f"{self.FORC_URL}/backends/byTemplate/{template}"
+        get_url = f"{self.FORC_URL}backends/byTemplate/{template}"
         try:
             response = requests.get(
                 get_url,
@@ -293,7 +293,7 @@ class ForcConnector:
 
     def get_backend_by_id(self, id: str) -> Backend:
         logger.info(f"Get backends by id: {id}")
-        get_url = f"{self.FORC_URL}/backends/{id}"
+        get_url = f"{self.FORC_URL}backends/{id}"
         try:
             response = requests.get(
                 get_url,
@@ -320,7 +320,7 @@ class ForcConnector:
 
     def get_backends_by_owner(self, owner: str) -> list[Backend]:
         logger.info(f"Get backends by owner: {owner}")
-        get_url = f"{self.FORC_URL}/backends/byOwner/{owner}"
+        get_url = f"{self.FORC_URL}backends/byOwner/{owner}"
         try:
             response = requests.get(
                 get_url,
