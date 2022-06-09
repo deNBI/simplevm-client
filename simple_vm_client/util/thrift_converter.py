@@ -14,7 +14,10 @@ logger = setup_custom_logger(__name__)
 
 
 def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
-    image_type = openstack_image.get("image_type", "image")
+    properties = openstack_image.get("properties")
+    if not properties:
+        properties = {}
+    image_type = properties.get("image_type", "image")
 
     image = Image(
         name=openstack_image.name,
@@ -24,8 +27,8 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
         created_at=openstack_image.created_at,
         updated_at=openstack_image.updated_at,
         openstack_id=openstack_image.id,
-        description=openstack_image.metadata.get("description", ""),
-        tags=openstack_image.tags,
+        description=properties.get("description", ""),
+        tags=openstack_image.get("tags", []),
         is_snapshot=image_type == "snapshot",
     )
     return image
@@ -57,7 +60,7 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
     if not openstack_volume:
         return Volume(status=VmStates.NOT_FOUND)
     if openstack_volume.get("attachments"):
-        device = openstack_volume.attachments[0].device
+        device = openstack_volume.attachments[0]["device"]
     else:
         device = None
     volume = Volume(
@@ -76,7 +79,7 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     if not openstack_server:
         logging.info("Openstack server not found")
 
-        return VM(status=VmStates.NOT_FOUND)
+        return VM(vm_state=VmStates.NOT_FOUND)
     fixed_ip = ""
     floating_ip = ""
 
