@@ -369,7 +369,7 @@ class OpenStackConnector:
             name_or_id="",
         )
 
-    def get_image(self, name_or_id: str, replace_inactive: bool = False) -> Image:
+    def get_image(self, name_or_id: str, replace_inactive: bool = False, ignore_not_active: bool = False) -> Image:
         logger.info(f"Get Image {name_or_id}")
 
         image: Image = self.openstack_connection.get_image(name_or_id=name_or_id)
@@ -384,7 +384,7 @@ class OpenStackConnector:
             image = self.get_active_image_by_os_version(
                 os_version=image_os_version, os_distro=image_os_distro
             )
-        elif image and image.status != "active":
+        elif image and image.status != "active" and not ignore_not_active:
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} found but not active!",
                 name_or_id=name_or_id,
@@ -694,7 +694,7 @@ class OpenStackConnector:
                 if not self.netcat(host=self.GATEWAY_IP, port=port):
                     server.task_state = VmTaskStates.CHECKING_SSH_CONNECTION.value
 
-            server.image = self.get_image(name_or_id=server.image["id"])
+            server.image = self.get_image(name_or_id=server.image["id"],ignore_not_active=True)
 
             server.flavor = self.get_flavor(name_or_id=server.flavor["id"])
 
