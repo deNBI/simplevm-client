@@ -12,7 +12,7 @@ from thrift.TRecursive import fix_spec
 
 import sys
 import logging
-from ttypes import *
+from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
 all_structs = []
@@ -309,13 +309,12 @@ class Iface(object):
         """
         pass
 
-    def add_user_to_backend(self, backend_id, owner_id, user_id):
+    def add_user_to_backend(self, backend_id, user_id):
         """
         Add a user to a backend
 
         Parameters:
          - backend_id
-         - owner_id
          - user_id
 
         """
@@ -331,13 +330,12 @@ class Iface(object):
         """
         pass
 
-    def delete_user_from_backend(self, backend_id, owner_id, user_id):
+    def delete_user_from_backend(self, backend_id, user_id):
         """
         Delete user from a backend
 
         Parameters:
          - backend_id
-         - owner_id
          - user_id
 
         """
@@ -1683,24 +1681,22 @@ class Client(Iface):
             raise result.b
         return
 
-    def add_user_to_backend(self, backend_id, owner_id, user_id):
+    def add_user_to_backend(self, backend_id, user_id):
         """
         Add a user to a backend
 
         Parameters:
          - backend_id
-         - owner_id
          - user_id
 
         """
-        self.send_add_user_to_backend(backend_id, owner_id, user_id)
+        self.send_add_user_to_backend(backend_id, user_id)
         return self.recv_add_user_to_backend()
 
-    def send_add_user_to_backend(self, backend_id, owner_id, user_id):
+    def send_add_user_to_backend(self, backend_id, user_id):
         self._oprot.writeMessageBegin('add_user_to_backend', TMessageType.CALL, self._seqid)
         args = add_user_to_backend_args()
         args.backend_id = backend_id
-        args.owner_id = owner_id
         args.user_id = user_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -1759,24 +1755,22 @@ class Client(Iface):
             raise result.b
         raise TApplicationException(TApplicationException.MISSING_RESULT, "get_users_from_backend failed: unknown result")
 
-    def delete_user_from_backend(self, backend_id, owner_id, user_id):
+    def delete_user_from_backend(self, backend_id, user_id):
         """
         Delete user from a backend
 
         Parameters:
          - backend_id
-         - owner_id
          - user_id
 
         """
-        self.send_delete_user_from_backend(backend_id, owner_id, user_id)
+        self.send_delete_user_from_backend(backend_id, user_id)
         return self.recv_delete_user_from_backend()
 
-    def send_delete_user_from_backend(self, backend_id, owner_id, user_id):
+    def send_delete_user_from_backend(self, backend_id, user_id):
         self._oprot.writeMessageBegin('delete_user_from_backend', TMessageType.CALL, self._seqid)
         args = delete_user_from_backend_args()
         args.backend_id = backend_id
-        args.owner_id = owner_id
         args.user_id = user_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -3509,7 +3503,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = add_user_to_backend_result()
         try:
-            result.success = self._handler.add_user_to_backend(args.backend_id, args.owner_id, args.user_id)
+            result.success = self._handler.add_user_to_backend(args.backend_id, args.user_id)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -3561,7 +3555,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = delete_user_from_backend_result()
         try:
-            result.success = self._handler.delete_user_from_backend(args.backend_id, args.owner_id, args.user_id)
+            result.success = self._handler.delete_user_from_backend(args.backend_id, args.user_id)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -8587,15 +8581,13 @@ class add_user_to_backend_args(object):
     """
     Attributes:
      - backend_id
-     - owner_id
      - user_id
 
     """
 
 
-    def __init__(self, backend_id=None, owner_id=None, user_id=None,):
+    def __init__(self, backend_id=None, user_id=None,):
         self.backend_id = backend_id
-        self.owner_id = owner_id
         self.user_id = user_id
 
     def read(self, iprot):
@@ -8614,11 +8606,6 @@ class add_user_to_backend_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.owner_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
                     self.user_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
@@ -8636,12 +8623,8 @@ class add_user_to_backend_args(object):
             oprot.writeFieldBegin('backend_id', TType.I64, 1)
             oprot.writeI64(self.backend_id)
             oprot.writeFieldEnd()
-        if self.owner_id is not None:
-            oprot.writeFieldBegin('owner_id', TType.STRING, 2)
-            oprot.writeString(self.owner_id.encode('utf-8') if sys.version_info[0] == 2 else self.owner_id)
-            oprot.writeFieldEnd()
         if self.user_id is not None:
-            oprot.writeFieldBegin('user_id', TType.STRING, 3)
+            oprot.writeFieldBegin('user_id', TType.STRING, 2)
             oprot.writeString(self.user_id.encode('utf-8') if sys.version_info[0] == 2 else self.user_id)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -8664,8 +8647,7 @@ all_structs.append(add_user_to_backend_args)
 add_user_to_backend_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'backend_id', None, None, ),  # 1
-    (2, TType.STRING, 'owner_id', 'UTF8', None, ),  # 2
-    (3, TType.STRING, 'user_id', 'UTF8', None, ),  # 3
+    (2, TType.STRING, 'user_id', 'UTF8', None, ),  # 2
 )
 
 
@@ -8899,15 +8881,13 @@ class delete_user_from_backend_args(object):
     """
     Attributes:
      - backend_id
-     - owner_id
      - user_id
 
     """
 
 
-    def __init__(self, backend_id=None, owner_id=None, user_id=None,):
+    def __init__(self, backend_id=None, user_id=None,):
         self.backend_id = backend_id
-        self.owner_id = owner_id
         self.user_id = user_id
 
     def read(self, iprot):
@@ -8926,11 +8906,6 @@ class delete_user_from_backend_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.owner_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
                     self.user_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
@@ -8948,12 +8923,8 @@ class delete_user_from_backend_args(object):
             oprot.writeFieldBegin('backend_id', TType.I64, 1)
             oprot.writeI64(self.backend_id)
             oprot.writeFieldEnd()
-        if self.owner_id is not None:
-            oprot.writeFieldBegin('owner_id', TType.STRING, 2)
-            oprot.writeString(self.owner_id.encode('utf-8') if sys.version_info[0] == 2 else self.owner_id)
-            oprot.writeFieldEnd()
         if self.user_id is not None:
-            oprot.writeFieldBegin('user_id', TType.STRING, 3)
+            oprot.writeFieldBegin('user_id', TType.STRING, 2)
             oprot.writeString(self.user_id.encode('utf-8') if sys.version_info[0] == 2 else self.user_id)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -8976,8 +8947,7 @@ all_structs.append(delete_user_from_backend_args)
 delete_user_from_backend_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'backend_id', None, None, ),  # 1
-    (2, TType.STRING, 'owner_id', 'UTF8', None, ),  # 2
-    (3, TType.STRING, 'user_id', 'UTF8', None, ),  # 3
+    (2, TType.STRING, 'user_id', 'UTF8', None, ),  # 2
 )
 
 

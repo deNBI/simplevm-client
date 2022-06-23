@@ -87,12 +87,11 @@ class ForcConnector:
             return []
 
     def delete_user_from_backend(
-        self, user_id: str, backend_id: str, owner: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         logger.info(f"Delete user {user_id} from backend {backend_id}")
         delete_url = f"{self.FORC_URL}users/{backend_id}"
         user_info = {
-            "owner": owner,
             "user": user_id,
         }
         try:
@@ -141,13 +140,12 @@ class ForcConnector:
             raise DefaultException(message="delete_backend timed out")
 
     def add_user_to_backend(
-        self, user_id: str, backend_id: str, owner: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
         try:
             post_url = f"{self.FORC_URL}users/{backend_id}"
             user_info = {
-                "owner": owner,
                 "user": user_id,
             }
         except Exception as e:

@@ -472,8 +472,7 @@ service VirtualMachineService {
     /** Add a user to a backend*/
     map<string,string> add_user_to_backend(
     1:i64 backend_id,
-    2:string owner_id,
-    3:string user_id
+    2:string user_id
     ) throws (1:BackendNotFoundException b)
 
     /** Get users from a backend*/
@@ -484,8 +483,7 @@ service VirtualMachineService {
     /** Delete user from a backend*/
     map<string,string> delete_user_from_backend(
     1:i64 backend_id,
-    2:string owner_id,
-    3:string user_id
+    2:string user_id
     ) throws (1:BackendNotFoundException b)
 
 
