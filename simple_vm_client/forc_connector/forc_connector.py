@@ -121,19 +121,17 @@ class ForcConnector:
                 headers={"X-API-KEY": self.FORC_API_KEY},
                 verify=True,
             )
-            if response.status_code != 200:
-                try:
-                    logger.exception(str(response.json()))
-                    raise BackendNotFoundException(
-                        message=str(response.json()), name_or_id=backend_id
-                    )
-
-                except json.JSONDecodeError:
-                    logger.exception(str(response.content))
-
-                    raise BackendNotFoundException(
-                        message=str(response.content), name_or_id=backend_id
-                    )
+            if response.status_code:
+                if response.status_code == 404 or response.status_code == 500:
+                    try:
+                        raise BackendNotFoundException(
+                            message=str(json.dumps(response.json())), name_or_id=str(backend_id)
+                        )
+                    except json.JSONDecodeError:
+                        logger.exception(str(response.content))
+                        raise BackendNotFoundException(
+                            message=str(response.content), name_or_id=str(backend_id)
+                        )
 
         except requests.Timeout:
             logger.exception(msg="delete_backend timed out")
