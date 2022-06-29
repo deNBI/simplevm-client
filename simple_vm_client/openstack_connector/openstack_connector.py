@@ -789,11 +789,15 @@ class OpenStackConnector:
                         server=server, security_group=sg
                     )
                     self.openstack_connection.delete_security_group(sg)
-            self.openstack_connection.delete_server(server)
+            self.openstack_connection.delete_server(server.id)
         except ConflictException as e:
             logger.error(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
+        except Exception as e:
+            logger.exception(e)
+
+            raise Exception
 
     def get_vm_ports(self, openstack_id: str) -> dict[str, str]:
         logger.info(f"Get IP and PORT for server {openstack_id}")
