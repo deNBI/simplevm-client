@@ -4,9 +4,24 @@
   gather_facts: yes
   vars_files:
   pre_tasks:
-    - name: PRE_TASKWait for cloud-init / user-data to finish
+    - name: PRE_TASK Wait for cloud-init / user-data to finish
       ansible.builtin.command: cloud-init status --wait
       changed_when: false
+
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+    - name: PRE_TASK Set if APT-Mirror Service Exists
+      set_fact:
+        bielefeld_mirror_service_exist: "'de.NBI_Bielefeld_environment' in services"
+
+    - name: PRE_TASK Wait till Apt_Mirror de.NBI Bielefeld Service is done
+      ansible.builtin.service_facts:
+      until: services['de.NBI_Bielefeld_environment.service'].state == 'stopped'
+      retries: 25
+      delay: 10
+      when: bielefeld_mirror_service_exist
+
     - name: PRE_TASK Disable unattended upgrades
       lineinfile:
         path: /etc/apt/apt.conf.d/10periodic
