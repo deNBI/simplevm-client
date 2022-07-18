@@ -84,6 +84,7 @@ class OpenStackConnector:
             )
             self.openstack_connection.authorize()
             logger.info("Connected to Openstack")
+            self.create_or_get_default_ssh_security_group()
         except Exception:
             logger.error("Client failed authentication at Openstack!")
             raise ConnectionError("Client failed authentication at Openstack")
@@ -105,10 +106,10 @@ class OpenStackConnector:
             self.SSH_MULTIPLICATION_PORT = cfg["openstack"]["ssh_multiplication_port"]
             self.UDP_MULTIPLICATION_PORT = cfg["openstack"]["udp_multiplication_port"]
             self.FORC_SECURITY_GROUP_ID = cfg["forc"]["forc_security_group_id"]
-            self.DEFAULT_SECURITY_GROUP_NAME = cfg["openstack"][
-                "default_simple_vm_security_group_name"
-            ]
+            self.DEFAULT_SECURITY_GROUP_NAME = "defaultSimpleVM"
             self.DEFAULT_SECURITY_GROUPS = [self.DEFAULT_SECURITY_GROUP_NAME]
+            self.GATEWAY_SECURITY_GROUP_ID = cfg["openstack_connection"]["gateway_security_group_id"]
+
 
     def load_env_config(self) -> None:
         logger.info("Load environment config: OpenStack")
@@ -556,6 +557,14 @@ class OpenStackConnector:
             text = encodeutils.safe_encode(text.encode("utf-8"))
         return text
 
+    def create_or_get_default_ssh_security_group(self):
+        logger.info("Get default SimpleVM SSH Security Group")
+        sec = self.conn.get_security_group(name_or_id=self.DEFAULT_SECURITY_GROUP_NAME)
+        if not sec:
+            logger.info("Default SimpleVM SSH Security group not found... Creating")
+
+            self.create_security_group(name=self.DEFAULT_SECURITY_GROUP_NAME, ssh=True, description="Default SSH SimpleVM Security Group")
+
     def create_security_group(
         self,
         name: str,
@@ -591,6 +600,7 @@ class OpenStackConnector:
                 port_range_max=udp_port_start + 9,
                 port_range_min=udp_port_start,
                 secgroup_name_or_id=new_security_group["id"],
+                remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
             )
             self.openstack_connection.create_security_group_rule(
                 direction="ingress",
@@ -599,6 +609,8 @@ class OpenStackConnector:
                 port_range_max=udp_port_start + 9,
                 port_range_min=udp_port_start,
                 secgroup_name_or_id=new_security_group["id"],
+                remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
+
             )
         if ssh:
             logger.info(f"Add ssh rule to security group {name}")
@@ -609,6 +621,8 @@ class OpenStackConnector:
                 port_range_max=22,
                 port_range_min=22,
                 secgroup_name_or_id=new_security_group["id"],
+                remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
+
             )
             self.openstack_connection.create_security_group_rule(
                 direction="ingress",
@@ -617,6 +631,8 @@ class OpenStackConnector:
                 port_range_max=22,
                 port_range_min=22,
                 secgroup_name_or_id=new_security_group["id"],
+                remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
+
             )
         if research_environment_metadata:
             self.openstack_connection.network.create_security_group_rule(
