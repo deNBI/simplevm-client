@@ -4,6 +4,24 @@
   gather_facts: yes
   vars_files:
   pre_tasks:
+    - name: PRE_TASK Wait for cloud-init / user-data to finish
+      ansible.builtin.command: cloud-init status --wait
+      changed_when: false
+
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+    - name: PRE_TASK Set if APT-Mirror Service Exists
+      set_fact:
+        bielefeld_mirror_service_exist: "'de.NBI_Bielefeld_environment' in services"
+
+    - name: PRE_TASK Wait till Apt_Mirror de.NBI Bielefeld Service is done
+      ansible.builtin.service_facts:
+      until: services['de.NBI_Bielefeld_environment.service'].state == 'stopped'
+      retries: 25
+      delay: 10
+      when: bielefeld_mirror_service_exist
+
     - name: PRE_TASK Disable unattended upgrades
       lineinfile:
         path: /etc/apt/apt.conf.d/10periodic
@@ -21,13 +39,13 @@
         - apt-daily-upgrade
         - apt-daily-upgrade.timer
 
-    - name:  PRE_TASK   Wait for automatic system updates 1
+    - name: PRE_TASK   Wait for automatic system updates 1
       shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
 
     - name: PRE_TASK  Wait for automatic system updates 2
       shell: while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 1; done;
 
-    - name:  PRE_TASK   Update apt cache
+    - name: PRE_TASK   Update apt cache
       become: true
       apt:
         upgrade: true
@@ -47,7 +65,7 @@
         regexp: "^APT::Periodic::Unattended-Upgrade"
         line: 'APT::Periodic::Unattended-Upgrade "1";'
         create: yes
-    - name:  POST_TASK Start apt-daily.* systemd services
+    - name: POST_TASK Start apt-daily.* systemd services
       service:
         name: "{{ item }}"
         state: started
