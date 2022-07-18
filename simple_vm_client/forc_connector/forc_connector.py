@@ -70,7 +70,7 @@ class ForcConnector:
 
     def get_users_from_backend(self, backend_id: str) -> list[str]:
         logger.info(f"Get users from backend {backend_id}")
-        get_url = f"{self.FORC_URL}/users/{backend_id}"
+        get_url = f"{self.FORC_URL}users/{backend_id}"
         try:
             response = requests.get(
                 get_url,
@@ -87,12 +87,11 @@ class ForcConnector:
             return []
 
     def delete_user_from_backend(
-        self, user_id: str, backend_id: str, owner: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         logger.info(f"Delete user {user_id} from backend {backend_id}")
-        delete_url = f"{self.FORC_URL}/users/{backend_id}"
+        delete_url = f"{self.FORC_URL}users/{backend_id}"
         user_info = {
-            "owner": owner,
             "user": user_id,
         }
         try:
@@ -114,7 +113,7 @@ class ForcConnector:
 
     def delete_backend(self, backend_id: str) -> None:
         logger.info(f"Delete Backend {backend_id}")
-        delete_url = f"{self.FORC_URL}/backends/{backend_id}"
+        delete_url = f"{self.FORC_URL}backends/{backend_id}"
         try:
             response = requests.delete(
                 delete_url,
@@ -122,32 +121,29 @@ class ForcConnector:
                 headers={"X-API-KEY": self.FORC_API_KEY},
                 verify=True,
             )
-            if response.status_code != 200:
-                try:
-                    logger.exception(str(response.json()))
-                    raise BackendNotFoundException(
-                        message=str(response.json()), name_or_id=backend_id
-                    )
-
-                except json.JSONDecodeError:
-                    logger.exception(str(response.content))
-
-                    raise BackendNotFoundException(
-                        message=str(response.content), name_or_id=backend_id
-                    )
+            if response.status_code:
+                if response.status_code == 404 or response.status_code == 500:
+                    try:
+                        raise BackendNotFoundException(
+                            message=str(json.dumps(response.json())), name_or_id=str(backend_id)
+                        )
+                    except json.JSONDecodeError:
+                        logger.exception(str(response.content))
+                        raise BackendNotFoundException(
+                            message=str(response.content), name_or_id=str(backend_id)
+                        )
 
         except requests.Timeout:
             logger.exception(msg="delete_backend timed out")
             raise DefaultException(message="delete_backend timed out")
 
     def add_user_to_backend(
-        self, user_id: str, backend_id: str, owner: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
         try:
-            post_url = f"{self.FORC_URL}/users/{backend_id}"
+            post_url = f"{self.FORC_URL}users/{backend_id}"
             user_info = {
-                "owner": owner,
                 "user": user_id,
             }
         except Exception as e:
@@ -190,7 +186,7 @@ class ForcConnector:
                 template=template,
             )
         try:
-            post_url = f"{self.FORC_URL}/backends"
+            post_url = f"{self.FORC_URL}backends"
             backend_info = {
                 "owner": owner,
                 "user_key_url": user_key_url,
@@ -234,7 +230,7 @@ class ForcConnector:
 
     def get_backends(self) -> list[Backend]:
         logger.info("Get Backends")
-        get_url = f"{self.FORC_URL}/backends"
+        get_url = f"{self.FORC_URL}backends"
         try:
             response = requests.get(
                 get_url,
@@ -263,7 +259,7 @@ class ForcConnector:
 
     def get_backends_by_template(self, template: str) -> list[Backend]:
         logger.info(f"Get Backends by template: {template}")
-        get_url = f"{self.FORC_URL}/backends/byTemplate/{template}"
+        get_url = f"{self.FORC_URL}backends/byTemplate/{template}"
         try:
             response = requests.get(
                 get_url,
@@ -293,7 +289,7 @@ class ForcConnector:
 
     def get_backend_by_id(self, id: str) -> Backend:
         logger.info(f"Get backends by id: {id}")
-        get_url = f"{self.FORC_URL}/backends/{id}"
+        get_url = f"{self.FORC_URL}backends/{id}"
         try:
             response = requests.get(
                 get_url,
@@ -320,7 +316,7 @@ class ForcConnector:
 
     def get_backends_by_owner(self, owner: str) -> list[Backend]:
         logger.info(f"Get backends by owner: {owner}")
-        get_url = f"{self.FORC_URL}/backends/byOwner/{owner}"
+        get_url = f"{self.FORC_URL}backends/byOwner/{owner}"
         try:
             response = requests.get(
                 get_url,

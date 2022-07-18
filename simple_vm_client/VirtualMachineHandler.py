@@ -236,20 +236,20 @@ class VirtualMachineHandler(Iface):
         return self.forc_connector.get_backend_by_id(id=id)
 
     def add_user_to_backend(
-        self, backend_id: str, owner_id: str, user_id: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         return self.forc_connector.add_user_to_backend(
-            user_id=user_id, owner=owner_id, backend_id=backend_id
+            user_id=user_id, backend_id=backend_id
         )
 
     def get_users_from_backend(self, backend_id: str) -> list[str]:
         return self.forc_connector.get_users_from_backend(backend_id=backend_id)
 
     def delete_user_from_backend(
-        self, backend_id: str, owner_id: str, user_id: str
+        self, backend_id: str, user_id: str
     ) -> dict[str, str]:
         return self.forc_connector.delete_user_from_backend(
-            user_id=user_id, backend_id=backend_id, owner=owner_id
+            user_id=user_id, backend_id=backend_id
         )
 
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:

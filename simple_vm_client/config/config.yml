@@ -19,7 +19,7 @@ server:
 
 
 openstack:
-  default_simple_vm_security_group_name: "defaultSimpleVM"
+  gateway_security_group_id:  88b530b3-0b62-4edc-b5f6-d80fbbba0830
   cloud_site: bielefeld
   base_gateway_port: 30000
   ssh_multiplication_port: 1
