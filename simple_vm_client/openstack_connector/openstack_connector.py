@@ -108,7 +108,7 @@ class OpenStackConnector:
             self.FORC_SECURITY_GROUP_ID = cfg["forc"]["forc_security_group_id"]
             self.DEFAULT_SECURITY_GROUP_NAME = "defaultSimpleVM"
             self.DEFAULT_SECURITY_GROUPS = [self.DEFAULT_SECURITY_GROUP_NAME]
-            self.GATEWAY_SECURITY_GROUP_ID = cfg["openstack_connection"]["gateway_security_group_id"]
+            self.GATEWAY_SECURITY_GROUP_ID = cfg["openstack"]["gateway_security_group_id"]
 
 
     def load_env_config(self) -> None:
