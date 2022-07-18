@@ -559,7 +559,7 @@ class OpenStackConnector:
 
     def create_or_get_default_ssh_security_group(self):
         logger.info("Get default SimpleVM SSH Security Group")
-        sec = self.conn.get_security_group(name_or_id=self.DEFAULT_SECURITY_GROUP_NAME)
+        sec = self.openstack_connection.get_security_group(name_or_id=self.DEFAULT_SECURITY_GROUP_NAME)
         if not sec:
             logger.info("Default SimpleVM SSH Security group not found... Creating")
 
