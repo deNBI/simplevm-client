@@ -433,7 +433,7 @@ class OpenStackConnector:
                 raise ImageNotFoundException(
                     message=f"Image {image_id} not found!", name_or_id=image_id
                 )
-            self.openstack_connection.compute.delete_image(image)
+            self.openstack_connection.compute.delete_image(image_id)
         except Exception as e:
             logger.exception(f"Delete Image {image_id} failed!")
             raise DefaultException(message=str(e))
