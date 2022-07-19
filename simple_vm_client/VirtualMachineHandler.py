@@ -57,9 +57,9 @@ class VirtualMachineHandler(Iface):
         )
         return images
 
-    def get_image(self, openstack_id: str) -> Image:
+    def get_image(self, openstack_id: str,ignore_not_active:bool=False) -> Image:
         return thrift_converter.os_to_thrift_image(
-            openstack_image=self.openstack_connector.get_image(name_or_id=openstack_id)
+            openstack_image=self.openstack_connector.get_image(name_or_id=openstack_id,ignore_not_active=ignore_not_active)
         )
 
     def get_public_images(self) -> list[Image]:

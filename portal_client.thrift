@@ -328,7 +328,7 @@ service VirtualMachineService {
 	 * Get an image with tag.
 	 * Returns: image.
 	 */
-	Image get_image(1:string openstack_id) throws (1:ImageNotFoundException i)
+	Image get_image(1:string openstack_id,2:bool ignore_not_active) throws (1:ImageNotFoundException i)
 
 
 	Volume get_volume(
