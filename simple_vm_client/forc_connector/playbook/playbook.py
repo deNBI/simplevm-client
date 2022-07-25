@@ -148,7 +148,7 @@ class Playbook(object):
                 ] = self.research_environment_template_version
                 data[self.research_environment_template + "_vars"][
                     "create_only_backend"
-                ] = str(self.create_only_backend).lower()
+                ] = self.create_only_backend
                 with open(
                         self.directory.name + playbook_var_yml, mode="w"
                 ) as variables:
