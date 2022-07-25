@@ -5,6 +5,7 @@ import redis
 import requests
 import yaml
 from openstack.compute.v2.server import Server
+from oslo_utils import encodeutils
 from ttypes import (
     Backend,
     BackendNotFoundException,
@@ -466,7 +467,7 @@ class ForcConnector:
             ),
             create_only_backend=create_only_backend,
             osi_private_key=key,
-            public_key=public_key,
+            public_key=encodeutils.safe_encode("\n".encode("utf-8"),public_key),
             pool=self.redis_pool,
             conda_packages=conda_packages,
             apt_packages=apt_packages,
