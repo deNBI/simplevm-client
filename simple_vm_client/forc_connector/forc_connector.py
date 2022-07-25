@@ -1,5 +1,6 @@
 import json
 import os
+import urllib
 
 import redis
 import requests
@@ -467,7 +468,7 @@ class ForcConnector:
             ),
             create_only_backend=create_only_backend,
             osi_private_key=key,
-            public_key=encodeutils.safe_encode("\n".encode("utf-8"),public_key),
+            public_key=urllib.parse.unquote(public_key),
             pool=self.redis_pool,
             conda_packages=conda_packages,
             apt_packages=apt_packages,
