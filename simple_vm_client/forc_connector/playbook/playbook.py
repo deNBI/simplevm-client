@@ -30,6 +30,7 @@ class Playbook(object):
             public_key: str,
             pool: redis.ConnectionPool,
             cloud_site: str,
+            base_url: str
     ):
         self.cloud_site: str = cloud_site
         self.redis: redis.Redis = redis.Redis(connection_pool=pool)  # redis connection
@@ -48,6 +49,7 @@ class Playbook(object):
         self.stdout: str = ""
         self.stderr: str = ""
         self.research_environment_template = research_environment_template
+        self.base_url = base_url
         # init temporary directories and mandatory generic files
         from forc_connector.template.template import Template
 
@@ -149,6 +151,9 @@ class Playbook(object):
                 data[self.research_environment_template + "_vars"][
                     "create_only_backend"
                 ] = self.create_only_backend
+                data[self.research_environment_template + "_vars"][
+                    "base_url"
+                ] = self.base_url
                 with open(
                         self.directory.name + playbook_var_yml, mode="w"
                 ) as variables:

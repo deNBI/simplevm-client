@@ -215,7 +215,7 @@ class Iface(object):
         """
         pass
 
-    def create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend):
+    def create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend, base_url):
         """
         Create and deploy an  ansible playbook
 
@@ -226,6 +226,7 @@ class Iface(object):
          - research_environment_template
          - apt_packages
          - create_only_backend
+         - base_url
 
         """
         pass
@@ -1326,7 +1327,7 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "exist_server failed: unknown result")
 
-    def create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend):
+    def create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend, base_url):
         """
         Create and deploy an  ansible playbook
 
@@ -1337,12 +1338,13 @@ class Client(Iface):
          - research_environment_template
          - apt_packages
          - create_only_backend
+         - base_url
 
         """
-        self.send_create_and_deploy_playbook(public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend)
+        self.send_create_and_deploy_playbook(public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend, base_url)
         return self.recv_create_and_deploy_playbook()
 
-    def send_create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend):
+    def send_create_and_deploy_playbook(self, public_key, openstack_id, conda_packages, research_environment_template, apt_packages, create_only_backend, base_url):
         self._oprot.writeMessageBegin('create_and_deploy_playbook', TMessageType.CALL, self._seqid)
         args = create_and_deploy_playbook_args()
         args.public_key = public_key
@@ -1351,6 +1353,7 @@ class Client(Iface):
         args.research_environment_template = research_environment_template
         args.apt_packages = apt_packages
         args.create_only_backend = create_only_backend
+        args.base_url = base_url
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -3246,7 +3249,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = create_and_deploy_playbook_result()
         try:
-            result.success = self._handler.create_and_deploy_playbook(args.public_key, args.openstack_id, args.conda_packages, args.research_environment_template, args.apt_packages, args.create_only_backend)
+            result.success = self._handler.create_and_deploy_playbook(args.public_key, args.openstack_id, args.conda_packages, args.research_environment_template, args.apt_packages, args.create_only_backend, args.base_url)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -7176,17 +7179,19 @@ class create_and_deploy_playbook_args(object):
      - research_environment_template
      - apt_packages
      - create_only_backend
+     - base_url
 
     """
 
 
-    def __init__(self, public_key=None, openstack_id=None, conda_packages=None, research_environment_template=None, apt_packages=None, create_only_backend=None,):
+    def __init__(self, public_key=None, openstack_id=None, conda_packages=None, research_environment_template=None, apt_packages=None, create_only_backend=None, base_url=None,):
         self.public_key = public_key
         self.openstack_id = openstack_id
         self.conda_packages = conda_packages
         self.research_environment_template = research_environment_template
         self.apt_packages = apt_packages
         self.create_only_backend = create_only_backend
+        self.base_url = base_url
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -7238,6 +7243,11 @@ class create_and_deploy_playbook_args(object):
                     self.create_only_backend = iprot.readBool()
                 else:
                     iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.base_url = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -7278,6 +7288,10 @@ class create_and_deploy_playbook_args(object):
             oprot.writeFieldBegin('create_only_backend', TType.BOOL, 6)
             oprot.writeBool(self.create_only_backend)
             oprot.writeFieldEnd()
+        if self.base_url is not None:
+            oprot.writeFieldBegin('base_url', TType.STRING, 7)
+            oprot.writeString(self.base_url.encode('utf-8') if sys.version_info[0] == 2 else self.base_url)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -7303,6 +7317,7 @@ create_and_deploy_playbook_args.thrift_spec = (
     (4, TType.STRING, 'research_environment_template', 'UTF8', None, ),  # 4
     (5, TType.LIST, 'apt_packages', (TType.STRING, 'UTF8', False), None, ),  # 5
     (6, TType.BOOL, 'create_only_backend', None, None, ),  # 6
+    (7, TType.STRING, 'base_url', 'UTF8', None, ),  # 7
 )
 
 

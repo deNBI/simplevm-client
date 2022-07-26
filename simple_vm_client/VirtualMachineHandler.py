@@ -330,6 +330,7 @@ class VirtualMachineHandler(Iface):
         research_environment_template: str,
         apt_packages:list[str],
         create_only_backend: bool,
+        base_url:str=""
     ) -> int:
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
@@ -346,6 +347,7 @@ class VirtualMachineHandler(Iface):
             port=port,
             ip=gateway_ip,
             cloud_site=cloud_site,
+            base_url=base_url
         )
 
     def is_bibigrid_available(self) -> bool:

@@ -422,6 +422,7 @@ service VirtualMachineService {
     4:string  research_environment_template,
     5:optional list<string> apt_packages,
     6:bool create_only_backend,
+    7:string base_url
 
     ) throws (1:ServerNotFoundException s)
 
