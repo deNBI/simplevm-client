@@ -1127,10 +1127,6 @@ class VM(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.flavor is None:
-            raise TProtocolException(message='Required field flavor is unset!')
-        if self.image is None:
-            raise TProtocolException(message='Required field image is unset!')
         if self.keyname is None:
             raise TProtocolException(message='Required field keyname is unset!')
         if self.openstack_id is None:

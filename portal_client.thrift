@@ -119,10 +119,10 @@ struct Image{
 struct VM {
 
     	/** The flavor of the VM*/
-    1: required Flavor flavor,
+    1: optional Flavor flavor,
 
 	/** The image of the VM*/
-	2: required Image image,
+	2: optional Image image,
 
 	/** The metadata of the VM*/
 	3: optional map<string,string> metadata
