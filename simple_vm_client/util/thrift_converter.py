@@ -86,6 +86,8 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
     if (openstack_server.image):
         image = os_to_thrift_image(openstack_image=openstack_server.image)
+    else:
+        image = None
     for values in openstack_server.addresses.values():
         for address in values:
 
