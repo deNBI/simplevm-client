@@ -192,6 +192,13 @@ class VirtualMachineHandler(Iface):
             )
         )
 
+    def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
+        return self.openstack_connector.create_volume_snapshot(
+            volume_id=volume_id,
+            name=name,
+            description=description
+        )
+
     def detach_volume(self, volume_id: str, server_id: str) -> None:
         return self.openstack_connector.detach_volume(
             volume_id=volume_id, server_id=server_id

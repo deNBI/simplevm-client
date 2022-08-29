@@ -171,6 +171,18 @@ class OpenStackConnector:
         except OpenStackCloudException as e:
             raise DefaultException(message=e.message)
 
+    def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
+        try:
+            logger.info(f"Create Snapshot for Volume {volume_id}")
+            volume_snapshot = self.openstack_connection.create_volume_snapshot(
+                volume_id=volume_id, name=name, description=description)
+            return volume_snapshot["id"]
+        except ResourceNotFound as e:
+            raise VolumeNotFoundException(message=e.message, name_or_id=volume_id)
+        except OpenStackCloudException as e:
+            raise DefaultException(message=e.message)
+
+
     def get_servers(self) -> list[Server]:
         logger.info("Get servers")
         servers: list[Server] = self.openstack_connection.list_servers()
