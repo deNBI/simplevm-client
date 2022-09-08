@@ -192,6 +192,17 @@ class VirtualMachineHandler(Iface):
             )
         )
 
+    def create_volume_by_source_volume(
+            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+    ) -> Volume:
+        return thrift_converter.os_to_thrift_volume(
+            openstack_volume=self.openstack_connector.create_volume_by_source_volume(
+                volume_name=volume_name,
+                metadata=metadata,
+                source_volume_id=source_volume_id
+            )
+        )
+
     def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
         return self.openstack_connector.create_volume_snapshot(
             volume_id=volume_id,

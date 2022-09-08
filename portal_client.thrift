@@ -374,7 +374,7 @@ service VirtualMachineService {
      7:list<map<string,string>> volume_ids_path_new,
      8:list<map<string,string>> volume_ids_path_attach,
      9:list <string> additional_keys
-)
+    )
 
     throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,5:ImageNotFoundException i,6:FlavorNotFoundException f,7:DefaultException o)
 
@@ -655,6 +655,38 @@ service VirtualMachineService {
 
     throws (1:DefaultException r,2:ResourceNotAvailableException n)
 
+    /**
+     * Create volume by source volume.
+     */
+    Volume create_volume_by_source_volume(
+
+    /**  Name of volume*/
+    1:string volume_name,
+
+    /** Metadata for the new volume*/
+    2:map<string,string> metadata,
+
+    /**  ID of source volume*/
+    3:string source_volume_id)
+
+    throws (1:DefaultException r,2:ResourceNotAvailableException n)
+
+    /**
+     * Create volume snapshot.
+     * Returns: ID of created snapshot
+     */
+    string create_volume_snapshot(
+
+    /**  ID of source volume*/
+    1:string volume_id,
+
+    /** Name for the volume snapshot*/
+    2:string name,
+
+    /**  Description for the volume snapshot*/
+    3:string description)
+
+    throws (1:VolumeNotFoundException e, 2:DefaultException r)
 
       /**
      * Reboot server.

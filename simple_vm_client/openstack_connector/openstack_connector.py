@@ -182,6 +182,22 @@ class OpenStackConnector:
         except OpenStackCloudException as e:
             raise DefaultException(message=e.message)
 
+    def create_volume_by_source_volume(
+            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+    ) -> Volume:
+
+        logger.info(f"Creating volume from source volume with id {source_volume_id}")
+        try:
+            volume: Volume = self.openstack_connection.block_storage.create_volume(
+                name=volume_name, metadata=metadata, source_volume_id=source_volume_id
+            )
+            return volume
+        except ResourceFailure as e:
+            logger.exception(
+                f"Trying to create volume from source volume with id {source_volume_id} failed",
+                exc_info=True,
+            )
+            raise ResourceNotAvailableException(message=e.message)
 
     def get_servers(self) -> list[Server]:
         logger.info("Get servers")
