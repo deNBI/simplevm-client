@@ -11,6 +11,7 @@ import yaml
 from forc_connector.template.template import ResearchEnvironmentMetadata
 from openstack import connection
 from openstack.block_storage.v3.volume import Volume
+from openstack.block_storage.v2.snapshot import Snapshot
 from openstack.compute.v2.flavor import Flavor
 from openstack.compute.v2.image import Image
 from openstack.compute.v2.keypair import Keypair
@@ -32,6 +33,7 @@ from ttypes import (
     ResourceNotAvailableException,
     ServerNotFoundException,
     VolumeNotFoundException,
+    SnapshotNotFoundException,
 )
 from util.logger import setup_custom_logger
 from util.state_enums import VmStates, VmTaskStates
@@ -179,6 +181,29 @@ class OpenStackConnector:
             return volume_snapshot["id"]
         except ResourceNotFound as e:
             raise VolumeNotFoundException(message=e.message, name_or_id=volume_id)
+        except OpenStackCloudException as e:
+            raise DefaultException(message=e.message)
+
+    def get_volume_snapshot(self, name_or_id: str) -> Snapshot:
+        logger.info(f"Get volume Snapshot {name_or_id}")
+        snapshot: Snapshot = self.openstack_connection.get_volume_snapshot(name_or_id=name_or_id)
+        if snapshot is None:
+            logger.exception(f"No volume Snapshot with id  {name_or_id} ")
+            raise VolumeNotFoundException(
+                message=f"No volume Snapshot with id  {name_or_id} ", name_or_id=name_or_id
+            )
+        return snapshot
+
+    def delete_volume_snapshot(self, snapshot_id: str) -> None:
+        try:
+            logger.info(f"Delete volume Snapshot   {snapshot_id} ")
+            self.openstack_connection.delete_volume_snapshot(name_or_id=snapshot_id)
+        except ResourceNotFound as e:
+            raise SnapshotNotFoundException(message=e.message, name_or_id=snapshot_id)
+
+        except ConflictException as e:
+            logger.exception(f"Delete volume snapshot: {snapshot_id}) failed!")
+            raise OpenStackCloudException(message=e.message)
         except OpenStackCloudException as e:
             raise DefaultException(message=e.message)
 

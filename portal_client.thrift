@@ -57,6 +57,32 @@ struct Volume{
 }
 
 /**
+ * This Struct defines a volume Snapshot.
+ */
+ struct Snapshot{
+    /** The OpenStack ID of the snapshot*/
+    1: optional string id,
+
+    /** The name of the snapshot*/
+    2: optional string name,
+
+    /** The description of the snapshot*/
+    3: optional string description,
+
+    /** The status of the snapshot*/
+    4: optional string status,
+
+    /** The time the snapshot was created*/
+    5: optional string created_at,
+
+    /** The size in GB of the snapshot*/
+    6: optional int size,
+
+    /** The OpenStack id of the snapshot source volume*/
+    7: optional string volume_id
+ }
+
+/**
  * This Struct defines a Flavor.
  */
  struct Flavor{
@@ -212,6 +238,12 @@ exception VolumeNotFoundException {
     1: string message
     2: string name_or_id
 }
+
+exception SnapshotNotFoundException {
+    1: string message
+    2: string name_or_id
+}
+
 exception ImageNotFoundException {
     1: string message
     2: string name_or_id
@@ -687,6 +719,23 @@ service VirtualMachineService {
     3:string description)
 
     throws (1:VolumeNotFoundException e, 2:DefaultException r)
+
+    /**
+     * Get volume snapshot.
+     * Returns: Snapshot object of volume snapshot
+     */
+    Snapshot get_volume_snapshot(
+
+    /**  Name or ID of volume snapshot*/
+    1:string name_or_id)
+
+    throws (1:ResourceNotFoundException r)
+
+    /**
+     * Delete volume snapshot.
+     * Returns:  True if deleted, False if not
+     */
+    void delete_volume_snapshot(1:string snapshot_id) throws (1: OpenStackConflictException c,2:DefaultException e)
 
       /**
      * Reboot server.

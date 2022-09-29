@@ -583,6 +583,28 @@ class Iface(object):
         """
         pass
 
+    def get_volume_snapshot(self, name_or_id):
+        """
+        Get volume snapshot.
+        Returns: Snapshot object of volume snapshot
+
+        Parameters:
+         - name_or_id: Name or ID of volume snapshot
+
+        """
+        pass
+
+    def delete_volume_snapshot(self, snapshot_id):
+        """
+        Delete volume snapshot.
+        Returns:  True if deleted, False if not
+
+        Parameters:
+         - snapshot_id
+
+        """
+        pass
+
     def reboot_hard_server(self, openstack_id):
         """
         Reboot server.
@@ -2656,6 +2678,80 @@ class Client(Iface):
             raise result.r
         raise TApplicationException(TApplicationException.MISSING_RESULT, "create_volume_snapshot failed: unknown result")
 
+    def get_volume_snapshot(self, name_or_id):
+        """
+        Get volume snapshot.
+        Returns: Snapshot object of volume snapshot
+
+        Parameters:
+         - name_or_id: Name or ID of volume snapshot
+
+        """
+        self.send_get_volume_snapshot(name_or_id)
+        return self.recv_get_volume_snapshot()
+
+    def send_get_volume_snapshot(self, name_or_id):
+        self._oprot.writeMessageBegin('get_volume_snapshot', TMessageType.CALL, self._seqid)
+        args = get_volume_snapshot_args()
+        args.name_or_id = name_or_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_volume_snapshot(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_volume_snapshot_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.r is not None:
+            raise result.r
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "get_volume_snapshot failed: unknown result")
+
+    def delete_volume_snapshot(self, snapshot_id):
+        """
+        Delete volume snapshot.
+        Returns:  True if deleted, False if not
+
+        Parameters:
+         - snapshot_id
+
+        """
+        self.send_delete_volume_snapshot(snapshot_id)
+        self.recv_delete_volume_snapshot()
+
+    def send_delete_volume_snapshot(self, snapshot_id):
+        self._oprot.writeMessageBegin('delete_volume_snapshot', TMessageType.CALL, self._seqid)
+        args = delete_volume_snapshot_args()
+        args.snapshot_id = snapshot_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_delete_volume_snapshot(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = delete_volume_snapshot_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.c is not None:
+            raise result.c
+        if result.e is not None:
+            raise result.e
+        return
+
     def reboot_hard_server(self, openstack_id):
         """
         Reboot server.
@@ -2791,6 +2887,8 @@ class Processor(Iface, TProcessor):
         self._processMap["create_volume"] = Processor.process_create_volume
         self._processMap["create_volume_by_source_volume"] = Processor.process_create_volume_by_source_volume
         self._processMap["create_volume_snapshot"] = Processor.process_create_volume_snapshot
+        self._processMap["get_volume_snapshot"] = Processor.process_get_volume_snapshot
+        self._processMap["delete_volume_snapshot"] = Processor.process_delete_volume_snapshot
         self._processMap["reboot_hard_server"] = Processor.process_reboot_hard_server
         self._processMap["reboot_soft_server"] = Processor.process_reboot_soft_server
         self._on_message_begin = None
@@ -4267,6 +4365,61 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("create_volume_snapshot", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_get_volume_snapshot(self, seqid, iprot, oprot):
+        args = get_volume_snapshot_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_volume_snapshot_result()
+        try:
+            result.success = self._handler.get_volume_snapshot(args.name_or_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ResourceNotFoundException as r:
+            msg_type = TMessageType.REPLY
+            result.r = r
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("get_volume_snapshot", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_delete_volume_snapshot(self, seqid, iprot, oprot):
+        args = delete_volume_snapshot_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = delete_volume_snapshot_result()
+        try:
+            self._handler.delete_volume_snapshot(args.snapshot_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except OpenStackConflictException as c:
+            msg_type = TMessageType.REPLY
+            result.c = c
+        except DefaultException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("delete_volume_snapshot", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12623,6 +12776,278 @@ create_volume_snapshot_result.thrift_spec = (
     (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
     (1, TType.STRUCT, 'e', [VolumeNotFoundException, None], None, ),  # 1
     (2, TType.STRUCT, 'r', [DefaultException, None], None, ),  # 2
+)
+
+
+class get_volume_snapshot_args(object):
+    """
+    Attributes:
+     - name_or_id: Name or ID of volume snapshot
+
+    """
+
+
+    def __init__(self, name_or_id=None,):
+        self.name_or_id = name_or_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.name_or_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('get_volume_snapshot_args')
+        if self.name_or_id is not None:
+            oprot.writeFieldBegin('name_or_id', TType.STRING, 1)
+            oprot.writeString(self.name_or_id.encode('utf-8') if sys.version_info[0] == 2 else self.name_or_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(get_volume_snapshot_args)
+get_volume_snapshot_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'name_or_id', 'UTF8', None, ),  # 1
+)
+
+
+class get_volume_snapshot_result(object):
+    """
+    Attributes:
+     - success
+     - r
+
+    """
+
+
+    def __init__(self, success=None, r=None,):
+        self.success = success
+        self.r = r
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Snapshot()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.r = ResourceNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('get_volume_snapshot_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.r is not None:
+            oprot.writeFieldBegin('r', TType.STRUCT, 1)
+            self.r.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(get_volume_snapshot_result)
+get_volume_snapshot_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [Snapshot, None], None, ),  # 0
+    (1, TType.STRUCT, 'r', [ResourceNotFoundException, None], None, ),  # 1
+)
+
+
+class delete_volume_snapshot_args(object):
+    """
+    Attributes:
+     - snapshot_id
+
+    """
+
+
+    def __init__(self, snapshot_id=None,):
+        self.snapshot_id = snapshot_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.snapshot_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('delete_volume_snapshot_args')
+        if self.snapshot_id is not None:
+            oprot.writeFieldBegin('snapshot_id', TType.STRING, 1)
+            oprot.writeString(self.snapshot_id.encode('utf-8') if sys.version_info[0] == 2 else self.snapshot_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(delete_volume_snapshot_args)
+delete_volume_snapshot_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'snapshot_id', 'UTF8', None, ),  # 1
+)
+
+
+class delete_volume_snapshot_result(object):
+    """
+    Attributes:
+     - c
+     - e
+
+    """
+
+
+    def __init__(self, c=None, e=None,):
+        self.c = c
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.c = OpenStackConflictException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.e = DefaultException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('delete_volume_snapshot_result')
+        if self.c is not None:
+            oprot.writeFieldBegin('c', TType.STRUCT, 1)
+            self.c.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 2)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(delete_volume_snapshot_result)
+delete_volume_snapshot_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'c', [OpenStackConflictException, None], None, ),  # 1
+    (2, TType.STRUCT, 'e', [DefaultException, None], None, ),  # 2
 )
 
 

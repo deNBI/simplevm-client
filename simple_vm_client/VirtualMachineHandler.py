@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         PlaybookResult,
         ResearchEnvironmentTemplate,
         Volume,
+        Snapshot,
     )
 
 logger = setup_custom_logger(__name__)
@@ -209,6 +210,14 @@ class VirtualMachineHandler(Iface):
             name=name,
             description=description
         )
+
+    def get_volume_snapshot(self, snapshot_id: str) -> Snapshot:
+        return thrift_converter.os_to_thrift_volume_snapshot(
+            openstack_volume_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
+        )
+
+    def delete_volume_snapshot(self, snapshot_id: str) -> None:
+        return self.openstack_connector.delete_volume_snapshot(snapshot_id=snapshot_id)
 
     def detach_volume(self, volume_id: str, server_id: str) -> None:
         return self.openstack_connector.detach_volume(
