@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
-from openstack.block_sotrage.v2.snapshot import Snapshot as OpenStack_Snapshot
+from openstack.block_storage.v2.snapshot import Snapshot as OpenStack_Snapshot
 from openstack.compute.v2.flavor import Flavor as OpenStack_Flavor
 from openstack.compute.v2.image import Image as OpenStack_Image
 from openstack.compute.v2.server import Server as OpenStack_Server
