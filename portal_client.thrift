@@ -704,6 +704,22 @@ service VirtualMachineService {
     throws (1:DefaultException r,2:ResourceNotAvailableException n)
 
     /**
+     * Create volume by volume snapshot.
+     */
+    Volume create_volume_by_volume_snap(
+
+    /**  Name of volume*/
+    1:string volume_name,
+
+    /** Metadata for the new volume*/
+    2:map<string,string> metadata,
+
+    /**  ID of volume snapshot*/
+    3:string volume_snap_id)
+
+    throws (1:DefaultException r,2:ResourceNotAvailableException n)
+
+    /**
      * Create volume snapshot.
      * Returns: ID of created snapshot
      */

@@ -79,6 +79,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void resume_server(string openstack_id)')
     print('  Volume create_volume(string volume_name, int volume_storage,  metadata)')
     print('  Volume create_volume_by_source_volume(string volume_name,  metadata, string source_volume_id)')
+    print('  Volume create_volume_by_volume_snap(string volume_name,  metadata, string volume_snap_id)')
     print('  string create_volume_snapshot(string volume_id, string name, string description)')
     print('  Snapshot get_volume_snapshot(string name_or_id)')
     print('  void delete_volume_snapshot(string snapshot_id)')
@@ -492,6 +493,12 @@ elif cmd == 'create_volume_by_source_volume':
         print('create_volume_by_source_volume requires 3 args')
         sys.exit(1)
     pp.pprint(client.create_volume_by_source_volume(args[0], eval(args[1]), args[2],))
+
+elif cmd == 'create_volume_by_volume_snap':
+    if len(args) != 3:
+        print('create_volume_by_volume_snap requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.create_volume_by_volume_snap(args[0], eval(args[1]), args[2],))
 
 elif cmd == 'create_volume_snapshot':
     if len(args) != 3:

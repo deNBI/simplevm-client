@@ -570,6 +570,18 @@ class Iface(object):
         """
         pass
 
+    def create_volume_by_volume_snap(self, volume_name, metadata, volume_snap_id):
+        """
+        Create volume by volume snapshot.
+
+        Parameters:
+         - volume_name: Name of volume
+         - metadata: Metadata for the new volume
+         - volume_snap_id: ID of volume snapshot
+
+        """
+        pass
+
     def create_volume_snapshot(self, volume_id, name, description):
         """
         Create volume snapshot.
@@ -2635,6 +2647,48 @@ class Client(Iface):
             raise result.n
         raise TApplicationException(TApplicationException.MISSING_RESULT, "create_volume_by_source_volume failed: unknown result")
 
+    def create_volume_by_volume_snap(self, volume_name, metadata, volume_snap_id):
+        """
+        Create volume by volume snapshot.
+
+        Parameters:
+         - volume_name: Name of volume
+         - metadata: Metadata for the new volume
+         - volume_snap_id: ID of volume snapshot
+
+        """
+        self.send_create_volume_by_volume_snap(volume_name, metadata, volume_snap_id)
+        return self.recv_create_volume_by_volume_snap()
+
+    def send_create_volume_by_volume_snap(self, volume_name, metadata, volume_snap_id):
+        self._oprot.writeMessageBegin('create_volume_by_volume_snap', TMessageType.CALL, self._seqid)
+        args = create_volume_by_volume_snap_args()
+        args.volume_name = volume_name
+        args.metadata = metadata
+        args.volume_snap_id = volume_snap_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_create_volume_by_volume_snap(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = create_volume_by_volume_snap_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.r is not None:
+            raise result.r
+        if result.n is not None:
+            raise result.n
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "create_volume_by_volume_snap failed: unknown result")
+
     def create_volume_snapshot(self, volume_id, name, description):
         """
         Create volume snapshot.
@@ -2886,6 +2940,7 @@ class Processor(Iface, TProcessor):
         self._processMap["resume_server"] = Processor.process_resume_server
         self._processMap["create_volume"] = Processor.process_create_volume
         self._processMap["create_volume_by_source_volume"] = Processor.process_create_volume_by_source_volume
+        self._processMap["create_volume_by_volume_snap"] = Processor.process_create_volume_by_volume_snap
         self._processMap["create_volume_snapshot"] = Processor.process_create_volume_snapshot
         self._processMap["get_volume_snapshot"] = Processor.process_get_volume_snapshot
         self._processMap["delete_volume_snapshot"] = Processor.process_delete_volume_snapshot
@@ -4336,6 +4391,35 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("create_volume_by_source_volume", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_create_volume_by_volume_snap(self, seqid, iprot, oprot):
+        args = create_volume_by_volume_snap_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = create_volume_by_volume_snap_result()
+        try:
+            result.success = self._handler.create_volume_by_volume_snap(args.volume_name, args.metadata, args.volume_snap_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except DefaultException as r:
+            msg_type = TMessageType.REPLY
+            result.r = r
+        except ResourceNotAvailableException as n:
+            msg_type = TMessageType.REPLY
+            result.n = n
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("create_volume_by_volume_snap", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12602,6 +12686,188 @@ class create_volume_by_source_volume_result(object):
         return not (self == other)
 all_structs.append(create_volume_by_source_volume_result)
 create_volume_by_source_volume_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [Volume, None], None, ),  # 0
+    (1, TType.STRUCT, 'r', [DefaultException, None], None, ),  # 1
+    (2, TType.STRUCT, 'n', [ResourceNotAvailableException, None], None, ),  # 2
+)
+
+
+class create_volume_by_volume_snap_args(object):
+    """
+    Attributes:
+     - volume_name: Name of volume
+     - metadata: Metadata for the new volume
+     - volume_snap_id: ID of volume snapshot
+
+    """
+
+
+    def __init__(self, volume_name=None, metadata=None, volume_snap_id=None,):
+        self.volume_name = volume_name
+        self.metadata = metadata
+        self.volume_snap_id = volume_snap_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.volume_name = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.MAP:
+                    self.metadata = {}
+                    (_ktype386, _vtype387, _size385) = iprot.readMapBegin()
+                    for _i389 in range(_size385):
+                        _key390 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                        _val391 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                        self.metadata[_key390] = _val391
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.volume_snap_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('create_volume_by_volume_snap_args')
+        if self.volume_name is not None:
+            oprot.writeFieldBegin('volume_name', TType.STRING, 1)
+            oprot.writeString(self.volume_name.encode('utf-8') if sys.version_info[0] == 2 else self.volume_name)
+            oprot.writeFieldEnd()
+        if self.metadata is not None:
+            oprot.writeFieldBegin('metadata', TType.MAP, 2)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
+            for kiter392, viter393 in self.metadata.items():
+                oprot.writeString(kiter392.encode('utf-8') if sys.version_info[0] == 2 else kiter392)
+                oprot.writeString(viter393.encode('utf-8') if sys.version_info[0] == 2 else viter393)
+            oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.volume_snap_id is not None:
+            oprot.writeFieldBegin('volume_snap_id', TType.STRING, 3)
+            oprot.writeString(self.volume_snap_id.encode('utf-8') if sys.version_info[0] == 2 else self.volume_snap_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(create_volume_by_volume_snap_args)
+create_volume_by_volume_snap_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'volume_name', 'UTF8', None, ),  # 1
+    (2, TType.MAP, 'metadata', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 2
+    (3, TType.STRING, 'volume_snap_id', 'UTF8', None, ),  # 3
+)
+
+
+class create_volume_by_volume_snap_result(object):
+    """
+    Attributes:
+     - success
+     - r
+     - n
+
+    """
+
+
+    def __init__(self, success=None, r=None, n=None,):
+        self.success = success
+        self.r = r
+        self.n = n
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Volume()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.r = DefaultException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.n = ResourceNotAvailableException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('create_volume_by_volume_snap_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.r is not None:
+            oprot.writeFieldBegin('r', TType.STRUCT, 1)
+            self.r.write(oprot)
+            oprot.writeFieldEnd()
+        if self.n is not None:
+            oprot.writeFieldBegin('n', TType.STRUCT, 2)
+            self.n.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(create_volume_by_volume_snap_result)
+create_volume_by_volume_snap_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [Volume, None], None, ),  # 0
     (1, TType.STRUCT, 'r', [DefaultException, None], None, ),  # 1
     (2, TType.STRUCT, 'n', [ResourceNotAvailableException, None], None, ),  # 2

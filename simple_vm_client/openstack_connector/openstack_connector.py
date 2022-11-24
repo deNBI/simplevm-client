@@ -224,6 +224,23 @@ class OpenStackConnector:
             )
             raise ResourceNotAvailableException(message=e.message)
 
+    def create_volume_by_volume_snap(
+            self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
+    ) -> Volume:
+
+        logger.info(f"Creating volume from volume snapshot with id {volume_snap_id}")
+        try:
+            volume: Volume = self.openstack_connection.block_storage.create_volume(
+                name=volume_name, metadata=metadata, snapshot_id=volume_snap_id
+            )
+            return volume
+        except ResourceFailure as e:
+            logger.exception(
+                f"Trying to create volume from volume snapshot with id {volume_snap_id} failed",
+                exc_info=True,
+            )
+            raise ResourceNotAvailableException(message=e.message)
+
     def get_servers(self) -> list[Server]:
         logger.info("Get servers")
         servers: list[Server] = self.openstack_connection.list_servers()
