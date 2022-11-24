@@ -213,7 +213,7 @@ class VirtualMachineHandler(Iface):
 
     def get_volume_snapshot(self, snapshot_id: str) -> Snapshot:
         return thrift_converter.os_to_thrift_volume_snapshot(
-            openstack_volume_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
+            openstack_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
         )
 
     def delete_volume_snapshot(self, snapshot_id: str) -> None:
