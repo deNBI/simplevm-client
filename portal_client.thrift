@@ -295,7 +295,7 @@ service VirtualMachineService {
 
 
 
-    map<string,i32>  get_calculation_values()
+    map<string,string>  get_calculation_values()
 
     /**
      * Import Key to openstack.

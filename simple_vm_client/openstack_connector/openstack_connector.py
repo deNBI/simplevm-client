@@ -6,6 +6,7 @@ import socket
 import urllib
 import urllib.parse
 from contextlib import closing
+import sympy
 
 import yaml
 from forc_connector.template.template import ResearchEnvironmentMetadata
@@ -55,7 +56,6 @@ class OpenStackConnector:
         self.PRODUCTION: bool = True
         self.AVAILABILITY_ZONE: str = "default"
         self.CLOUD_SITE: str = ""
-        self.BASE_GATEWAY_PORT: int = 30000
         self.SSH_MULTIPLICATION_PORT: int = 1
         self.UDP_MULTIPLICATION_PORT: int = 10
         self.DEFAULT_SECURITY_GROUP_NAME: str = ""
@@ -104,9 +104,8 @@ class OpenStackConnector:
             self.PRODUCTION = cfg["production"]
             self.AVAILABILITY_ZONE = cfg["openstack"]["availability_zone"]
             self.CLOUD_SITE = cfg["openstack"]["cloud_site"]
-            self.BASE_GATEWAY_PORT = cfg["openstack"]["base_gateway_port"]
-            self.SSH_MULTIPLICATION_PORT = cfg["openstack"]["ssh_multiplication_port"]
-            self.UDP_MULTIPLICATION_PORT = cfg["openstack"]["udp_multiplication_port"]
+            self.SSH_PORT_CALCULATION = cfg["openstack"]["ssh_port_calculation"]
+            self.UDP_PORT_CALCULATION = cfg["openstack"]["udp_port_calculation"]
             self.FORC_SECURITY_GROUP_ID = cfg["forc"]["forc_security_group_id"]
             self.DEFAULT_SECURITY_GROUP_NAME = "defaultSimpleVM"
             self.DEFAULT_SECURITY_GROUPS = [self.DEFAULT_SECURITY_GROUP_NAME]
@@ -422,7 +421,8 @@ class OpenStackConnector:
             name_or_id="",
         )
 
-    def get_image(self, name_or_id: str, replace_inactive: bool = False, ignore_not_active: bool = False,ignore_not_found:bool=False) -> Image:
+    def get_image(self, name_or_id: str, replace_inactive: bool = False, ignore_not_active: bool = False,
+                  ignore_not_found: bool = False) -> Image:
         logger.info(f"Get Image {name_or_id}")
 
         image: Image = self.openstack_connection.get_image(name_or_id=name_or_id)
@@ -538,12 +538,11 @@ class OpenStackConnector:
             logger.info("no connection")
             return []
 
-    def get_calculation_values(self) -> dict[str, int]:
+    def get_calculation_values(self) -> dict[str, str]:
         logger.info("Get Client Calculation Values")
         return {
-            "SSH_MULTIPLICATION_PORT": self.SSH_MULTIPLICATION_PORT,
-            "UDP_MULTIPLICATION_PORT": self.UDP_MULTIPLICATION_PORT,
-            "BASE_GATEWAY_PORT": self.BASE_GATEWAY_PORT,
+            "SSH_PORT_CALCULATION": self.SSH_PORT_CALCULATION,
+            "UDP_PORT_CALCULATION": self.UDP_PORT_CALCULATION
         }
 
     def get_gateway_ip(self) -> dict[str, str]:
@@ -620,7 +619,7 @@ class OpenStackConnector:
     def create_security_group(
             self,
             name: str,
-            udp_port_start: int = None,  # type: ignore
+            udp_port: int = None,  # type: ignore
             ssh: bool = True,
             udp: bool = False,
             description: str = "",
@@ -641,16 +640,16 @@ class OpenStackConnector:
 
         if udp:
             logger.info(
-                "Add udp rule ports {} - {} to security group {}".format(
-                    udp_port_start, udp_port_start + 9, name
+                "Add udp rule ports {}  to security group {}".format(
+                    udp_port, name
                 )
             )
 
             self.openstack_connection.create_security_group_rule(
                 direction="ingress",
                 protocol="udp",
-                port_range_max=udp_port_start + 9,
-                port_range_min=udp_port_start,
+                port_range_max=udp_port,
+                port_range_min=udp_port,
                 secgroup_name_or_id=new_security_group["id"],
                 remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
             )
@@ -658,8 +657,8 @@ class OpenStackConnector:
                 direction="ingress",
                 ethertype="IPv6",
                 protocol="udp",
-                port_range_max=udp_port_start + 9,
-                port_range_min=udp_port_start,
+                port_range_max=udp_port,
+                port_range_min=udp_port,
                 secgroup_name_or_id=new_security_group["id"],
                 remote_group_id=self.GATEWAY_SECURITY_GROUP_ID
 
@@ -755,15 +754,21 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
             if server.vm_state == VmStates.ACTIVE.value:
-                server_base = int(server.private_v4.split(".")[-1])
-                port = self.BASE_GATEWAY_PORT + (
-                        server_base * self.SSH_MULTIPLICATION_PORT
-                )
+                fixed_ip = server.private_v4
+                base_port = int(fixed_ip.split(".")[-1])  # noqa F841
+                subnet_port = int(fixed_ip.split(".")[-2])  # noqa F841
 
-                if not self.netcat(host=self.GATEWAY_IP, port=port):
+                x = sympy.symbols("x")
+                y = sympy.symbols("y")
+                ssh_port = int(sympy.sympify(self.SSH_PORT_CALCULATION).evalf(
+                    subs={x: base_port, y: subnet_port}
+                ))
+
+
+                if not self.netcat(host=self.GATEWAY_IP, port=ssh_port):
                     server.task_state = VmTaskStates.CHECKING_SSH_CONNECTION.value
 
-            server.image = self.get_image(name_or_id=server.image["id"], ignore_not_active=True,ignore_not_found=True)
+            server.image = self.get_image(name_or_id=server.image["id"], ignore_not_active=True, ignore_not_found=True)
 
             server.flavor = self.get_flavor(name_or_id=server.flavor["id"])
 
@@ -870,13 +875,19 @@ class OpenStackConnector:
             raise ServerNotFoundException(
                 message=f"Server {openstack_id} not found!", name_or_id=openstack_id
             )
-        server_base = int(server["private_v4"].split(".")[-1])
-        ssh_port = (
-                self.BASE_GATEWAY_PORT + int(server_base) * self.SSH_MULTIPLICATION_PORT
-        )
-        udp_port = (
-                self.BASE_GATEWAY_PORT + int(server_base) * self.UDP_MULTIPLICATION_PORT
-        )
+        fixed_ip = server["private_v4"]
+        base_port = int(fixed_ip.split(".")[-1]) # noqa F841
+        subnet_port = int(fixed_ip.split(".")[-2])  # noqa F841
+
+        x = sympy.symbols("x")
+        y = sympy.symbols("y")
+        ssh_port = int(sympy.sympify(self.SSH_PORT_CALCULATION).evalf(
+            subs={x: base_port, y: subnet_port}
+        ))
+        udp_port = int(sympy.sympify(self.UDP_PORT_CALCULATION).evalf(
+            subs={x: base_port, y: subnet_port}
+        ))
+
         return {"port": str(ssh_port), "udp": str(udp_port)}
 
     def create_userdata(
@@ -1091,7 +1102,7 @@ class OpenStackConnector:
 
         security_group = self.create_security_group(
             name=server.name + "_udp",
-            udp_port_start=int(udp_port),
+            udp_port=int(udp_port),
             udp=True,
             ssh=False,
             description="UDP",

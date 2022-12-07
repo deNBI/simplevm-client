@@ -99,8 +99,9 @@ class VirtualMachineHandler(Iface):
     def get_gateway_ip(self) -> dict[str, str]:
         return self.openstack_connector.get_gateway_ip()
 
-    def get_calculation_values(self) -> dict[str, int]:
-        return self.openstack_connector.get_calculation_values()
+    def get_calculation_values(self) -> dict[str, str]:
+        val= self.openstack_connector.get_calculation_values()
+        return val
 
     def import_keypair(self, keyname: str, public_key: str) -> dict[str, str]:
         return self.openstack_connector.import_keypair(
