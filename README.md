@@ -39,7 +39,7 @@ The config file contains two ids for security groups:
 
 `gateway_security_group_id:` ID of the security group which allows the access to the gateway and thus the forwarding to the instances. Every other security group which gets created will only be accessible from this security group.
 
-`forc_security_group_id:` ID of the security group from the forc gateway, every forc resenv will only be accessible from this security group 
+`forc_security_group_id:` ID of the security group from the forc gateway, every forc resenv will only be accessible from this security group
 
 
 ##### Gateway

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import logging
 
-from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
 from openstack.block_storage.v2.snapshot import Snapshot as OpenStack_Snapshot
+from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
 from openstack.compute.v2.flavor import Flavor as OpenStack_Flavor
 from openstack.compute.v2.image import Image as OpenStack_Image
 from openstack.compute.v2.server import Server as OpenStack_Server
-from ttypes import VM, Flavor, Image, Volume, Snapshot
+from ttypes import VM, Flavor, Image, Snapshot, Volume
 from util.logger import setup_custom_logger
 from util.state_enums import VmStates
 
@@ -75,6 +75,7 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
     )
     return volume
 
+
 def os_to_thrift_volume_snapshot(openstack_snapshot: OpenStack_Snapshot) -> Snapshot:
     if not openstack_snapshot:
         return Snapshot(status=VmStates.NOT_FOUND)
@@ -89,6 +90,7 @@ def os_to_thrift_volume_snapshot(openstack_snapshot: OpenStack_Snapshot) -> Snap
     )
     return snapshot
 
+
 def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     if not openstack_server:
         logging.info("Openstack server not found")
@@ -98,7 +100,7 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     floating_ip = ""
 
     flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
-    if (openstack_server.image):
+    if openstack_server.image:
         image = os_to_thrift_image(openstack_image=openstack_server.image)
     else:
         image = None
