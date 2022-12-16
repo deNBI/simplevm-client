@@ -25,8 +25,8 @@ if TYPE_CHECKING:
         Image,
         PlaybookResult,
         ResearchEnvironmentTemplate,
-        Volume,
         Snapshot,
+        Volume,
     )
 
 logger = setup_custom_logger(__name__)
@@ -58,9 +58,11 @@ class VirtualMachineHandler(Iface):
         )
         return images
 
-    def get_image(self, openstack_id: str,ignore_not_active:bool=False) -> Image:
+    def get_image(self, openstack_id: str, ignore_not_active: bool = False) -> Image:
         return thrift_converter.os_to_thrift_image(
-            openstack_image=self.openstack_connector.get_image(name_or_id=openstack_id,ignore_not_active=ignore_not_active)
+            openstack_image=self.openstack_connector.get_image(
+                name_or_id=openstack_id, ignore_not_active=ignore_not_active
+            )
         )
 
     def get_public_images(self) -> list[Image]:
@@ -99,8 +101,9 @@ class VirtualMachineHandler(Iface):
     def get_gateway_ip(self) -> dict[str, str]:
         return self.openstack_connector.get_gateway_ip()
 
-    def get_calculation_values(self) -> dict[str, int]:
-        return self.openstack_connector.get_calculation_values()
+    def get_calculation_values(self) -> dict[str, str]:
+        val = self.openstack_connector.get_calculation_values()
+        return val
 
     def import_keypair(self, keyname: str, public_key: str) -> dict[str, str]:
         return self.openstack_connector.import_keypair(
@@ -194,26 +197,28 @@ class VirtualMachineHandler(Iface):
         )
 
     def create_volume_by_source_volume(
-            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+        self, volume_name: str, metadata: dict[str, str], source_volume_id: str
     ) -> Volume:
         return thrift_converter.os_to_thrift_volume(
             openstack_volume=self.openstack_connector.create_volume_by_source_volume(
                 volume_name=volume_name,
                 metadata=metadata,
-                source_volume_id=source_volume_id
+                source_volume_id=source_volume_id,
             )
         )
 
-    def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
+    def create_volume_snapshot(
+        self, volume_id: str, name: str, description: str
+    ) -> str:
         return self.openstack_connector.create_volume_snapshot(
-            volume_id=volume_id,
-            name=name,
-            description=description
+            volume_id=volume_id, name=name, description=description
         )
 
     def get_volume_snapshot(self, snapshot_id: str) -> Snapshot:
         return thrift_converter.os_to_thrift_volume_snapshot(
-            openstack_volume_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
+            openstack_volume_snapshot=self.openstack_connector.get_volume_snapshot(
+                name_or_id=snapshot_id
+            )
         )
 
     def delete_volume_snapshot(self, snapshot_id: str) -> None:
@@ -262,9 +267,7 @@ class VirtualMachineHandler(Iface):
     def get_backend_by_id(self, id: str) -> Backend:
         return self.forc_connector.get_backend_by_id(id=id)
 
-    def add_user_to_backend(
-        self, backend_id: str, user_id: str
-    ) -> dict[str, str]:
+    def add_user_to_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         return self.forc_connector.add_user_to_backend(
             user_id=user_id, backend_id=backend_id
         )
@@ -272,9 +275,7 @@ class VirtualMachineHandler(Iface):
     def get_users_from_backend(self, backend_id: str) -> list[str]:
         return self.forc_connector.get_users_from_backend(backend_id=backend_id)
 
-    def delete_user_from_backend(
-        self, backend_id: str, user_id: str
-    ) -> dict[str, str]:
+    def delete_user_from_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         return self.forc_connector.delete_user_from_backend(
             user_id=user_id, backend_id=backend_id
         )
@@ -282,9 +283,8 @@ class VirtualMachineHandler(Iface):
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
 
-    def add_udp_security_group(self, server_id:str)-> None:
+    def add_udp_security_group(self, server_id: str) -> None:
         return self.openstack_connector.add_udp_security_group(server_id=server_id)
-
 
     def start_server(
         self,
@@ -355,9 +355,9 @@ class VirtualMachineHandler(Iface):
         openstack_id: str,
         conda_packages: list[CondaPackage],
         research_environment_template: str,
-        apt_packages:list[str],
+        apt_packages: list[str],
         create_only_backend: bool,
-        base_url:str=""
+        base_url: str = "",
     ) -> int:
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
@@ -374,7 +374,7 @@ class VirtualMachineHandler(Iface):
             port=port,
             ip=gateway_ip,
             cloud_site=cloud_site,
-            base_url=base_url
+            base_url=base_url,
         )
 
     def is_bibigrid_available(self) -> bool:
