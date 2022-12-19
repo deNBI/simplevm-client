@@ -91,6 +91,7 @@ class Template(object):
         self._all_templates = [name for name in os.listdir(Template.get_playbook_dir()) if
                                name not in NO_TEMPLATE_NAMES and os.path.isdir(os.path.join(Template.get_playbook_dir(), name))]
         logger.info(f"Loaded Template Names: {self._all_templates}")
+        self.install_ansible_galaxy_requirements()
 
         templates_metadata: list[dict[str, str]] = self.load_resenv_metadata()
         for template_metadata in templates_metadata:
@@ -183,23 +184,25 @@ class Template(object):
     def load_resenv_metadata(self) -> list[dict[str, str]]:
         templates_metada = []
         for template in self._all_templates:
-            try:
-                with open(f"{Template.get_playbook_dir()}{template}/{template}_metadata.yml") as template_metadata:
-                    try:
-                        loaded_metadata = yaml.load(
-                            template_metadata, Loader=yaml.FullLoader
-                        )
+            if template not in ["optional", "packer", ".github"]:
+                template_metadata_name = f"{template}_metadata.yml"
+                try:
+                    with open(f"{Template.get_playbook_dir()}{template}/{template}_metadata.yml") as template_metadata:
+                        try:
+                            loaded_metadata = yaml.load(
+                                template_metadata, Loader=yaml.FullLoader
+                            )
 
-                        templates_metada.append(loaded_metadata)
-                        self.add_forc_allowed_template(metadata=loaded_metadata)
+                            templates_metada.append(loaded_metadata)
+                            self.add_forc_allowed_template(metadata=loaded_metadata)
 
 
-                    except Exception as e:
-                        logger.exception(
-                            "Failed to parse Metadata yml: " + template_metadata + "\n" + str(e)
-                        )
-            except Exception as e:
-                logger.exception(f"No Metadata File found for {template} - {e}")
+                        except Exception as e:
+                            logger.exception(
+                                "Failed to parse Metadata yml: " + template_metadata_name + "\n" + str(e)
+                            )
+                except Exception as e:
+                    logger.exception(f"No Metadata File found for {template} - {e}")
         return templates_metada
 
     def get_template_version_for(self, template: str) -> str:
@@ -207,6 +210,14 @@ class Template(object):
         if template_versions:
             return template_versions[0]
         return ""
+
+    def install_ansible_galaxy_requirements(self):
+        logger.info("Installing Ansible galaxy requirements..")
+        stream = os.popen(
+            f"ansible-galaxy install -r {Template.get_playbook_dir()}/packer/requirements.yml"
+        )
+        output = stream.read()
+        logger.info(output)
 
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         logger.info(f"Allowed templates -> {self._allowed_forc_templates}")

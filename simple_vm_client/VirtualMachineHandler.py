@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         PlaybookResult,
         ResearchEnvironmentTemplate,
         Volume,
+        Snapshot,
     )
 
 logger = setup_custom_logger(__name__)
@@ -57,9 +58,9 @@ class VirtualMachineHandler(Iface):
         )
         return images
 
-    def get_image(self, openstack_id: str) -> Image:
+    def get_image(self, openstack_id: str,ignore_not_active:bool=False) -> Image:
         return thrift_converter.os_to_thrift_image(
-            openstack_image=self.openstack_connector.get_image(name_or_id=openstack_id)
+            openstack_image=self.openstack_connector.get_image(name_or_id=openstack_id,ignore_not_active=ignore_not_active)
         )
 
     def get_public_images(self) -> list[Image]:
@@ -191,6 +192,43 @@ class VirtualMachineHandler(Iface):
                 metadata=metadata,
             )
         )
+
+    def create_volume_by_source_volume(
+            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+    ) -> Volume:
+        return thrift_converter.os_to_thrift_volume(
+            openstack_volume=self.openstack_connector.create_volume_by_source_volume(
+                volume_name=volume_name,
+                metadata=metadata,
+                source_volume_id=source_volume_id
+            )
+        )
+
+    def create_volume_by_volume_snap(
+            self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
+    ) -> Volume:
+        return thrift_converter.os_to_thrift_volume(
+            openstack_volume=self.openstack_connector.create_volume_by_volume_snap(
+                volume_name=volume_name,
+                metadata=metadata,
+                volume_snap_id=volume_snap_id
+            )
+        )
+
+    def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
+        return self.openstack_connector.create_volume_snapshot(
+            volume_id=volume_id,
+            name=name,
+            description=description
+        )
+
+    def get_volume_snapshot(self, snapshot_id: str) -> Snapshot:
+        return thrift_converter.os_to_thrift_volume_snapshot(
+            openstack_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
+        )
+
+    def delete_volume_snapshot(self, snapshot_id: str) -> None:
+        return self.openstack_connector.delete_volume_snapshot(snapshot_id=snapshot_id)
 
     def detach_volume(self, volume_id: str, server_id: str) -> None:
         return self.openstack_connector.detach_volume(
@@ -330,6 +368,7 @@ class VirtualMachineHandler(Iface):
         research_environment_template: str,
         apt_packages:list[str],
         create_only_backend: bool,
+        base_url:str=""
     ) -> int:
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
@@ -346,6 +385,7 @@ class VirtualMachineHandler(Iface):
             port=port,
             ip=gateway_ip,
             cloud_site=cloud_site,
+            base_url=base_url
         )
 
     def is_bibigrid_available(self) -> bool:
