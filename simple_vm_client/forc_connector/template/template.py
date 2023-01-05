@@ -31,15 +31,15 @@ NEEDS_FORC_SUPPORT = "needs_forc_support"
 
 class ResearchEnvironmentMetadata:
     def __init__(
-            self,
-            name: str,
-            port: str,
-            security_group_name: str,
-            security_group_description: str,
-            security_group_ssh: bool,
-            direction: str,
-            protocol: str,
-            information_for_display: str,
+        self,
+        name: str,
+        port: str,
+        security_group_name: str,
+        security_group_description: str,
+        security_group_ssh: bool,
+        direction: str,
+        protocol: str,
+        information_for_display: str,
     ):
         self.name = name
         self.port = port
@@ -79,17 +79,28 @@ class Template(object):
         logger.info(f"STARTED update of playbooks from - {self.GITHUB_PLAYBOOKS_REPO}")
         r = requests.get(self.GITHUB_PLAYBOOKS_REPO)
         filename = "resenv_repo"
-        with open(filename, 'wb') as output_file:
+        with open(filename, "wb") as output_file:
             output_file.write(r.content)
-        logger.info('Downloading Completed')
-        with zipfile.ZipFile(filename, 'r') as zip_ref:
+        logger.info("Downloading Completed")
+        with zipfile.ZipFile(filename, "r") as zip_ref:
             zip_ref.extractall(Template.get_playbook_dir())
 
-        resenvs_unziped_dir = next(filter(lambda f: os.path.isdir(f) and "resenvs" in f, glob.glob(Template.get_playbook_dir() + '*')))
-        shutil.copytree(resenvs_unziped_dir, Template.get_playbook_dir(), dirs_exist_ok=True)
+        resenvs_unziped_dir = next(
+            filter(
+                lambda f: os.path.isdir(f) and "resenvs" in f,
+                glob.glob(Template.get_playbook_dir() + "*"),
+            )
+        )
+        shutil.copytree(
+            resenvs_unziped_dir, Template.get_playbook_dir(), dirs_exist_ok=True
+        )
         shutil.rmtree(resenvs_unziped_dir, ignore_errors=True)
-        self._all_templates = [name for name in os.listdir(Template.get_playbook_dir()) if
-                               name not in NO_TEMPLATE_NAMES and os.path.isdir(os.path.join(Template.get_playbook_dir(), name))]
+        self._all_templates = [
+            name
+            for name in os.listdir(Template.get_playbook_dir())
+            if name not in NO_TEMPLATE_NAMES
+            and os.path.isdir(os.path.join(Template.get_playbook_dir(), name))
+        ]
         logger.info(f"Loaded Template Names: {self._all_templates}")
         self.install_ansible_galaxy_requirements()
 
@@ -143,12 +154,12 @@ class Template(object):
         cross_tags = list(set(self._all_templates).intersection(tags))
         for template_dict in templates:
             if (
-                    template_dict["name"] in self._forc_allowed
-                    and template_dict["name"] in cross_tags
+                template_dict["name"] in self._forc_allowed
+                and template_dict["name"] in cross_tags
             ):
                 if (
-                        template_dict["version"]
-                        in self._forc_allowed[template_dict["name"]]
+                    template_dict["version"]
+                    in self._forc_allowed[template_dict["name"]]
                 ):
                     return True
         return False
@@ -171,13 +182,9 @@ class Template(object):
                 logo_url=metadata["logo_url"],
                 info_url=metadata["info_url"],
                 port=int(metadata["port"]),
-                incompatible_versions=metadata[
-                    "incompatible_versions"
-                ],
+                incompatible_versions=metadata["incompatible_versions"],
                 is_maintained=metadata["is_maintained"],
-                information_for_display=metadata[
-                    "information_for_display"
-                ],
+                information_for_display=metadata["information_for_display"],
             )
             self._allowed_forc_templates.append(template)
 
@@ -187,7 +194,9 @@ class Template(object):
             if template not in ["optional", "packer", ".github"]:
                 template_metadata_name = f"{template}_metadata.yml"
                 try:
-                    with open(f"{Template.get_playbook_dir()}{template}/{template}_metadata.yml") as template_metadata:
+                    with open(
+                        f"{Template.get_playbook_dir()}{template}/{template}_metadata.yml"
+                    ) as template_metadata:
                         try:
                             loaded_metadata = yaml.load(
                                 template_metadata, Loader=yaml.FullLoader
@@ -196,10 +205,12 @@ class Template(object):
                             templates_metada.append(loaded_metadata)
                             self.add_forc_allowed_template(metadata=loaded_metadata)
 
-
                         except Exception as e:
                             logger.exception(
-                                "Failed to parse Metadata yml: " + template_metadata_name + "\n" + str(e)
+                                "Failed to parse Metadata yml: "
+                                + template_metadata_name
+                                + "\n"
+                                + str(e)
                             )
                 except Exception as e:
                     logger.exception(f"No Metadata File found for {template} - {e}")
