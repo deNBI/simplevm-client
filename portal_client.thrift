@@ -295,7 +295,7 @@ service VirtualMachineService {
 
 
 
-    map<string,i32>  get_calculation_values()
+    map<string,string>  get_calculation_values()
 
     /**
      * Import Key to openstack.
@@ -700,6 +700,22 @@ service VirtualMachineService {
 
     /**  ID of source volume*/
     3:string source_volume_id)
+
+    throws (1:DefaultException r,2:ResourceNotAvailableException n)
+
+    /**
+     * Create volume by volume snapshot.
+     */
+    Volume create_volume_by_volume_snap(
+
+    /**  Name of volume*/
+    1:string volume_name,
+
+    /** Metadata for the new volume*/
+    2:map<string,string> metadata,
+
+    /**  ID of volume snapshot*/
+    3:string volume_snap_id)
 
     throws (1:DefaultException r,2:ResourceNotAvailableException n)
 

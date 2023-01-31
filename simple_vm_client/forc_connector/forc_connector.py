@@ -6,7 +6,6 @@ import redis
 import requests
 import yaml
 from openstack.compute.v2.server import Server
-from oslo_utils import encodeutils
 from ttypes import (
     Backend,
     BackendNotFoundException,
@@ -88,9 +87,7 @@ class ForcConnector:
             logger.info(msg=f"Get users for backend timed out. {e}")
             return []
 
-    def delete_user_from_backend(
-            self, backend_id: str, user_id: str
-    ) -> dict[str, str]:
+    def delete_user_from_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Delete user {user_id} from backend {backend_id}")
         delete_url = f"{self.FORC_URL}users/{backend_id}"
         user_info = {
@@ -127,7 +124,8 @@ class ForcConnector:
                 if response.status_code == 404 or response.status_code == 500:
                     try:
                         raise BackendNotFoundException(
-                            message=str(json.dumps(response.json())), name_or_id=str(backend_id)
+                            message=str(json.dumps(response.json())),
+                            name_or_id=str(backend_id),
                         )
                     except json.JSONDecodeError:
                         logger.exception(str(response.content))
@@ -139,9 +137,7 @@ class ForcConnector:
             logger.exception(msg="delete_backend timed out")
             raise DefaultException(message="delete_backend timed out")
 
-    def add_user_to_backend(
-            self, backend_id: str, user_id: str
-    ) -> dict[str, str]:
+    def add_user_to_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
         try:
             post_url = f"{self.FORC_URL}users/{backend_id}"
@@ -173,7 +169,7 @@ class ForcConnector:
             raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
 
     def create_backend(
-            self, owner: str, user_key_url: str, template: str, upstream_url: str
+        self, owner: str, user_key_url: str, template: str, upstream_url: str
     ) -> Backend:
         logger.info(
             f"Create Backend - [Owner:{owner}, user_key_url:{user_key_url}, template:{template}, upstream_url:{upstream_url}"
@@ -361,8 +357,8 @@ class ForcConnector:
     def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
         logger.warning(f"Get Playbook logs {openstack_id}")
         if (
-                self.redis_connection.exists(openstack_id) == 1
-                and openstack_id in self._active_playbooks
+            self.redis_connection.exists(openstack_id) == 1
+            and openstack_id in self._active_playbooks
         ):
             playbook = self._active_playbooks.get(openstack_id)
             logger.warning(f"playbook {playbook}")
@@ -385,7 +381,7 @@ class ForcConnector:
             )
 
     def set_vm_wait_for_playbook(
-            self, openstack_id: str, private_key: str, name: str
+        self, openstack_id: str, private_key: str, name: str
     ) -> None:
         logger.info(
             f"Set vm {openstack_id}: {VmTaskStates.PREPARE_PLAYBOOK_BUILD.value} "
@@ -414,8 +410,8 @@ class ForcConnector:
 
             # Server needs to have no task state(so port is not closed)
             if (
-                    status == VmTaskStates.PREPARE_PLAYBOOK_BUILD.value
-                    and not server.task_state
+                status == VmTaskStates.PREPARE_PLAYBOOK_BUILD.value
+                and not server.task_state
             ):
                 server.task_state = VmTaskStates.PREPARE_PLAYBOOK_BUILD.value
             elif status == VmTaskStates.BUILD_PLAYBOOK.value:
@@ -427,7 +423,7 @@ class ForcConnector:
         return server
 
     def get_metadata_by_research_environment(
-            self, research_environment: str
+        self, research_environment: str
     ) -> ResearchEnvironmentMetadata:
         logger.info(f"Get Metadata Research environment: {research_environment}")
         if research_environment in self.template.loaded_research_env_metadata:
@@ -436,7 +432,7 @@ class ForcConnector:
             ]
             return resenv_metadata
         elif (
-                research_environment != "user_key_url" and research_environment != BIOCONDA
+            research_environment != "user_key_url" and research_environment != BIOCONDA
         ):
             logger.error(
                 f"Failure to load metadata of reasearch enviroment: {research_environment}"
@@ -445,17 +441,17 @@ class ForcConnector:
         return None
 
     def create_and_deploy_playbook(
-            self,
-            public_key: str,
-            research_environment_template: str,
-            create_only_backend: bool,
-            conda_packages: list[CondaPackage],
-            apt_packages: list[str],
-            openstack_id: str,
-            port: int,
-            ip: str,
-            cloud_site: str,
-            base_url: str = ""
+        self,
+        public_key: str,
+        research_environment_template: str,
+        create_only_backend: bool,
+        conda_packages: list[CondaPackage],
+        apt_packages: list[str],
+        openstack_id: str,
+        port: int,
+        ip: str,
+        cloud_site: str,
+        base_url: str = "",
     ) -> int:
 
         logger.info(f"Starting Playbook for (openstack_id): {openstack_id}")
@@ -474,7 +470,7 @@ class ForcConnector:
             conda_packages=conda_packages,
             apt_packages=apt_packages,
             cloud_site=cloud_site,
-            base_url=base_url
+            base_url=base_url,
         )
         self.redis_connection.hset(
             openstack_id, "status", VmTaskStates.BUILD_PLAYBOOK.value

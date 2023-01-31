@@ -18,19 +18,19 @@ logger = setup_custom_logger(__name__)
 
 class Playbook(object):
     def __init__(
-            self,
-            ip: str,
-            port: int,
-            research_environment_template: str,
-            research_environment_template_version: str,
-            create_only_backend: bool,
-            conda_packages: list[CondaPackage],
-            apt_packages: list[str],
-            osi_private_key: str,
-            public_key: str,
-            pool: redis.ConnectionPool,
-            cloud_site: str,
-            base_url: str
+        self,
+        ip: str,
+        port: int,
+        research_environment_template: str,
+        research_environment_template_version: str,
+        create_only_backend: bool,
+        conda_packages: list[CondaPackage],
+        apt_packages: list[str],
+        osi_private_key: str,
+        public_key: str,
+        pool: redis.ConnectionPool,
+        cloud_site: str,
+        base_url: str,
     ):
         self.cloud_site: str = cloud_site
         self.redis: redis.Redis = redis.Redis(connection_pool=pool)  # redis connection
@@ -93,12 +93,12 @@ class Playbook(object):
             self.playbooks_dir + "/change_key_vars_file.yml", self.directory.name
         )
         with open(
-                self.directory.name + "/change_key_vars_file.yml", mode="r"
+            self.directory.name + "/change_key_vars_file.yml", mode="r"
         ) as key_file:
             data_ck = self.yaml_exec.load(key_file)
             data_ck["change_key_vars"]["key"] = public_key.strip('"')
         with open(
-                self.directory.name + "/change_key_vars_file.yml", mode="w"
+            self.directory.name + "/change_key_vars_file.yml", mode="w"
         ) as key_file:
             self.yaml_exec.dump(data_ck, key_file)
         self.add_to_playbook_always_lists("change_key")
@@ -116,14 +116,14 @@ class Playbook(object):
             self.playbooks_dir + "/" + self.playbook_exec_name, self.directory.name
         )
         with open(
-                self.directory.name + "/" + self.playbook_exec_name, mode="r"
+            self.directory.name + "/" + self.playbook_exec_name, mode="r"
         ) as generic_playbook:
             data_gp = self.yaml_exec.load(generic_playbook)
             data_gp[0]["vars_files"] = self.vars_files
             data_gp[0]["tasks"][0]["block"] = self.tasks
             data_gp[0]["tasks"][0]["always"] = self.always_tasks
         with open(
-                self.directory.name + "/" + self.playbook_exec_name, mode="w"
+            self.directory.name + "/" + self.playbook_exec_name, mode="w"
         ) as generic_playbook:
             self.yaml_exec.dump(data_gp, generic_playbook)
 
@@ -131,18 +131,24 @@ class Playbook(object):
         if not self.research_environment_template:
             return
 
-        shutil.copytree(f"{self.playbooks_dir}/{self.research_environment_template}", self.directory.name, dirs_exist_ok=True)
+        shutil.copytree(
+            f"{self.playbooks_dir}/{self.research_environment_template}",
+            self.directory.name,
+            dirs_exist_ok=True,
+        )
 
-        site_specific_yml = f"/{self.research_environment_template}{'-' + self.cloud_site}.yml"
+        site_specific_yml = (
+            f"/{self.research_environment_template}{'-' + self.cloud_site}.yml"
+        )
         playbook_name_local = self.research_environment_template
         if os.path.isfile(self.directory.name + site_specific_yml):
-            playbook_name_local = self.research_environment_template + "-" + self.cloud_site
+            playbook_name_local = (
+                self.research_environment_template + "-" + self.cloud_site
+            )
         playbook_var_yml = f"/{self.research_environment_template}_vars_file.yml"
 
         try:
-            with open(
-                    self.directory.name + playbook_var_yml, mode="r"
-            ) as variables:
+            with open(self.directory.name + playbook_var_yml, mode="r") as variables:
                 data = self.yaml_exec.load(variables)
 
                 data[self.research_environment_template + "_vars"][
@@ -155,7 +161,7 @@ class Playbook(object):
                     "base_url"
                 ] = self.base_url
                 with open(
-                        self.directory.name + playbook_var_yml, mode="w"
+                    self.directory.name + playbook_var_yml, mode="w"
                 ) as variables:
                     self.yaml_exec.dump(data, variables)
                 self.add_to_playbook_lists(
@@ -182,12 +188,12 @@ class Playbook(object):
             try:
                 shutil.copy(self.playbooks_dir + playbook_var_yml, self.directory.name)
                 with open(
-                        self.directory.name + playbook_var_yml, mode="r"
+                    self.directory.name + playbook_var_yml, mode="r"
                 ) as variables:
                     data = self.yaml_exec.load(variables)
                     data["apt_packages"] = self.apt_packages
                     with open(
-                            self.directory.name + playbook_var_yml, mode="w"
+                        self.directory.name + playbook_var_yml, mode="w"
                     ) as variables:
                         self.yaml_exec.dump(data, variables)
                     self.add_to_playbook_lists(playbook_name_local, OPTIONAL)
@@ -206,7 +212,9 @@ class Playbook(object):
         if not self.conda_packages:
             return
 
-        shutil.copytree(f"{self.playbooks_dir}/{CONDA}", self.directory.name, dirs_exist_ok=True)
+        shutil.copytree(
+            f"{self.playbooks_dir}/{CONDA}", self.directory.name, dirs_exist_ok=True
+        )
 
         site_specific_yml = f"/{CONDA}{'-' + self.cloud_site}.yml"
         playbook_name_local = CONDA
@@ -215,9 +223,7 @@ class Playbook(object):
         playbook_var_yml = f"/{CONDA}_vars_file.yml"
 
         try:
-            with open(
-                    self.directory.name + playbook_var_yml, mode="r"
-            ) as variables:
+            with open(self.directory.name + playbook_var_yml, mode="r") as variables:
                 data = self.yaml_exec.load(variables)
                 p_dict = {}
 
@@ -232,7 +238,7 @@ class Playbook(object):
                     )
                 data[CONDA + "_vars"]["packages"] = p_dict
                 with open(
-                        self.directory.name + playbook_var_yml, mode="w"
+                    self.directory.name + playbook_var_yml, mode="w"
                 ) as variables:
                     self.yaml_exec.dump(data, variables)
                 self.add_to_playbook_lists(playbook_name_local, CONDA)
@@ -244,7 +250,7 @@ class Playbook(object):
             self.add_tasks_only(playbook_name_local)
 
     def add_to_playbook_lists(
-            self, playbook_name_local: str, playbook_name: str
+        self, playbook_name_local: str, playbook_name: str
     ) -> None:
         self.vars_files.append(playbook_name + "_vars_file.yml")
         self.tasks.append(
