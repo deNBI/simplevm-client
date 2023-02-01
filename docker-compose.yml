@@ -1,6 +1,6 @@
 version: '3.5'
 services:
-  portal-client:
+  simplevm-client:
     container_name: simplevm-client
     image: denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
     ports:
@@ -13,18 +13,18 @@ services:
       - ./logs/client:/code/simple_vm_client/log:rw
     command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
     networks:
-     - portal
+     - portal-production
 
-  client_redis:
+  simplevm_client_redis:
     container_name: simplevm_client_redis
     image: redis:7.0.8
     expose:
       - "6379"
     networks:
-      - portal
+      - portal-production
 
   # filebeat
-  filebeat:
+  simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
     image: docker.elastic.co/beats/filebeat:8.6.1
     env_file:
@@ -35,11 +35,11 @@ services:
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
     networks:
-      - portal
+      - portal-production
 
 networks:
-  portal:
-    name: portal_default
+  portal-production:
+    name:  portal-production
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440

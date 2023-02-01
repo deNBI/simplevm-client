@@ -191,7 +191,7 @@ class Template(object):
     def load_resenv_metadata(self) -> list[dict[str, str]]:
         templates_metada = []
         for template in self._all_templates:
-            if template not in ["optional", "packer", ".github"]:
+            if template not in ["optional", "packer", ".github", "cluster"]:
                 template_metadata_name = f"{template}_metadata.yml"
                 try:
                     with open(
