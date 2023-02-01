@@ -2,5 +2,6 @@ client:
   PERSISTENT_PATH: /home/ubuntu/persistent-simplevm
   CONFIG_DIR_PATH: /home/ubuntu/simplevm-client/VirtualMachineService/config
   CERT_FILE_PATH: /home/ubuntu/simplevm-client/VirtualMachineService/keys
+  CA_FILE_PATH: /home/ubuntu/simplevm-client/VirtualMachineService/keys
   REPO_PATH: /home/ubuntu/simplevm-client
   FILEBEAT_DATA_APPEND: filebeat/data
