@@ -52,7 +52,7 @@ def startServer(config: str) -> None:
         USE_SSL = cfg["server"].get("use_ssl", True)
         if USE_SSL:
             CERTFILE = cfg["server"]["certfile"]
-            CA_CERTS_PATH = cfg["openstack_connection"].get("ca_certs_path", None)
+            CA_CERTS_PATH = cfg["server"].get("ca_certs_path", None)
 
         THREADS = cfg["server"]["threads"]
     click.echo(f"Server is running on port {PORT}")
