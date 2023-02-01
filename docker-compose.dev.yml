@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   portal-client:
-    container_name: simplevm_client
+    container_name: simplevm-client
     build:
       context: .
       dockerfile: Dockerfile

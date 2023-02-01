@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   portal-client:
-    container_name: client
+    container_name: simplevm-client
     image: denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
     ports:
       - ${CLIENT_PORT}:9090
@@ -16,7 +16,7 @@ services:
      - portal
 
   client_redis:
-    container_name: client_redis
+    container_name: simplevm_client_redis
     image: redis:7.0.8
     expose:
       - "6379"
@@ -25,7 +25,7 @@ services:
 
   # filebeat
   filebeat:
-    container_name: client_filebeat
+    container_name: simplevm_client_filebeat
     image: docker.elastic.co/beats/filebeat:8.6.1
     env_file:
       - .env
