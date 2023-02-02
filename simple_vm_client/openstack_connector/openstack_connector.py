@@ -570,6 +570,12 @@ class OpenStackConnector:
 
     def get_calculation_values(self) -> dict[str, str]:
         logger.info("Get Client Calculation Values")
+        logger.info(
+            {
+                "SSH_PORT_CALCULATION": self.SSH_PORT_CALCULATION,
+                "UDP_PORT_CALCULATION": self.UDP_PORT_CALCULATION,
+            }
+        )
         return {
             "SSH_PORT_CALCULATION": self.SSH_PORT_CALCULATION,
             "UDP_PORT_CALCULATION": self.UDP_PORT_CALCULATION,

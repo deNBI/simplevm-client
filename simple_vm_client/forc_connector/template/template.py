@@ -40,6 +40,7 @@ class ResearchEnvironmentMetadata:
         direction: str,
         protocol: str,
         information_for_display: str,
+        needs_forc_support: bool = True,
     ):
         self.name = name
         self.port = port
@@ -49,6 +50,7 @@ class ResearchEnvironmentMetadata:
         self.direction = direction
         self.protocol = protocol
         self.information_for_display = information_for_display
+        self.needs_forc_support = needs_forc_support
 
 
 class Template(object):
@@ -110,14 +112,19 @@ class Template(object):
                 if template_metadata.get(NEEDS_FORC_SUPPORT, False):
 
                     metadata = ResearchEnvironmentMetadata(
-                        template_metadata[TEMPLATE_NAME],
-                        template_metadata[PORT],
-                        template_metadata[SECURITYGROUP_NAME],
-                        template_metadata[SECURITYGROUP_DESCRIPTION],
-                        bool(template_metadata[SECURITYGROUP_SSH]),
-                        template_metadata[DIRECTION],
-                        template_metadata[PROTOCOL],
-                        template_metadata[INFORMATION_FOR_DISPLAY],
+                        name=template_metadata[TEMPLATE_NAME],
+                        port=template_metadata[PORT],
+                        security_group_name=template_metadata[SECURITYGROUP_NAME],
+                        security_group_description=template_metadata[
+                            SECURITYGROUP_DESCRIPTION
+                        ],
+                        security_group_ssh=bool(template_metadata[SECURITYGROUP_SSH]),
+                        direction=template_metadata[DIRECTION],
+                        protocol=template_metadata[PROTOCOL],
+                        information_for_display=template_metadata[
+                            INFORMATION_FOR_DISPLAY
+                        ],
+                        needs_forc_support=True,
                     )
                     self.update_forc_allowed(template_metadata)
                     if metadata.name not in list(self._loaded_resenv_metadata.keys()):

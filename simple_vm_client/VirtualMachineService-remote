@@ -17,8 +17,9 @@ else:
 
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 from thrift.transport import THttpClient, TSocket, TSSLSocket, TTransport
-from VirtualMachineService import VirtualMachineService
-from VirtualMachineService.ttypes import *
+import VirtualMachineService
+import ttypes
+
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
