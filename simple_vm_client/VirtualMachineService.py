@@ -12,8 +12,7 @@ import sys
 from thrift.Thrift import TApplicationException, TMessageType, TProcessor, TType
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
-
-from .ttypes import *
+from ttypes import *
 
 all_structs = []
 
