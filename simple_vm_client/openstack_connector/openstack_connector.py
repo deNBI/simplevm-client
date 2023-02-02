@@ -742,7 +742,7 @@ class OpenStackConnector:
         logger.info(
             f"Check if Security Group for resenv - {resenv_metadata.security_group_name} exists... "
         )
-        sec = self.conn.get_security_group(
+        sec = self.openstack_connection.get_security_group(
             name_or_id=resenv_metadata.security_group_name
         )
         if sec:
