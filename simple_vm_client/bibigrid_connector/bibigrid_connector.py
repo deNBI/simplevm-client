@@ -72,7 +72,7 @@ class BibigridConnector:
 
         return json_resp
 
-    def get_cluster_info(self, cluster_id: str) -> ClusterInfo | None:
+    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         infos: list[dict[str, str]] = self.get_clusters_info()
         for info in infos:
@@ -91,6 +91,7 @@ class BibigridConnector:
                 logger.info(f"Cluster {cluster_id} info: {cluster_info} ")
 
                 return cluster_info
+        return None
 
     def get_clusters_info(self) -> list[dict[str, str]]:
         logger.info("Get clusters info")
