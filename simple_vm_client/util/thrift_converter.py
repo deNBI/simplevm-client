@@ -62,8 +62,10 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
         return Volume(status=VmStates.NOT_FOUND)
     if openstack_volume.get("attachments"):
         device = openstack_volume.attachments[0]["device"]
+        server_id = openstack_volume.attachments[0]["server_id"]
     else:
         device = None
+        server_id=None
     volume = Volume(
         status=openstack_volume.status,
         id=openstack_volume.id,
@@ -72,6 +74,7 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
         created_at=openstack_volume.created_at,
         device=device,
         size=openstack_volume.size,
+        server_id=server_id
     )
     return volume
 

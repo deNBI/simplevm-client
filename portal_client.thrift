@@ -54,6 +54,7 @@ struct Volume{
 5:optional string created_at,
 6:optional string device,
 7:optional int size,
+8:optional string server_id,
 }
 
 /**
@@ -625,7 +626,6 @@ service VirtualMachineService {
 
     /**
      * Delete volume attachment
-     * Return: True if deleted, False if not
      */
     void detach_volume(
     /** Id of the attached volume */
@@ -639,7 +639,6 @@ service VirtualMachineService {
 
     /**
      * Delete volume.
-     * Returns:  True if deleted, False if not
      */
     void delete_volume(1:string volume_id) throws (1: OpenStackConflictException c,2:VolumeNotFoundException v)
 
@@ -662,7 +661,6 @@ service VirtualMachineService {
 
     /**
      * Resume Server.
-     * Returns: True if resumed False if not
      */
     void resume_server(
     /** Id of the server */
@@ -749,13 +747,11 @@ service VirtualMachineService {
 
     /**
      * Delete volume snapshot.
-     * Returns:  True if deleted, False if not
      */
     void delete_volume_snapshot(1:string snapshot_id) throws (1: OpenStackConflictException c,2:DefaultException e)
 
       /**
      * Reboot server.
-     * Returns: True if rebooted False if not
      */
     void reboot_hard_server(
 
@@ -767,7 +763,6 @@ service VirtualMachineService {
 
        /**
      * Reboot server.
-     * Returns: True if rebooted False if not
      */
     void reboot_soft_server(
 
