@@ -523,14 +523,18 @@ class OpenStackConnector:
     def get_public_images(self) -> list[Image]:
         logger.info("Get public images")
         if self.openstack_connection:
-            images = filter(
-                lambda x: "tags" in x
-                and len(x["tags"]) > 0
-                and x["status"] == "active"
-                and x["visibility"] == "public",
-                self.openstack_connection.list_images(),
+            # Use compute.images() method with filters and extra_info
+            images = self.openstack_connection.image.images(
+                status="active", visibility="public"
             )
-            return list(images)
+            # Use list comprehension to filter images based on tags
+            images = [
+                image for image in images if "tags" in image and len(image["tags"]) > 0
+            ]
+            image_names = [image.name for image in images]
+            logger.info(f"Found public images - {image_names}")
+
+            return images
 
         else:
             logger.info("no connection")
@@ -539,14 +543,18 @@ class OpenStackConnector:
     def get_private_images(self) -> list[Image]:
         logger.info("Get private images")
         if self.openstack_connection:
-            images = filter(
-                lambda x: "tags" in x
-                and len(x["tags"]) > 0
-                and x["status"] == "active"
-                and x["visibility"] == "private",
-                self.openstack_connection.list_images(),
+            # Use compute.images() method with filters and extra_info
+            images = self.openstack_connection.image.images(
+                status="active", visibility="private"
             )
-            return list(images)
+            # Use list comprehension to filter images based on tags
+            images = [
+                image for image in images if "tags" in image and len(image["tags"]) > 0
+            ]
+            image_names = [image.name for image in images]
+            logger.info(f"Found private images - {image_names}")
+
+            return images
         else:
             logger.info("no connection")
             return []
@@ -555,15 +563,15 @@ class OpenStackConnector:
 
         logger.info("Get Images")
         if self.openstack_connection:
-            # todo check
-            images = filter(
-                lambda x: "tags" in x
-                and len(x["tags"]) > 0
-                and x["status"] == "active",
-                self.openstack_connection.list_images(),
-            )
+            images = self.openstack_connection.image.images(status="active")
+            images = [
+                image for image in images if "tags" in image and len(image["tags"]) > 0
+            ]
+            image_names = [image.name for image in images]
 
-            return list(images)
+            logger.info(f"Found  images - {image_names}")
+
+            return images
         else:
             logger.info("no connection")
             return []
