@@ -9,7 +9,7 @@ flake8==6.0.0
 paramiko==2.12.0
 ruamel.yaml==0.17.24
 pyvim==3.0.3
-redis==4.5.4
+redis==4.5.5
 requests==2.30.0
 pyyaml==6.0
 pre-commit==3.3.1
