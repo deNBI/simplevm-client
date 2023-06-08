@@ -27,7 +27,7 @@ services:
   # filebeat
   simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
-    image: docker.elastic.co/beats/filebeat:8.8.0
+    image: docker.elastic.co/beats/filebeat:8.8.1
     env_file:
       - .env
     volumes:
