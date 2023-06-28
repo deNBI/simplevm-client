@@ -26,7 +26,6 @@ class BibigridConnector:
             self._NETWORK = cfg["openstack"]["network"]
             self._SUB_NETWORK = cfg["openstack"]["sub_network"]
             self._PRODUCTION = cfg["production"]
-            self._AVAILABILITY_ZONE = cfg["openstack"]["availability_zone"]
 
             self._BIBIGRID_HOST = cfg["bibigrid"]["host"]
             self._BIBIGRID_PORT = cfg["bibigrid"]["port"]
@@ -161,7 +160,6 @@ class BibigridConnector:
             "sshPublicKeys": [public_key],
             "user": user,
             "sshUser": "ubuntu",
-            "availabilityZone": self._AVAILABILITY_ZONE,
             "masterInstance": master_instance,
             "workerInstances": wI,
             "useMasterWithPublicIp": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
