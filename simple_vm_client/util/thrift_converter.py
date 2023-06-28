@@ -27,6 +27,7 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
         status=openstack_image.status,
         created_at=openstack_image.created_at,
         updated_at=openstack_image.updated_at,
+        os_version=openstack_image.get("os_version", ""),
         openstack_id=openstack_image.id,
         description=properties.get("description", ""),
         tags=openstack_image.get("tags", []),
@@ -65,7 +66,7 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
         server_id = openstack_volume.attachments[0]["server_id"]
     else:
         device = None
-        server_id=None
+        server_id = None
     volume = Volume(
         status=openstack_volume.status,
         id=openstack_volume.id,
@@ -74,7 +75,7 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
         created_at=openstack_volume.created_at,
         device=device,
         size=openstack_volume.size,
-        server_id=server_id
+        server_id=server_id,
     )
     return volume
 
