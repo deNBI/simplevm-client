@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import os
 import socket
+import sys
 import urllib
 import urllib.parse
 from contextlib import closing
@@ -54,7 +55,6 @@ class OpenStackConnector:
         self.NETWORK: str = ""
         self.SUB_NETWORK: str = ""
         self.PRODUCTION: bool = True
-        self.AVAILABILITY_ZONE: str = "default"
         self.CLOUD_SITE: str = ""
         self.SSH_MULTIPLICATION_PORT: int = 1
         self.UDP_MULTIPLICATION_PORT: int = 10
@@ -70,20 +70,33 @@ class OpenStackConnector:
         self.AUTH_URL: str = ""
         self.PROJECT_DOMAIN_ID: str = ""
         self.FORC_SECURITY_GROUP_ID: str = ""
+        self.APPLICATION_CREDENTIAL_ID = ""
+        self.APPLICATION_CREDENTIAL_SECRET = ""
+        self.USE_APPLICATION_CREDENTIALS: bool = False
 
         self.load_env_config()
         self.load_config_yml(config_file)
 
         try:
-            logger.info("Connecting to Openstack..")
-            self.openstack_connection = connection.Connection(
-                username=self.USERNAME,
-                password=self.PASSWORD,
-                auth_url=self.AUTH_URL,
-                project_name=self.PROJECT_NAME,
-                user_domain_name=self.USER_DOMAIN_NAME,
-                project_domain_id=self.PROJECT_DOMAIN_ID,
-            )
+            if self.USE_APPLICATION_CREDENTIALS:
+                logger.info("Using Application Credentials for OpenStack Connection")
+                self.openstack_connection = connection.Connection(
+                    auth_url=self.AUTH_URL,
+                    application_credential_id=self.APPLICATION_CREDENTIAL_ID,
+                    application_credential_secret=self.APPLICATION_CREDENTIAL_SECRET,
+                    auth_type="v3applicationcredential",
+                )
+            else:
+                logger.info("Using User Credentials for OpenStack Connection")
+
+                self.openstack_connection = connection.Connection(
+                    username=self.USERNAME,
+                    password=self.PASSWORD,
+                    auth_url=self.AUTH_URL,
+                    project_name=self.PROJECT_NAME,
+                    user_domain_name=self.USER_DOMAIN_NAME,
+                    project_domain_id=self.PROJECT_DOMAIN_ID,
+                )
             self.openstack_connection.authorize()
             logger.info("Connected to Openstack")
             self.create_or_get_default_ssh_security_group()
@@ -102,7 +115,6 @@ class OpenStackConnector:
             self.NETWORK = cfg["openstack"]["network"]
             self.SUB_NETWORK = cfg["openstack"]["sub_network"]
             self.PRODUCTION = cfg["production"]
-            self.AVAILABILITY_ZONE = cfg["openstack"]["availability_zone"]
             self.CLOUD_SITE = cfg["openstack"]["cloud_site"]
             self.SSH_PORT_CALCULATION = cfg["openstack"]["ssh_port_calculation"]
             self.UDP_PORT_CALCULATION = cfg["openstack"]["udp_port_calculation"]
@@ -115,13 +127,36 @@ class OpenStackConnector:
 
     def load_env_config(self) -> None:
         logger.info("Load environment config: OpenStack")
-        self.USERNAME = os.environ["OS_USERNAME"]
-        self.PASSWORD = os.environ["OS_PASSWORD"]
-        self.PROJECT_NAME = os.environ["OS_PROJECT_NAME"]
-        self.PROJECT_ID = os.environ["OS_PROJECT_ID"]
-        self.USER_DOMAIN_NAME = os.environ["OS_USER_DOMAIN_NAME"]
-        self.AUTH_URL = os.environ["OS_AUTH_URL"]
-        self.PROJECT_DOMAIN_ID = os.environ["OS_PROJECT_DOMAIN_ID"]
+
+        self.USE_APPLICATION_CREDENTIALS = os.environ.get(
+            "USE_APPLICATION_CREDENTIALS", False
+        )
+        if self.USE_APPLICATION_CREDENTIALS:
+            logger.info("APPLICATION CREDENTIALS will be used!")
+            try:
+                self.APPLICATION_CREDENTIAL_ID = os.environ["APPLICATION_CREDENTIAL_ID"]
+                self.APPLICATION_CREDENTIAL_SECRET = os.environ[
+                    "APPLICATION_CREDENTIAL_SECRET"
+                ]
+            except KeyError:
+                logger.error(
+                    "Usage of Application Credentials enabled - but no credential id or/and secret provided in env!"
+                )
+                sys.exit(1)
+        else:
+            try:
+                self.USERNAME = os.environ["OS_USERNAME"]
+                self.PASSWORD = os.environ["OS_PASSWORD"]
+                self.PROJECT_NAME = os.environ["OS_PROJECT_NAME"]
+                self.PROJECT_ID = os.environ["OS_PROJECT_ID"]
+                self.USER_DOMAIN_NAME = os.environ["OS_USER_DOMAIN_NAME"]
+                self.AUTH_URL = os.environ["OS_AUTH_URL"]
+                self.PROJECT_DOMAIN_ID = os.environ["OS_PROJECT_DOMAIN_ID"]
+            except KeyError:
+                logger.error(
+                    "Usage of Username/Password enabled - but some keys not provided in env!"
+                )
+                sys.exit(1)
 
     def create_server(
         self,
@@ -145,7 +180,6 @@ class OpenStackConnector:
             userdata=userdata,
             key_name=key_name,
             meta=metadata,
-            availability_zone=self.AVAILABILITY_ZONE,
             security_groups=security_groups,
         )
         return server
@@ -1087,7 +1121,6 @@ class OpenStackConnector:
                 meta=metadata,
                 volumes=volumes,
                 userdata=init_script,
-                availability_zone=self.AVAILABILITY_ZONE,
                 security_groups=security_groups,
             )
 
@@ -1171,7 +1204,6 @@ class OpenStackConnector:
                 meta=metadata,
                 volumes=volumes,
                 userdata=init_script,
-                availability_zone=self.AVAILABILITY_ZONE,
                 security_groups=security_groups,
             )
 

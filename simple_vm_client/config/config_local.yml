@@ -43,8 +43,6 @@ openstack:
 
 
   floating_ip_network: external
-  # The name of the availability zone the server should be placed.
-  availability_zone: default
 
 
   # Used for gateway port calculation , x is always the last octet of the fixed ip (example : (x + 3) *3 ) )
