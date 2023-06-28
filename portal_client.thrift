@@ -138,7 +138,8 @@ struct Image{
 	9: required list<string> tags
 
 	/** If the Image is a snapshot*/
-	10:optional bool is_snapshot
+	10:optional bool is_snapshot,
+	11:optional string os_version
 }
 /**
  * This Struct defines a VirtualMachine.
