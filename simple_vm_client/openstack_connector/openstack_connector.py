@@ -777,7 +777,7 @@ class OpenStackConnector:
         return new_security_group
 
     def is_security_group_in_use(self, security_group_id):
-        self.LOG.info(f"Checking if security group [{security_group_id}] is in use")
+        logger.info(f"Checking if security group [{security_group_id}] is in use")
 
         """
         Checks if a security group is still in use.
@@ -787,7 +787,7 @@ class OpenStackConnector:
         :returns: True if the security group is still in use, False otherwise.
         """
         # First, get a list of all instances using the security group
-        instances = self.conn.compute.servers(
+        instances = self.openstack_connection.compute.servers(
             details=True,
             search_opts={"all_tenants": True, "security_group": security_group_id},
         )
@@ -797,12 +797,14 @@ class OpenStackConnector:
             return True
 
         # Otherwise, check if the security group is still associated with any ports
-        ports = self.conn.network.ports(security_group_id=security_group_id)
+        ports = self.openstack_connection.network.ports(
+            security_group_id=security_group_id
+        )
         if ports:
             return True
 
         # Finally, check if the security group is still associated with any load balancers
-        load_balancers = self.conn.network.load_balancers(
+        load_balancers = self.openstack_connection.network.load_balancers(
             security_group_id=security_group_id
         )
         if load_balancers:
@@ -1015,16 +1017,17 @@ class OpenStackConnector:
             security_groups = server["security_groups"]
             if security_groups is not None:
                 for sg in security_groups:
-                    logger.info(f"Delete security group {sg['name']}")
+                    sec = self.openstack_connection.get_security_group(
+                        name_or_id=sg["name"]
+                    )
+                    logger.info(f"Delete security group {sec}")
                     self.openstack_connection.compute.remove_security_group_from_server(
-                        server=server, security_group=sg
+                        server=server, security_group=sec
                     )
                     if (
                         sg["name"] != self.DEFAULT_SECURITY_GROUP_NAME
-                        and "bibigrid" not in sg["name"]
-                        and not self.is_security_group_in_use(
-                            security_group_id=sg["id"]
-                        )
+                        and "bibigrid" not in sec.name
+                        and not self.is_security_group_in_use(security_group_id=sec.id)
                     ):
                         self.openstack_connection.delete_security_group(sg)
             self.openstack_connection.delete_server(server.id)
