@@ -1,6 +1,7 @@
 import json
 import os
 import urllib
+from urllib.parse import urlparse
 
 import redis
 import requests
@@ -52,10 +53,8 @@ class ForcConnector:
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
             self.FORC_URL = cfg["forc"]["forc_url"]
-            access_url_backup = self.FORC_URL.split(":")
-            self.FORC_ACCESS_URL = cfg["forc"].get(
-                "forc_access_url", access_url_backup[:1]
-            )
+            url_components = urlparse(cfg["forc"]["forc_url"])
+            self.FORC_ACCESS_URL = f"{url_components.scheme}://{url_components.netloc}"
             self.FORC_REMOTE_ID = cfg["forc"]["forc_security_group_id"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
             self.REDIS_HOST = cfg["redis"]["host"]
