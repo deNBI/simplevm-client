@@ -359,10 +359,6 @@ class ForcConnector:
         logger.info("Get Forc Access Url")
         return self.FORC_ACCESS_URL
 
-    def get_openresty_url(self) -> str:
-        logger.info("get openresty url")
-        return self.OPE
-
     def load_env(self) -> None:
         logger.info("Load env: FORC")
         self.FORC_API_KEY = os.environ.get("FORC_API_KEY", None)

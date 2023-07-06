@@ -166,9 +166,6 @@ class VirtualMachineHandler(Iface):
     def get_forc_url(self) -> str:
         return self.forc_connector.get_forc_access_url()
 
-    def get_openresty_url(self) -> str:
-        return self.forc_connector.get_openresty_url()
-
     def create_snapshot(
         self,
         openstack_id: str,
