@@ -2,7 +2,7 @@ version: '3.5'
 services:
   simplevm-client:
     container_name: simplevm-client
-    image: denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
+    image: quay.io/denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
     ports:
       - ${CLIENT_PORT}:9090
     env_file:

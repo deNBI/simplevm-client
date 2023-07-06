@@ -74,3 +74,10 @@
         images_filter:
           dangling: false
         networks: yes
+
+    - name: "Ensure the user {{ ansible_user }} is part of the docker group"
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      tags: always
