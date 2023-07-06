@@ -30,11 +30,11 @@ class ForcConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Forc Connector")
 
-        self.FORC_URL: str = None  # type: ignore
-        self.FORC_ACCESS_URL: str = None  # type: ignore
-        self.FORC_REMOTE_ID: str = None  # type: ignore
-        self.GITHUB_PLAYBOOKS_REPO: str = None  # type: ignore
-        self.REDIS_HOST: str = None  # type: ignore
+        self.FORC_URL: str = ""  # type: ignore
+        self.FORC_ACCESS_URL: str = ""  # type: ignore
+        self.FORC_REMOTE_ID: str = ""  # type: ignore
+        self.GITHUB_PLAYBOOKS_REPO: str = ""  # type: ignore
+        self.REDIS_HOST: str = ""  # type: ignore
         self.REDIS_PORT: int = None  # type: ignore
         self.redis_pool: redis.ConnectionPool = None  # type: ignore
         self.redis_connection: redis.Redis.connection_pool = None
