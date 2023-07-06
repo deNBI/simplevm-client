@@ -30,6 +30,7 @@ class ForcConnector:
         logger.info("Initializing Forc Connector")
 
         self.FORC_URL: str = None  # type: ignore
+        self.FORC_ACCESS_URL: str = None  # type: ignore
         self.FORC_REMOTE_ID: str = None  # type: ignore
         self.GITHUB_PLAYBOOKS_REPO: str = None  # type: ignore
         self.REDIS_HOST: str = None  # type: ignore
@@ -51,6 +52,10 @@ class ForcConnector:
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
             self.FORC_URL = cfg["forc"]["forc_url"]
+            access_url_backup = self.FORC_URL.split(":")
+            self.FORC_ACCESS_URL = cfg["forc"].get(
+                "forc_access_url", access_url_backup[:1]
+            )
             self.FORC_REMOTE_ID = cfg["forc"]["forc_security_group_id"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
             self.REDIS_HOST = cfg["redis"]["host"]
@@ -349,6 +354,14 @@ class ForcConnector:
     def get_forc_url(self) -> str:
         logger.info("Get Forc Url")
         return self.FORC_URL
+
+    def get_forc_access_url(self) -> str:
+        logger.info("Get Forc Access Url")
+        return self.FORC_ACCESS_URL
+
+    def get_openresty_url(self) -> str:
+        logger.info("get openresty url")
+        return self.OPE
 
     def load_env(self) -> None:
         logger.info("Load env: FORC")

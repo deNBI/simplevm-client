@@ -10,7 +10,7 @@ logger:
   level: INFO
   file: log/portal_client.log
   file_backup_count: 5
-  max_bytes:  1073741824
+  max_bytes: 1073741824
 
 server:
   threads: 30
@@ -22,7 +22,7 @@ server:
 
 openstack:
 
-  gateway_security_group_id:  88b530b3-0b62-4edc-b5f6-d80fbbba0830
+  gateway_security_group_id: 88b530b3-0b62-4edc-b5f6-d80fbbba0830
   cloud_site: bielefeld
   #Calculation for Ports - 30000 Base Port (192.168.1.20 - 1 = y , 20 =x)
   ssh_port_calculation: 30000 + x + y * 256
@@ -51,15 +51,16 @@ openstack:
 
 bibigrid:
   # Url for Bibigrid API
-    port: 8080
-    host: bibigrid
-    https: False
-    sub_network: portalexternalsubnetwork
-    modes:
-      -   slurm
+  port: 8080
+  host: bibigrid
+  https: False
+  sub_network: portalexternalsubnetwork
+  modes:
+    - slurm
 
 forc:
   forc_url: https://proxy-simplevm-dev.bi.denbi.de:5000/
+  forc_access_url: https://proxy-simplevm-dev.bi.denbi.de/
   github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
   forc_security_group_id: 9a08eecc-d9a5-405b-aeda-9d4180fc94d6
 

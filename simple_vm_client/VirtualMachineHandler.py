@@ -164,7 +164,10 @@ class VirtualMachineHandler(Iface):
         return self.forc_connector.has_forc()
 
     def get_forc_url(self) -> str:
-        return self.forc_connector.get_forc_url()
+        return self.forc_connector.get_forc_access_url()
+
+    def get_openresty_url(self) -> str:
+        return self.forc_connector.get_openresty_url()
 
     def create_snapshot(
         self,
@@ -208,24 +211,28 @@ class VirtualMachineHandler(Iface):
         )
 
     def create_volume_by_volume_snap(
-            self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
+        self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
     ) -> Volume:
         return thrift_converter.os_to_thrift_volume(
             openstack_volume=self.openstack_connector.create_volume_by_volume_snap(
                 volume_name=volume_name,
                 metadata=metadata,
-                volume_snap_id=volume_snap_id
+                volume_snap_id=volume_snap_id,
             )
         )
 
-    def create_volume_snapshot(self, volume_id: str, name: str, description: str) -> str:
+    def create_volume_snapshot(
+        self, volume_id: str, name: str, description: str
+    ) -> str:
         return self.openstack_connector.create_volume_snapshot(
             volume_id=volume_id, name=name, description=description
         )
 
     def get_volume_snapshot(self, snapshot_id: str) -> Snapshot:
         return thrift_converter.os_to_thrift_volume_snapshot(
-            openstack_snapshot=self.openstack_connector.get_volume_snapshot(name_or_id=snapshot_id)
+            openstack_snapshot=self.openstack_connector.get_volume_snapshot(
+                name_or_id=snapshot_id
+            )
         )
 
     def delete_volume_snapshot(self, snapshot_id: str) -> None:
