@@ -160,7 +160,6 @@ class ForcConnector:
                 timeout=(30, 30),
                 headers={
                     "X-API-KEY": self.FORC_API_KEY,
-                    "Content-Type": "application/x-www-form-urlencoded",
                 },
                 verify=True,
             )
