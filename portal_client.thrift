@@ -407,7 +407,9 @@ service VirtualMachineService {
 
      7:list<map<string,string>> volume_ids_path_new,
      8:list<map<string,string>> volume_ids_path_attach,
-     9:list <string> additional_keys
+     9:list <string> additional_keys,
+     10:optional string research_environment
+
     )
 
     throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,5:ImageNotFoundException i,6:FlavorNotFoundException f,7:DefaultException o)
