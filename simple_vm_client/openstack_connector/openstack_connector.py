@@ -1030,7 +1030,9 @@ class OpenStackConnector:
                         and not self.is_security_group_in_use(security_group_id=sec.id)
                     ):
                         self.openstack_connection.delete_security_group(sg)
-            self.openstack_connection.delete_server(server.id)
+            self.openstack_connection.compute.delete_server(server.id,force=True):
+
+
         except ConflictException as e:
             logger.error(f"Delete Server {openstack_id} failed!")
 
