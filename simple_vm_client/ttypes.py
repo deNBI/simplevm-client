@@ -170,6 +170,8 @@ class ResearchEnvironmentTemplate(object):
      - incompatible_versions
      - is_maintained
      - information_for_display
+     - min_ram
+     - min_cores
 
     """
 
@@ -184,6 +186,8 @@ class ResearchEnvironmentTemplate(object):
         incompatible_versions=None,
         is_maintained=None,
         information_for_display=None,
+        min_ram=0,
+        min_cores=0,
     ):
         self.template_name = template_name
         self.title = title
@@ -194,6 +198,12 @@ class ResearchEnvironmentTemplate(object):
         self.incompatible_versions = incompatible_versions
         self.is_maintained = is_maintained
         self.information_for_display = information_for_display
+        if min_ram is self.thrift_spec[10][4]:
+            min_ram = 0
+        self.min_ram = min_ram
+        if min_cores is self.thrift_spec[11][4]:
+            min_cores = 0
+        self.min_cores = min_cores
 
     def read(self, iprot):
         if (
@@ -296,6 +306,16 @@ class ResearchEnvironmentTemplate(object):
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.min_ram = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I32:
+                    self.min_cores = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -376,6 +396,14 @@ class ResearchEnvironmentTemplate(object):
                     viter15.encode("utf-8") if sys.version_info[0] == 2 else viter15
                 )
             oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.min_ram is not None:
+            oprot.writeFieldBegin("min_ram", TType.I32, 10)
+            oprot.writeI32(self.min_ram)
+            oprot.writeFieldEnd()
+        if self.min_cores is not None:
+            oprot.writeFieldBegin("min_cores", TType.I32, 11)
+            oprot.writeI32(self.min_cores)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -3725,6 +3753,20 @@ ResearchEnvironmentTemplate.thrift_spec = (
         (TType.STRING, "UTF8", TType.STRING, "UTF8", False),
         None,
     ),  # 9
+    (
+        10,
+        TType.I32,
+        "min_ram",
+        None,
+        0,
+    ),  # 10
+    (
+        11,
+        TType.I32,
+        "min_cores",
+        None,
+        0,
+    ),  # 11
 )
 all_structs.append(CondaPackage)
 CondaPackage.thrift_spec = (
