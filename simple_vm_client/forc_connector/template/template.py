@@ -27,6 +27,8 @@ PROTOCOL = "protocol"
 INFORMATION_FOR_DISPLAY = "information_for_display"
 NO_TEMPLATE_NAMES = ["packer"]
 NEEDS_FORC_SUPPORT = "needs_forc_support"
+MIN_RAM = "min_ram"
+MIN_CORES = "min_cores"
 
 
 class ResearchEnvironmentMetadata:
@@ -41,6 +43,8 @@ class ResearchEnvironmentMetadata:
         protocol: str,
         information_for_display: str,
         needs_forc_support: bool = True,
+        min_ram: int = 0,
+        min_cores: int = 0,
     ):
         self.name = name
         self.port = port
@@ -51,6 +55,8 @@ class ResearchEnvironmentMetadata:
         self.protocol = protocol
         self.information_for_display = information_for_display
         self.needs_forc_support = needs_forc_support
+        self.min_ram = min_ram
+        self.min_cores = min_cores
 
 
 class Template(object):
@@ -125,6 +131,8 @@ class Template(object):
                             INFORMATION_FOR_DISPLAY
                         ],
                         needs_forc_support=True,
+                        min_cores=template_metadata.get(MIN_CORES, 0),
+                        min_ram=template_metadata.get(MIN_RAM, 0),
                     )
                     self.update_forc_allowed(template_metadata)
                     if metadata.name not in list(self._loaded_resenv_metadata.keys()):
@@ -192,6 +200,8 @@ class Template(object):
                 incompatible_versions=metadata["incompatible_versions"],
                 is_maintained=metadata["is_maintained"],
                 information_for_display=metadata["information_for_display"],
+                min_ram=metadata.get("min_ram", 0),
+                min_cores=metadata.get("min_cores", 0),
             )
             self._allowed_forc_templates.append(template)
 
@@ -238,7 +248,10 @@ class Template(object):
         logger.info(output)
 
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
-        logger.info(f"Allowed templates -> {self._allowed_forc_templates}")
+        logger.info("Allowed templates:")
+        for template in self._allowed_forc_templates:
+            logger.info(template)
+
         return self._allowed_forc_templates
 
     def update_forc_allowed(self, template_metadata: dict[str, str]) -> None:

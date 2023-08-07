@@ -25,6 +25,9 @@ struct ResearchEnvironmentTemplate{
 7: optional list<string> incompatible_versions,
 8: optional bool is_maintained,
 9: optional map<string,string> information_for_display
+10: optional int min_ram = 0
+11: optional int min_cores = 0
+
 }
 struct CondaPackage{
 1:optional string build,
