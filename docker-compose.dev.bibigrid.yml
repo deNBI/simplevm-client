@@ -24,8 +24,8 @@ services:
     networks:
       - portal
 
-  bibigrid:
-    container_name: bibigrid
+  simplevm_bibigrid:
+    container_name: simplevm_bibigrid
     image: bibiserv/bibigrid:bibigrid-rest-2.3
     env_file:
       - .env

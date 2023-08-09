@@ -336,6 +336,16 @@ service VirtualMachineService {
     )
 
 
+    /**
+	 * Add metadata to a server.
+	 * Returns: List of flavor instances.
+	 */
+    map<string,string> add_metadata_to_server(1:string openstack_id,2:map<string,string> metadata)  throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
+
+
+
 	 /**
 	 * Get Flavors.
 	 * Returns: List of flavor instances.
