@@ -155,10 +155,12 @@ class BibigridConnector:
         logger.info(
             f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n\tuser:{user}"
         )
+        master_instance = master_instance.__dict__
+        del master_instance["count"]
         wI = []
         for wk in worker_instances:
             logger.info(wk)
-            wI.append(wk)
+            wI.append(wk.__dict__)
         headers = {"content-Type": "application/json"}
         body = {
             "mode": "openstack",

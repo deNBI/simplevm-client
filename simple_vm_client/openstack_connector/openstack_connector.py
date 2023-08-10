@@ -1052,10 +1052,6 @@ class OpenStackConnector:
             logger.error(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
-        except Exception as e:
-            logger.exception(e)
-
-            raise Exception
 
     def get_vm_ports(self, openstack_id: str) -> dict[str, str]:
         logger.info(f"Get IP and PORT for server {openstack_id}")
