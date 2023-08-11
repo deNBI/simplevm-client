@@ -52,11 +52,16 @@ openstack:
 bibigrid:
   # Url for Bibigrid API
   port: 8080
-  host: bibigrid
+  host: simplevm_bibigrid
   https: False
+  localDnsLookup: False
   sub_network: portalexternalsubnetwork
   modes:
     - slurm
+  ansibleGalaxyRoles:
+    - name: autoscaling
+      hosts: master
+      git: https://github.com/patricS4/autoscaling-config-ansible
 
 forc:
   forc_url: https://proxy-dev.bi.denbi.de:5000/
