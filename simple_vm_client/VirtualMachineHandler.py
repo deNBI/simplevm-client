@@ -131,6 +131,11 @@ class VirtualMachineHandler(Iface):
     def resume_server(self, openstack_id: str) -> None:
         return self.openstack_connector.resume_server(openstack_id=openstack_id)
 
+    def set_server_metadata(self, openstack_id: str, metadata: dict[str, str]):
+        self.openstack_connector.set_server_metadata(
+            openstack_id=openstack_id, metadata=metadata
+        )
+
     def get_server(self, openstack_id: str) -> VM:
         server = self.openstack_connector.get_server(openstack_id=openstack_id)
         server = self.forc_connector.get_playbook_status(server=server)

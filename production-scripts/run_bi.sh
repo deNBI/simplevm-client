@@ -1,0 +1,1 @@
+ansible-playbook -v -i inventory.bielefeld  --extra-vars "client_config=$PWD/config_bielefeld.yml client_ca_pem=$PWD/CA_bi.pem env_file=$PWD/.env_bi client_server_pem=$PWD/server_bi.pem  " --tags="bibigrid" ../site.yml
