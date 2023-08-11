@@ -54,7 +54,9 @@ class ForcConnector:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
             self.FORC_URL = cfg["forc"]["forc_url"]
             url_components = urlparse(cfg["forc"]["forc_url"])
-            self.FORC_ACCESS_URL = f"{url_components.scheme}://{url_components.netloc}"
+            path = url_components.netloc.split(":")[0]
+
+            self.FORC_ACCESS_URL = f"{url_components.scheme}://{path}/"
             self.FORC_REMOTE_ID = cfg["forc"]["forc_security_group_id"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
             self.REDIS_HOST = cfg["redis"]["host"]
@@ -156,7 +158,9 @@ class ForcConnector:
                 post_url,
                 json=user_info,
                 timeout=(30, 30),
-                headers={"X-API-KEY": self.FORC_API_KEY},
+                headers={
+                    "X-API-KEY": self.FORC_API_KEY,
+                },
                 verify=True,
             )
             try:

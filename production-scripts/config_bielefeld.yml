@@ -1,5 +1,4 @@
-production: False
-
+production: True
 
 
 redis:
@@ -7,19 +6,24 @@ redis:
   port: 6379
   password: ""
 
+logger:
+  level: INFO
+  file: log/portal_client.log
+  file_backup_count: 5
+  max_bytes:  1073741824
 
 server:
   threads: 30
   host: 0.0.0.0
   port: 9090
   # If you use docker-compose this path needs to be the path you mount the server.pem into
-  certfile: /code/VirtualMachineService/keys/server.pem
+  certfile: /code/simple_vm_client/keys/server.pem
+  ca_certs_path: /code/simple_vm_client/keys/CA.pem
   use_ssl: True
 
-
-
 openstack:
-  gateway_security_group_id:  88b530b3-0b62-4edc-b5f6-d80fbbba0830
+
+  gateway_security_group_id:  a59e3a42-f4c7-4f58-9dcb-2b0ee9014a2f
   cloud_site: bielefeld
   #Calculation for Ports - 30000 Base Port (192.168.1.20 - 1 = y , 20 =x)
   ssh_port_calculation: 30000 + x + y * 256
@@ -27,37 +31,32 @@ openstack:
 
 
   # Gateway IP
-  gateway_ip: 129.70.51.75
+  gateway_ip: 129.70.51.6
   # If set to True the client will use a Gateway instead of providing floating IPs for each instance.
   use_gateway: True
 
   set_password: False
   # network where the project is located
-  network: portalexternalnetwork
+  network: portal-pool-network
 
   # subnetwork for starting Clusters
-  sub_network: portalexternalsubnetwork
-
-  production: False
+  sub_network: portal-pool-subnet
 
 
   floating_ip_network: external
 
-  # If you use docker-compose this path needs to be the path you mount the server.pem into
-  certfile: /code/VirtualMachineService/keys/server.pem
-  use_ssl: True
-
 bibigrid:
   # Url for Bibigrid API
     port: 8080
-    host: simplevm_bibigrid
+    host: bibigrid
     https: False
-    sub_network: portalexternalsubnetwork
+    sub_network: portal-pool-subnet
     modes:
       -   slurm
 
 forc:
-  forc_url: https://proxy-dev.bi.denbi.de:5000/
-  forc_access_url: https://proxy-dev.bi.denbi.de/
-  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
-  forc_security_group_id: forc_security_group_id
+  forc_url: https://simplevm.bi.denbi.de:5000/
+  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/master.zip
+  forc_security_group_id: 42c2081a-0297-4e97-928c-c31acc2e0a32
+
+cloud_site: bielefeld

@@ -904,6 +904,22 @@ class OpenStackConnector:
         else:
             return False
 
+    def set_server_metadata(self, openstack_id: str, metadata) -> None:
+        try:
+            logger.info(f"Set Server Metadata: {openstack_id} --> {metadata}")
+            server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
+            if server is None:
+                logger.exception(f"Instance {openstack_id} not found")
+                raise ServerNotFoundException(
+                    message=f"Instance {openstack_id} not found",
+                    name_or_id=openstack_id,
+                )
+            self.openstack_connection.compute.set_server_metadata(server, metadata)
+        except OpenStackCloudException as e:
+            raise DefaultException(
+                message=f"Error when setting server {openstack_id} metadata --> {metadata}! - {e}"
+            )
+
     def get_server(self, openstack_id: str) -> Server:
         try:
             logger.info(f"Get Server by id: {openstack_id}")
@@ -1030,15 +1046,12 @@ class OpenStackConnector:
                         and not self.is_security_group_in_use(security_group_id=sec.id)
                     ):
                         self.openstack_connection.delete_security_group(sg)
-            self.openstack_connection.delete_server(server.id)
+            self.openstack_connection.compute.delete_server(server.id, force=True)
+
         except ConflictException as e:
             logger.error(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
-        except Exception as e:
-            logger.exception(e)
-
-            raise Exception
 
     def get_vm_ports(self, openstack_id: str) -> dict[str, str]:
         logger.info(f"Get IP and PORT for server {openstack_id}")

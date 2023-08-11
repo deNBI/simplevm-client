@@ -131,6 +131,11 @@ class VirtualMachineHandler(Iface):
     def resume_server(self, openstack_id: str) -> None:
         return self.openstack_connector.resume_server(openstack_id=openstack_id)
 
+    def set_server_metadata(self, openstack_id: str, metadata: dict[str, str]):
+        self.openstack_connector.set_server_metadata(
+            openstack_id=openstack_id, metadata=metadata
+        )
+
     def get_server(self, openstack_id: str) -> VM:
         server = self.openstack_connector.get_server(openstack_id=openstack_id)
         server = self.forc_connector.get_playbook_status(server=server)
@@ -307,15 +312,16 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
+        research_environment: str,
     ) -> str:
-        # if research_environment:
-        #     research_environment_metadata = (
-        #         self.forc_connector.get_metadata_by_research_environment(
-        #             research_environment=research_environment
-        #         )
-        #     )
-        # else:
-        #     research_environment_metadata = None
+        if research_environment:
+            research_environment_metadata = (
+                self.forc_connector.get_metadata_by_research_environment(
+                    research_environment=research_environment
+                )
+            )
+        else:
+            research_environment_metadata = None
         return self.openstack_connector.start_server(
             flavor_name=flavor_name,
             image_name=image_name,
@@ -325,7 +331,7 @@ class VirtualMachineHandler(Iface):
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
             additional_keys=additional_keys,
-            # research_environment_metadata=research_environment_metadata,
+            research_environment_metadata=research_environment_metadata,
         )
 
     def start_server_with_custom_key(

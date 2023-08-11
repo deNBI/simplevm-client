@@ -1,7 +1,7 @@
 version: '3.5'
 services:
-  portal-client:
-    container_name: simplevm_client
+  simplevm-client:
+    container_name: simplevm-client
     build:
       context: .
       dockerfile: Dockerfile
@@ -18,14 +18,14 @@ services:
 
   client_redis:
     container_name: simplevm_client_redis
-    image: redis:7.0.11
+    image: redis:7.0.12
     expose:
       - "6379"
     networks:
       - portal
 
-  bibigrid:
-    container_name: bibigrid
+ simplevm_bibigrid:
+    container_name: simplevm_bibigrid
     image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
     env_file:
       - .env

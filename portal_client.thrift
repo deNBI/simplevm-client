@@ -25,6 +25,9 @@ struct ResearchEnvironmentTemplate{
 7: optional list<string> incompatible_versions,
 8: optional bool is_maintained,
 9: optional map<string,string> information_for_display
+10: optional int min_ram = 0
+11: optional int min_cores = 0
+
 }
 struct CondaPackage{
 1:optional string build,
@@ -333,6 +336,16 @@ service VirtualMachineService {
     )
 
 
+    /**
+	 * Add metadata to a server.
+	 * Returns: List of flavor instances.
+	 */
+    map<string,string> add_metadata_to_server(1:string openstack_id,2:map<string,string> metadata)  throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
+
+
+
 	 /**
 	 * Get Flavors.
 	 * Returns: List of flavor instances.
@@ -407,7 +420,9 @@ service VirtualMachineService {
 
      7:list<map<string,string>> volume_ids_path_new,
      8:list<map<string,string>> volume_ids_path_attach,
-     9:list <string> additional_keys
+     9:list <string> additional_keys,
+     10:optional string research_environment
+
     )
 
     throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,5:ImageNotFoundException i,6:FlavorNotFoundException f,7:DefaultException o)
