@@ -422,6 +422,7 @@ service VirtualMachineService {
      8:list<map<string,string>> volume_ids_path_attach,
      9:list <string> additional_keys,
      10:optional string research_environment
+     11:optional list<string> additional_security_group_ids,
 
     )
 
@@ -453,10 +454,9 @@ service VirtualMachineService {
 
     5:optional string research_environment,
     7:list<map<string,string>> volume_ids_path_new,
-    8:list<map<string,string>> volume_ids_path_attach)
-
-
-    throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
+    8:list<map<string,string>> volume_ids_path_attach,
+        9:optional list<string> additional_security_group_ids,
+)  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
 
     /** Check if there is an instance with name */
     bool exist_server(

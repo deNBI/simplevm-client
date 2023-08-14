@@ -7,6 +7,7 @@ import sys
 import urllib
 import urllib.parse
 from contextlib import closing
+from typing import Union
 
 import sympy
 import yaml
@@ -1110,10 +1111,11 @@ class OpenStackConnector:
         servername: str,
         metadata: dict[str, str],
         public_key: str,
-        research_environment_metadata: ResearchEnvironmentMetadata = None,
-        volume_ids_path_new: list[dict[str, str]] = None,  # type: ignore
-        volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
-        additional_keys: list[str] = None,  # type: ignore
+        research_environment_metadata: Union[ResearchEnvironmentMetadata, None] = None,
+        volume_ids_path_new: Union[list[dict[str, str]], None] = None,
+        volume_ids_path_attach: Union[list[dict[str, str]], None] = None,
+        additional_keys: Union[list[str], None] = None,
+        additional_security_group_ids: Union[list[str], None] = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1140,6 +1142,13 @@ class OpenStackConnector:
                         project_name=project_name, project_id=project_id
                     )
                 )
+            if additional_security_group_ids:
+                for security_id in additional_security_group_ids:
+                    sec = self.openstack_connection.get_security_group(
+                        name_or_id=security_id
+                    )
+                    if sec:
+                        security_groups.append(sec["id"])
             public_key = urllib.parse.unquote(public_key)
             self.import_keypair(key_name, public_key)
             volume_ids = []
@@ -1198,6 +1207,7 @@ class OpenStackConnector:
         volume_ids_path_new: list[dict[str, str]] = None,  # type: ignore
         volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
         additional_keys: list[str] = None,  # type: ignore
+        additional_security_group_ids=None,  # type: ignore
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1216,6 +1226,13 @@ class OpenStackConnector:
                     project_name=project_name, project_id=project_id
                 )
             )
+        if additional_security_group_ids:
+            for security_id in additional_security_group_ids:
+                sec = self.openstack_connection.get_security_group(
+                    name_or_id=security_id
+                )
+                if sec:
+                    security_groups.append(sec["id"])
         key_name = ""
         try:
 
