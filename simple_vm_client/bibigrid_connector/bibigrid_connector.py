@@ -81,7 +81,6 @@ class BibigridConnector:
         for info in infos:
             if info["cluster-id"] == cluster_id:
                 cluster_info = ClusterInfo(
-                    launch_date=info["launch_date"],
                     group_id=info["group-id"],
                     network_id=info["network-id"],
                     public_ip=info["public-ip"],
