@@ -24,7 +24,7 @@ services:
     networks:
       - portal
 
- simplevm_bibigrid:
+  simplevm_bibigrid:
     container_name: simplevm_bibigrid
     image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
     env_file:

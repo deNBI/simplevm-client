@@ -196,7 +196,6 @@ class OpenStackConnector:
         return volume
 
     def delete_volume(self, volume_id: str) -> None:
-
         try:
             logger.info(f"Delete Volume   {volume_id} ")
             self.openstack_connection.delete_volume(name_or_id=volume_id)
@@ -252,7 +251,6 @@ class OpenStackConnector:
     def create_volume_by_source_volume(
         self, volume_name: str, metadata: dict[str, str], source_volume_id: str
     ) -> Volume:
-
         logger.info(f"Creating volume from source volume with id {source_volume_id}")
         try:
             volume: Volume = self.openstack_connection.block_storage.create_volume(
@@ -269,7 +267,6 @@ class OpenStackConnector:
     def create_volume_by_volume_snap(
         self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
     ) -> Volume:
-
         logger.info(f"Creating volume from volume snapshot with id {volume_snap_id}")
         try:
             volume: Volume = self.openstack_connection.block_storage.create_volume(
@@ -304,7 +301,6 @@ class OpenStackConnector:
     def attach_volume_to_server(
         self, openstack_id: str, volume_id: str
     ) -> dict[str, str]:
-
         server = self.get_server(openstack_id=openstack_id)
         volume = self.get_volume(name_or_id=volume_id)
 
@@ -322,9 +318,7 @@ class OpenStackConnector:
             raise OpenStackConflictException(message=e.message)
 
     def detach_volume(self, volume_id: str, server_id: str) -> None:
-
         try:
-
             logger.info(f"Delete Volume Attachment  {volume_id} - {server_id}")
             volume = self.get_volume(name_or_id=volume_id)
             server = self.get_server(openstack_id=server_id)
@@ -336,7 +330,6 @@ class OpenStackConnector:
             raise OpenStackConflictException(message=e.message)
 
     def resize_volume(self, volume_id: str, size: int) -> None:
-
         try:
             logger.info(f"Extend volume {volume_id} to size {size}")
             self.openstack_connection.block_storage.extend_volume(volume_id, size)
@@ -349,7 +342,6 @@ class OpenStackConnector:
     def create_volume(
         self, volume_name: str, volume_storage: int, metadata: dict[str, str]
     ) -> Volume:
-
         logger.info(f"Creating volume with {volume_storage} GB storage")
         try:
             volume: Volume = self.openstack_connection.block_storage.create_volume(
@@ -364,7 +356,6 @@ class OpenStackConnector:
             raise ResourceNotAvailableException(message=e.message)
 
     def get_network(self) -> Network:
-
         network: Network = self.openstack_connection.network.find_network(self.NETWORK)
         if network is None:
             logger.exception(f"Network {network} not found!")
@@ -404,9 +395,7 @@ class OpenStackConnector:
     def create_add_keys_script(self, keys: list[str]) -> str:
         logger.info("create add key script")
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        key_script = os.path.join(
-            file_dir, "openstack_connector/scripts/bash/add_keys_to_authorized.sh"
-        )
+        key_script = os.path.join(file_dir, "scripts/bash/add_keys_to_authorized.sh")
         bash_keys_array = "("
         for key in keys:
             bash_keys_array += f'"{key}" '
@@ -517,7 +506,6 @@ class OpenStackConnector:
         base_tags: list[str],
         description: str,
     ) -> str:
-
         logger.info(
             f"Create Snapshot from Instance {openstack_id} with name {name} for {username}"
         )
@@ -541,7 +529,6 @@ class OpenStackConnector:
             raise DefaultException(message=e.message)
 
     def delete_image(self, image_id: str) -> None:
-
         logger.info(f"Delete Image {image_id}")
         try:
             image = self.openstack_connection.get_image(image_id)
@@ -595,7 +582,6 @@ class OpenStackConnector:
             return []
 
     def get_images(self) -> list[Image]:
-
         logger.info("Get Images")
         if self.openstack_connection:
             images = self.openstack_connection.image.images(status="active")
@@ -879,7 +865,6 @@ class OpenStackConnector:
         return new_security_group["id"]
 
     def get_limits(self) -> dict[str, str]:
-
         logger.info("Get Limits")
         limits = {}
         limits.update(self.openstack_connection.get_compute_limits())
@@ -899,7 +884,6 @@ class OpenStackConnector:
         }
 
     def exist_server(self, name: str) -> bool:
-
         if self.openstack_connection.compute.find_server(name) is not None:
             return True
         else:
@@ -962,7 +946,6 @@ class OpenStackConnector:
             )
 
     def resume_server(self, openstack_id: str) -> None:
-
         logger.info(f"Resume Server {openstack_id}")
         try:
             server = self.get_server(openstack_id=openstack_id)
@@ -995,7 +978,6 @@ class OpenStackConnector:
             raise OpenStackConflictException(message=str(e))
 
     def stop_server(self, openstack_id: str) -> None:
-
         logger.info(f"Stop Server {openstack_id}")
         server = self.get_server(openstack_id=openstack_id)
         try:
@@ -1012,7 +994,6 @@ class OpenStackConnector:
             raise OpenStackConflictException(message=e.message)
 
     def delete_server(self, openstack_id: str) -> None:
-
         logger.info(f"Delete Server {openstack_id}")
         try:
             server = self.get_server(openstack_id=openstack_id)
@@ -1086,7 +1067,6 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
     ) -> str:
-
         init_script = self.create_mount_init_script(
             new_volumes=volume_ids_path_new,
             attach_volumes=volume_ids_path_attach,
@@ -1121,7 +1101,6 @@ class OpenStackConnector:
 
         key_name: str = None  # type: ignore
         try:
-
             image: Image = self.get_image(name_or_id=image_name)
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
@@ -1235,7 +1214,6 @@ class OpenStackConnector:
                     security_groups.append(sec["id"])
         key_name = ""
         try:
-
             image: Image = self.get_image(name_or_id=image_name)
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
