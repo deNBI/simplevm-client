@@ -20,17 +20,6 @@ AUTH_URL = "OS_AUTH_URL"
 PROJECT_DOMAIN_ID = "OS_PROJECT_DOMAIN_ID"
 FORC_API_KEY = "FORC_API_KEY"
 
-environment_variables = [
-    USERNAME,
-    PASSWORD,
-    PROJECT_NAME,
-    PROJECT_ID,
-    USER_DOMAIN_ID,
-    AUTH_URL,
-    PROJECT_DOMAIN_ID,
-    FORC_API_KEY,
-]
-
 
 @click.command()
 @click.argument("config")
@@ -94,5 +83,4 @@ def check_environment_variables(envs: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    check_environment_variables(environment_variables)
     startServer()

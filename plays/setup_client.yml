@@ -50,7 +50,7 @@
     - name: Copy specified client config file to remote machine
       copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
-        - { src: "{{client_config}}", dest:  "{{ client.PERSISTENT_PATH }}/config.yml" }
+        - { src: "{{client_config}}", dest: "{{ client.PERSISTENT_PATH }}/config.yml" }
       when: client_config is defined
       tags: always
 
@@ -64,7 +64,7 @@
     - name: Copy specified server pem file to remote machine persistent from default path
       copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
-        - { src:  "{{client.CERT_FILE_PATH}}", dest: "{{ client.PERSISTENT_PATH }}/server.pem" }
+        - { src: "{{client.CERT_FILE_PATH}}", dest: "{{ client.PERSISTENT_PATH }}/server.pem" }
       when: client_server_pem is not defined and stat_client_pem.stat.exists == False
       tags: always
 
@@ -78,7 +78,7 @@
     - name: Copy specified ca pem file to remote machine persistent from default path
       copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
-        - { src:  "{{client.CA_FILE_PATH}}", dest: "{{ client.PERSISTENT_PATH }}/CA.pem" }
+        - { src: "{{client.CA_FILE_PATH}}", dest: "{{ client.PERSISTENT_PATH }}/CA.pem" }
       when: client_ca_pem is not defined and stat_ca_pem.stat.exists == False
       tags: always
 
@@ -114,10 +114,25 @@
       shell: rm -f "{{ client.REPO_PATH }}"/.ansible_environment && jq -r '.[]|"\(.key)=\(.value)"' "{{ client.REPO_PATH }}"/.ansible_environment_*.json >> "{{ client.REPO_PATH }}"/.ansible_environment
       tags: always
 
-    - name: Append variables to env file
-      shell: cat "{{ client.REPO_PATH }}"/.ansible_environment >> "{{ client.REPO_PATH }}"/.env
-      tags: always
 
+    - name: Read existing content from .ansible_environment
+      slurp:
+        src: "{{ client.REPO_PATH }}/.ansible_environment"
+      register: existing_content
+
+    - name: Append variables with empty line to .env
+      lineinfile:
+        path: "{{ client.REPO_PATH }}/.env"
+        insertafter: EOF
+        line: ""
+        state: present
+        create: yes
+    - name: Append existing content to .env
+      lineinfile:
+        path: "{{ client.REPO_PATH }}/.env"
+        insertafter: ""
+        line: "{{ existing_content.content | b64decode | string }}"
+      tags: always
     # Start
     - name: Start client docker container without bibigrid
       docker_compose:
@@ -131,10 +146,10 @@
 
     - name: Start docker container with bibigrid
       docker_compose:
-          recreate: always
-          pull: yes
-          project_src: "{{ client.REPO_PATH }}"
-          files:
-            - docker-compose.bibigrid.yml
+        recreate: always
+        pull: yes
+        project_src: "{{ client.REPO_PATH }}"
+        files:
+          - docker-compose.bibigrid.yml
       become: yes
-      tags: ['never', 'bibigrid']
+      tags: [ 'never', 'bibigrid' ]

@@ -71,8 +71,6 @@
       community.docker.docker_prune:
         containers: yes
         images: yes
-        images_filter:
-          dangling: false
         networks: yes
 
     - name: "Ensure the user {{ ansible_user }} is part of the docker group"
