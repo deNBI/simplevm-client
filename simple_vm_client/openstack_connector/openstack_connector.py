@@ -135,9 +135,11 @@ class OpenStackConnector:
         if self.USE_APPLICATION_CREDENTIALS:
             logger.info("APPLICATION CREDENTIALS will be used!")
             try:
-                self.APPLICATION_CREDENTIAL_ID = os.environ["APPLICATION_CREDENTIAL_ID"]
+                self.APPLICATION_CREDENTIAL_ID = os.environ[
+                    "OS_APPLICATION_CREDENTIAL_ID"
+                ]
                 self.APPLICATION_CREDENTIAL_SECRET = os.environ[
-                    "APPLICATION_CREDENTIAL_SECRET"
+                    "OS_APPLICATION_CREDENTIAL_SECRET"
                 ]
             except KeyError:
                 logger.error(
