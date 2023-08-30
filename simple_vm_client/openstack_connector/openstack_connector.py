@@ -129,9 +129,15 @@ class OpenStackConnector:
     def load_env_config(self) -> None:
         logger.info("Load environment config: OpenStack")
 
+        self.AUTH_URL = os.environ.get("OS_AUTH_URL")
+        if not self.AUTH_URL:
+            logger.error("OS_AUTH_URL not provided in env!")
+            sys.exit(1)
+
         self.USE_APPLICATION_CREDENTIALS = os.environ.get(
             "USE_APPLICATION_CREDENTIALS", False
         )
+
         if self.USE_APPLICATION_CREDENTIALS:
             logger.info("APPLICATION CREDENTIALS will be used!")
             try:
@@ -141,25 +147,34 @@ class OpenStackConnector:
                 self.APPLICATION_CREDENTIAL_SECRET = os.environ[
                     "OS_APPLICATION_CREDENTIAL_SECRET"
                 ]
-            except KeyError:
+            except KeyError as e:
                 logger.error(
-                    "Usage of Application Credentials enabled - but no credential id or/and secret provided in env!"
+                    f"Usage of Application Credentials enabled - but {e.args[0]} not provided in env!"
                 )
                 sys.exit(1)
         else:
-            try:
+            required_keys = [
+                "OS_USERNAME",
+                "OS_PASSWORD",
+                "OS_PROJECT_NAME",
+                "OS_PROJECT_ID",
+                "OS_USER_DOMAIN_NAME",
+                "OS_PROJECT_DOMAIN_ID",
+            ]
+            missing_keys = [key for key in required_keys if key not in os.environ]
+            if missing_keys:
+                missing_keys_str = ", ".join(missing_keys)
+                logger.error(
+                    f"Usage of Username/Password enabled - but keys {missing_keys_str} not provided in env!"
+                )
+                sys.exit(1)
+            else:
                 self.USERNAME = os.environ["OS_USERNAME"]
                 self.PASSWORD = os.environ["OS_PASSWORD"]
                 self.PROJECT_NAME = os.environ["OS_PROJECT_NAME"]
                 self.PROJECT_ID = os.environ["OS_PROJECT_ID"]
                 self.USER_DOMAIN_NAME = os.environ["OS_USER_DOMAIN_NAME"]
-                self.AUTH_URL = os.environ["OS_AUTH_URL"]
                 self.PROJECT_DOMAIN_ID = os.environ["OS_PROJECT_DOMAIN_ID"]
-            except KeyError:
-                logger.error(
-                    "Usage of Username/Password enabled - but some keys not provided in env!"
-                )
-                sys.exit(1)
 
     def create_server(
         self,
