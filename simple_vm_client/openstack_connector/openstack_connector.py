@@ -134,8 +134,8 @@ class OpenStackConnector:
             logger.error("OS_AUTH_URL not provided in env!")
             sys.exit(1)
 
-        self.USE_APPLICATION_CREDENTIALS = os.environ.get(
-            "USE_APPLICATION_CREDENTIALS", False
+        self.USE_APPLICATION_CREDENTIALS = (
+            os.environ.get("USE_APPLICATION_CREDENTIALS", False).lower() == "true"
         )
 
         if self.USE_APPLICATION_CREDENTIALS:
