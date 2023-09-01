@@ -135,7 +135,7 @@ class OpenStackConnector:
             sys.exit(1)
 
         self.USE_APPLICATION_CREDENTIALS = (
-            os.environ.get("USE_APPLICATION_CREDENTIALS", False).lower() == "true"
+            os.environ.get("USE_APPLICATION_CREDENTIALS", "False").lower() == "true"
         )
 
         if self.USE_APPLICATION_CREDENTIALS:

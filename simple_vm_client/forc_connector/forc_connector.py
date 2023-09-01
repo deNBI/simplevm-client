@@ -218,7 +218,7 @@ class ForcConnector:
                 raise DefaultException(message=e)
             logger.info(f"Backend created {data}")
             new_backend = Backend(
-                id=data["id"],
+                id=int(data["id"]),
                 owner=data["owner"],
                 location_url=data["location_url"],
                 template=data["template"],
@@ -465,7 +465,6 @@ class ForcConnector:
         cloud_site: str,
         base_url: str = "",
     ) -> int:
-
         logger.info(f"Starting Playbook for (openstack_id): {openstack_id}")
         key: str = self.redis_connection.hget(openstack_id, "key").decode("utf-8")
         playbook = Playbook(
