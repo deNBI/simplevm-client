@@ -132,6 +132,7 @@
         path: "{{ client.REPO_PATH }}/.env"
         insertafter: ""
         line: "{{ existing_content.content | b64decode | string }}"
+      when: existing_content
       tags: always
     # Start
     - name: Start client docker container without bibigrid
