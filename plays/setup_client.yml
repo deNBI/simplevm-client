@@ -119,6 +119,7 @@
       slurp:
         src: "{{ client.REPO_PATH }}/.ansible_environment"
       register: existing_content
+      tags: always
 
     - name: Append variables with empty line to .env
       lineinfile:
