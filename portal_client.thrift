@@ -233,6 +233,11 @@ exception ServerNotFoundException {
     2: string name_or_id
 }
 
+exception SecurityGroupRuleNotFoundException {
+    /** Server not found. */
+    1: string message
+    2: string name_or_id
+}
 
 exception FlavorNotFoundException {
     1: string message
@@ -388,6 +393,12 @@ service VirtualMachineService {
 
 	void resize_volume(1:string volume_id,2:int size) throws(1:VolumeNotFoundException v)
 
+	/**
+	* Creates/Updates a security group for a vm with a specific port range for a project
+    */
+	string open_port_range_for_vm_in_project(1:int range_start,2:int range_stop,3:string openstack_id,4: string ethertype = "IPv4",5:string protocol ="TCP") throws (1:ServerNotFoundException e,2: DefaultException v,3:OpenStackConflictException o)
+
+	void delete_security_group_rule(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
 
 
 	 /**
