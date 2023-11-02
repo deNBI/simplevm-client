@@ -44,6 +44,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("  Volume get_volume(string volume_id)")
     print("   get_volumes_by_ids( volume_ids)")
     print("  void resize_volume(string volume_id, int size)")
+    print(
+        "  string open_port_range_for_vm_in_project(int range_start, int range_stop, string openstack_id, string ethertype)"
+    )
+    print("  void delete_security_group_rule(string openstack_id)")
     print("  void delete_server(string openstack_id)")
     print(
         "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_keys, string research_environment,  additional_security_group_ids)"
@@ -331,6 +335,29 @@ elif cmd == "resize_volume":
         client.resize_volume(
             args[0],
             eval(args[1]),
+        )
+    )
+
+elif cmd == "open_port_range_for_vm_in_project":
+    if len(args) != 4:
+        print("open_port_range_for_vm_in_project requires 4 args")
+        sys.exit(1)
+    pp.pprint(
+        client.open_port_range_for_vm_in_project(
+            eval(args[0]),
+            eval(args[1]),
+            args[2],
+            args[3],
+        )
+    )
+
+elif cmd == "delete_security_group_rule":
+    if len(args) != 1:
+        print("delete_security_group_rule requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.delete_security_group_rule(
+            args[0],
         )
     )
 

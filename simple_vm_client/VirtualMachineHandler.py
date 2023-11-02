@@ -299,6 +299,16 @@ class VirtualMachineHandler(Iface):
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
 
+    def open_port_range_for_vm_in_project(
+        self, range_start, range_stop, openstack_id, ethertype: str = "IPv4"
+    ) -> str:
+        return self.openstack_connector.open_port_range_for_vm_in_project(
+            range_start=range_start,
+            range_stop=range_stop,
+            openstack_id=openstack_id,
+            ethertype=ethertype,
+        )
+
     def add_udp_security_group(self, server_id: str) -> None:
         return self.openstack_connector.add_udp_security_group(server_id=server_id)
 

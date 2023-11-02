@@ -704,6 +704,65 @@ class OpenStackConnector:
                 description="Default SSH SimpleVM Security Group",
             )
 
+    def open_port_range_for_vm_in_project(
+        self, range_start, range_stop, openstack_id, ethertype="IPV4"
+    ):
+        server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
+        if server is None:
+            logger.exception(f"Instance {openstack_id} not found")
+            raise ServerNotFoundException(
+                message=f"Instance {openstack_id} not found",
+                name_or_id=openstack_id,
+            )
+        project_name = server.metadata.get("project_name")
+        project_id = server.metadata.get("project_id")
+
+        project_security_group = self.get_or_create_project_security_group(
+            project_name=project_name, project_id=project_id
+        )
+        vm_security_group = self.get_or_create_vm_security_group(
+            openstack_id=openstack_id
+        )
+        current_vm_security_group_names = [
+            sec["name"] for sec in server["security_groups"]
+        ]
+        if openstack_id not in current_vm_security_group_names:
+            self.openstack_connection.add_server_security_groups(
+                server=server, security_groups=[vm_security_group]
+            )
+        if ethertype not in ["IPv4", "IPv6"]:
+            raise DefaultException(
+                message=f"Type {ethertype} does not exist for security group rules"
+            )
+
+        try:
+            if ethertype == "IPv4":
+                security_rule = self.openstack_connection.create_security_group_rule(
+                    direction="ingress",
+                    protocol="tcp",
+                    port_range_max=range_stop,
+                    port_range_min=range_start,
+                    secgroup_name_or_id=vm_security_group,
+                    remote_group_id=project_security_group,
+                )
+                return security_rule["id"]
+            elif ethertype == "IPv6":
+                security_rule = self.openstack_connection.create_security_group_rule(
+                    direction="ingress",
+                    ethertype="IPv6",
+                    protocol="tcp",
+                    port_range_max=range_stop,
+                    port_range_min=range_start,
+                    secgroup_name_or_id=vm_security_group,
+                    remote_group_id=project_security_group,
+                )
+                return security_rule["id"]
+        except ConflictException as e:
+            logger.exception(
+                f"Could not create security group rule for instance {openstack_id}"
+            )
+            raise OpenStackConflictException(message=e.message)
+
     def create_security_group(
         self,
         name: str,
@@ -848,6 +907,18 @@ class OpenStackConnector:
             port_range_min=resenv_metadata.port,
             security_group_id=new_security_group["id"],
             remote_group_id=self.FORC_SECURITY_GROUP_ID,
+        )
+        return new_security_group["id"]
+
+    def get_or_create_vm_security_group(self, openstack_id):
+        logger.info(f"Check if Security Group for vm - [{openstack_id}] exists... ")
+        sec = self.openstack_connection.get_security_group(name_or_id=openstack_id)
+        if sec:
+            logger.info(f"Security group [{openstack_id}]  already exists.")
+            return sec["id"]
+        logger.info(f"No security Group for [{openstack_id}]  exists. Creating.. ")
+        new_security_group = self.openstack_connection.create_security_group(
+            name=openstack_id, description=f"VM ID: {openstack_id} Security Group"
         )
         return new_security_group["id"]
 
