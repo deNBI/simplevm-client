@@ -704,8 +704,19 @@ class OpenStackConnector:
                 description="Default SSH SimpleVM Security Group",
             )
 
+    def delete_security_group_rule(self, openstack_id):
+        logger.info(f"Delete Security Group Rule -- {openstack_id}")
+        deleted = self.openstack_connection.delete_security_group_rule(
+            rule_id=openstack_id
+        )
+        logger.info(f"Delete Result -- {deleted}")
+        if not deleted:
+            raise DefaultException(
+                message=f"Could not delete security group rule - {openstack_id}"
+            )
+
     def open_port_range_for_vm_in_project(
-        self, range_start, range_stop, openstack_id, ethertype="IPV4"
+        self, range_start, range_stop, openstack_id, ethertype="IPV4", protocol="TCP"
     ):
         server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
         if server is None:
@@ -736,27 +747,17 @@ class OpenStackConnector:
             )
 
         try:
-            if ethertype == "IPv4":
-                security_rule = self.openstack_connection.create_security_group_rule(
-                    direction="ingress",
-                    protocol="tcp",
-                    port_range_max=range_stop,
-                    port_range_min=range_start,
-                    secgroup_name_or_id=vm_security_group,
-                    remote_group_id=project_security_group,
-                )
-                return security_rule["id"]
-            elif ethertype == "IPv6":
-                security_rule = self.openstack_connection.create_security_group_rule(
-                    direction="ingress",
-                    ethertype="IPv6",
-                    protocol="tcp",
-                    port_range_max=range_stop,
-                    port_range_min=range_start,
-                    secgroup_name_or_id=vm_security_group,
-                    remote_group_id=project_security_group,
-                )
-                return security_rule["id"]
+            security_rule = self.openstack_connection.create_security_group_rule(
+                direction="ingress",
+                ethertype=ethertype,
+                protocol=protocol,
+                port_range_max=range_stop,
+                port_range_min=range_start,
+                secgroup_name_or_id=vm_security_group,
+                remote_group_id=project_security_group,
+            )
+            return security_rule["id"]
+
         except ConflictException as e:
             logger.exception(
                 f"Could not create security group rule for instance {openstack_id}"
@@ -1112,7 +1113,7 @@ class OpenStackConnector:
                     )
                     if (
                         sg["name"] != self.DEFAULT_SECURITY_GROUP_NAME
-                        and "bibigrid" not in sec.name
+                        and ("bibigrid" not in sec.name or "master" not in server.name)
                         and not self.is_security_group_in_use(security_group_id=sec.id)
                     ):
                         self.openstack_connection.delete_security_group(sg)

@@ -149,7 +149,7 @@ class Iface(object):
         """
 
     def open_port_range_for_vm_in_project(
-        self, range_start, range_stop, openstack_id, ethertype
+        self, range_start, range_stop, openstack_id, ethertype, protocol
     ):
         """
         Creates/Updates a security group for a vm with a specific port range for a project
@@ -159,6 +159,7 @@ class Iface(object):
          - range_stop
          - openstack_id
          - ethertype
+         - protocol
 
         """
 
@@ -1252,7 +1253,7 @@ class Client(Iface):
         return
 
     def open_port_range_for_vm_in_project(
-        self, range_start, range_stop, openstack_id, ethertype
+        self, range_start, range_stop, openstack_id, ethertype, protocol
     ):
         """
         Creates/Updates a security group for a vm with a specific port range for a project
@@ -1262,15 +1263,16 @@ class Client(Iface):
          - range_stop
          - openstack_id
          - ethertype
+         - protocol
 
         """
         self.send_open_port_range_for_vm_in_project(
-            range_start, range_stop, openstack_id, ethertype
+            range_start, range_stop, openstack_id, ethertype, protocol
         )
         return self.recv_open_port_range_for_vm_in_project()
 
     def send_open_port_range_for_vm_in_project(
-        self, range_start, range_stop, openstack_id, ethertype
+        self, range_start, range_stop, openstack_id, ethertype, protocol
     ):
         self._oprot.writeMessageBegin(
             "open_port_range_for_vm_in_project", TMessageType.CALL, self._seqid
@@ -1280,6 +1282,7 @@ class Client(Iface):
         args.range_stop = range_stop
         args.openstack_id = openstack_id
         args.ethertype = ethertype
+        args.protocol = protocol
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -1301,6 +1304,8 @@ class Client(Iface):
             raise result.e
         if result.v is not None:
             raise result.v
+        if result.o is not None:
+            raise result.o
         raise TApplicationException(
             TApplicationException.MISSING_RESULT,
             "open_port_range_for_vm_in_project failed: unknown result",
@@ -3928,7 +3933,11 @@ class Processor(Iface, TProcessor):
         result = open_port_range_for_vm_in_project_result()
         try:
             result.success = self._handler.open_port_range_for_vm_in_project(
-                args.range_start, args.range_stop, args.openstack_id, args.ethertype
+                args.range_start,
+                args.range_stop,
+                args.openstack_id,
+                args.ethertype,
+                args.protocol,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -3939,6 +3948,9 @@ class Processor(Iface, TProcessor):
         except DefaultException as v:
             msg_type = TMessageType.REPLY
             result.v = v
+        except OpenStackConflictException as o:
+            msg_type = TMessageType.REPLY
+            result.o = o
         except TApplicationException as ex:
             logging.exception("TApplication exception in handler")
             msg_type = TMessageType.EXCEPTION
@@ -8071,6 +8083,7 @@ class open_port_range_for_vm_in_project_args(object):
      - range_stop
      - openstack_id
      - ethertype
+     - protocol
 
     """
 
@@ -8080,11 +8093,13 @@ class open_port_range_for_vm_in_project_args(object):
         range_stop=None,
         openstack_id=None,
         ethertype="IPv4",
+        protocol="TCP",
     ):
         self.range_start = range_start
         self.range_stop = range_stop
         self.openstack_id = openstack_id
         self.ethertype = ethertype
+        self.protocol = protocol
 
     def read(self, iprot):
         if (
@@ -8127,6 +8142,15 @@ class open_port_range_for_vm_in_project_args(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.protocol = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -8161,6 +8185,14 @@ class open_port_range_for_vm_in_project_args(object):
                 self.ethertype.encode("utf-8")
                 if sys.version_info[0] == 2
                 else self.ethertype
+            )
+            oprot.writeFieldEnd()
+        if self.protocol is not None:
+            oprot.writeFieldBegin("protocol", TType.STRING, 5)
+            oprot.writeString(
+                self.protocol.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.protocol
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -8211,6 +8243,13 @@ open_port_range_for_vm_in_project_args.thrift_spec = (
         "UTF8",
         "IPv4",
     ),  # 4
+    (
+        5,
+        TType.STRING,
+        "protocol",
+        "UTF8",
+        "TCP",
+    ),  # 5
 )
 
 
@@ -8220,6 +8259,7 @@ class open_port_range_for_vm_in_project_result(object):
      - success
      - e
      - v
+     - o
 
     """
 
@@ -8228,10 +8268,12 @@ class open_port_range_for_vm_in_project_result(object):
         success=None,
         e=None,
         v=None,
+        o=None,
     ):
         self.success = success
         self.e = e
         self.v = v
+        self.o = o
 
     def read(self, iprot):
         if (
@@ -8265,6 +8307,11 @@ class open_port_range_for_vm_in_project_result(object):
                     self.v = DefaultException.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.o = OpenStackConflictException.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -8292,6 +8339,10 @@ class open_port_range_for_vm_in_project_result(object):
         if self.v is not None:
             oprot.writeFieldBegin("v", TType.STRUCT, 2)
             self.v.write(oprot)
+            oprot.writeFieldEnd()
+        if self.o is not None:
+            oprot.writeFieldBegin("o", TType.STRUCT, 3)
+            self.o.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -8333,6 +8384,13 @@ open_port_range_for_vm_in_project_result.thrift_spec = (
         [DefaultException, None],
         None,
     ),  # 2
+    (
+        3,
+        TType.STRUCT,
+        "o",
+        [OpenStackConflictException, None],
+        None,
+    ),  # 3
 )
 
 
