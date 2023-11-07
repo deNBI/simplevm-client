@@ -126,6 +126,9 @@ class OpenStackConnector:
                 "gateway_security_group_id"
             ]
 
+    def _get_default_security_groups(self):
+        return self.DEFAULT_SECURITY_GROUPS.copy()
+
     def load_env_config(self) -> None:
         logger.info("Load environment config: OpenStack")
 
@@ -1195,7 +1198,7 @@ class OpenStackConnector:
             network: Network = self.get_network()
             key_name = f"{servername}_{metadata['project_name']}"
             logger.info(f"Key name {key_name}")
-            security_groups = self.DEFAULT_SECURITY_GROUPS
+            security_groups = self._get_default_security_groups()
             if research_environment_metadata:
                 security_groups.append(
                     self.get_or_create_research_environment_security_group(
@@ -1279,7 +1282,7 @@ class OpenStackConnector:
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
-        security_groups = self.DEFAULT_SECURITY_GROUPS
+        security_groups = self._get_default_security_groups()
         if research_environment_metadata:
             security_groups.append(
                 self.get_or_create_research_environment_security_group(
