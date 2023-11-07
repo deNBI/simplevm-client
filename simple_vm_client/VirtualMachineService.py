@@ -148,6 +148,28 @@ class Iface(object):
 
         """
 
+    def open_port_range_for_vm_in_project(
+        self, range_start, range_stop, openstack_id, ethertype, protocol
+    ):
+        """
+        Creates/Updates a security group for a vm with a specific port range for a project
+
+        Parameters:
+         - range_start
+         - range_stop
+         - openstack_id
+         - ethertype
+         - protocol
+
+        """
+
+    def delete_security_group_rule(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id
+
+        """
+
     def delete_server(self, openstack_id):
         """
         Delete server.
@@ -1228,6 +1250,99 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.v is not None:
             raise result.v
+        return
+
+    def open_port_range_for_vm_in_project(
+        self, range_start, range_stop, openstack_id, ethertype, protocol
+    ):
+        """
+        Creates/Updates a security group for a vm with a specific port range for a project
+
+        Parameters:
+         - range_start
+         - range_stop
+         - openstack_id
+         - ethertype
+         - protocol
+
+        """
+        self.send_open_port_range_for_vm_in_project(
+            range_start, range_stop, openstack_id, ethertype, protocol
+        )
+        return self.recv_open_port_range_for_vm_in_project()
+
+    def send_open_port_range_for_vm_in_project(
+        self, range_start, range_stop, openstack_id, ethertype, protocol
+    ):
+        self._oprot.writeMessageBegin(
+            "open_port_range_for_vm_in_project", TMessageType.CALL, self._seqid
+        )
+        args = open_port_range_for_vm_in_project_args()
+        args.range_start = range_start
+        args.range_stop = range_stop
+        args.openstack_id = openstack_id
+        args.ethertype = ethertype
+        args.protocol = protocol
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_open_port_range_for_vm_in_project(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = open_port_range_for_vm_in_project_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        if result.v is not None:
+            raise result.v
+        if result.o is not None:
+            raise result.o
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "open_port_range_for_vm_in_project failed: unknown result",
+        )
+
+    def delete_security_group_rule(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id
+
+        """
+        self.send_delete_security_group_rule(openstack_id)
+        self.recv_delete_security_group_rule()
+
+    def send_delete_security_group_rule(self, openstack_id):
+        self._oprot.writeMessageBegin(
+            "delete_security_group_rule", TMessageType.CALL, self._seqid
+        )
+        args = delete_security_group_rule_args()
+        args.openstack_id = openstack_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_delete_security_group_rule(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = delete_security_group_rule_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
         return
 
     def delete_server(self, openstack_id):
@@ -3277,6 +3392,12 @@ class Processor(Iface, TProcessor):
         self._processMap["get_volume"] = Processor.process_get_volume
         self._processMap["get_volumes_by_ids"] = Processor.process_get_volumes_by_ids
         self._processMap["resize_volume"] = Processor.process_resize_volume
+        self._processMap[
+            "open_port_range_for_vm_in_project"
+        ] = Processor.process_open_port_range_for_vm_in_project
+        self._processMap[
+            "delete_security_group_rule"
+        ] = Processor.process_delete_security_group_rule
         self._processMap["delete_server"] = Processor.process_delete_server
         self._processMap["start_server"] = Processor.process_start_server
         self._processMap[
@@ -3801,6 +3922,74 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("resize_volume", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_open_port_range_for_vm_in_project(self, seqid, iprot, oprot):
+        args = open_port_range_for_vm_in_project_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = open_port_range_for_vm_in_project_result()
+        try:
+            result.success = self._handler.open_port_range_for_vm_in_project(
+                args.range_start,
+                args.range_stop,
+                args.openstack_id,
+                args.ethertype,
+                args.protocol,
+            )
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ServerNotFoundException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except DefaultException as v:
+            msg_type = TMessageType.REPLY
+            result.v = v
+        except OpenStackConflictException as o:
+            msg_type = TMessageType.REPLY
+            result.o = o
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("open_port_range_for_vm_in_project", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_delete_security_group_rule(self, seqid, iprot, oprot):
+        args = delete_security_group_rule_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = delete_security_group_rule_result()
+        try:
+            self._handler.delete_security_group_rule(args.openstack_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except SecurityGroupRuleNotFoundException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("delete_security_group_rule", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -7882,6 +8071,486 @@ resize_volume_result.thrift_spec = (
         TType.STRUCT,
         "v",
         [VolumeNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
+class open_port_range_for_vm_in_project_args(object):
+    """
+    Attributes:
+     - range_start
+     - range_stop
+     - openstack_id
+     - ethertype
+     - protocol
+
+    """
+
+    def __init__(
+        self,
+        range_start=None,
+        range_stop=None,
+        openstack_id=None,
+        ethertype="IPv4",
+        protocol="TCP",
+    ):
+        self.range_start = range_start
+        self.range_stop = range_stop
+        self.openstack_id = openstack_id
+        self.ethertype = ethertype
+        self.protocol = protocol
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.range_start = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.range_stop = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.openstack_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.ethertype = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.protocol = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("open_port_range_for_vm_in_project_args")
+        if self.range_start is not None:
+            oprot.writeFieldBegin("range_start", TType.I32, 1)
+            oprot.writeI32(self.range_start)
+            oprot.writeFieldEnd()
+        if self.range_stop is not None:
+            oprot.writeFieldBegin("range_stop", TType.I32, 2)
+            oprot.writeI32(self.range_stop)
+            oprot.writeFieldEnd()
+        if self.openstack_id is not None:
+            oprot.writeFieldBegin("openstack_id", TType.STRING, 3)
+            oprot.writeString(
+                self.openstack_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.openstack_id
+            )
+            oprot.writeFieldEnd()
+        if self.ethertype is not None:
+            oprot.writeFieldBegin("ethertype", TType.STRING, 4)
+            oprot.writeString(
+                self.ethertype.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.ethertype
+            )
+            oprot.writeFieldEnd()
+        if self.protocol is not None:
+            oprot.writeFieldBegin("protocol", TType.STRING, 5)
+            oprot.writeString(
+                self.protocol.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.protocol
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(open_port_range_for_vm_in_project_args)
+open_port_range_for_vm_in_project_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.I32,
+        "range_start",
+        None,
+        None,
+    ),  # 1
+    (
+        2,
+        TType.I32,
+        "range_stop",
+        None,
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRING,
+        "openstack_id",
+        "UTF8",
+        None,
+    ),  # 3
+    (
+        4,
+        TType.STRING,
+        "ethertype",
+        "UTF8",
+        "IPv4",
+    ),  # 4
+    (
+        5,
+        TType.STRING,
+        "protocol",
+        "UTF8",
+        "TCP",
+    ),  # 5
+)
+
+
+class open_port_range_for_vm_in_project_result(object):
+    """
+    Attributes:
+     - success
+     - e
+     - v
+     - o
+
+    """
+
+    def __init__(
+        self,
+        success=None,
+        e=None,
+        v=None,
+        o=None,
+    ):
+        self.success = success
+        self.e = e
+        self.v = v
+        self.o = o
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = ServerNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.v = DefaultException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.o = OpenStackConflictException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("open_port_range_for_vm_in_project_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRING, 0)
+            oprot.writeString(
+                self.success.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.success
+            )
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin("e", TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        if self.v is not None:
+            oprot.writeFieldBegin("v", TType.STRUCT, 2)
+            self.v.write(oprot)
+            oprot.writeFieldEnd()
+        if self.o is not None:
+            oprot.writeFieldBegin("o", TType.STRUCT, 3)
+            self.o.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(open_port_range_for_vm_in_project_result)
+open_port_range_for_vm_in_project_result.thrift_spec = (
+    (
+        0,
+        TType.STRING,
+        "success",
+        "UTF8",
+        None,
+    ),  # 0
+    (
+        1,
+        TType.STRUCT,
+        "e",
+        [ServerNotFoundException, None],
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRUCT,
+        "v",
+        [DefaultException, None],
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRUCT,
+        "o",
+        [OpenStackConflictException, None],
+        None,
+    ),  # 3
+)
+
+
+class delete_security_group_rule_args(object):
+    """
+    Attributes:
+     - openstack_id
+
+    """
+
+    def __init__(
+        self,
+        openstack_id=None,
+    ):
+        self.openstack_id = openstack_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.openstack_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("delete_security_group_rule_args")
+        if self.openstack_id is not None:
+            oprot.writeFieldBegin("openstack_id", TType.STRING, 1)
+            oprot.writeString(
+                self.openstack_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.openstack_id
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(delete_security_group_rule_args)
+delete_security_group_rule_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "openstack_id",
+        "UTF8",
+        None,
+    ),  # 1
+)
+
+
+class delete_security_group_rule_result(object):
+    """
+    Attributes:
+     - e
+
+    """
+
+    def __init__(
+        self,
+        e=None,
+    ):
+        self.e = e
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = SecurityGroupRuleNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("delete_security_group_rule_result")
+        if self.e is not None:
+            oprot.writeFieldBegin("e", TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(delete_security_group_rule_result)
+delete_security_group_rule_result.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRUCT,
+        "e",
+        [SecurityGroupRuleNotFoundException, None],
         None,
     ),  # 1
 )
