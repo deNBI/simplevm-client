@@ -1163,17 +1163,24 @@ class OpenStackConnector:
             new_volumes=volume_ids_path_new,
             attach_volumes=volume_ids_path_attach,
         )
+
         if additional_keys:
             if init_script:
                 add_key_script = self.create_add_keys_script(keys=additional_keys)
                 init_script = (
                     add_key_script
                     + encodeutils.safe_encode("\n".encode("utf-8"))
+
                     + init_script
                 )
 
             else:
                 init_script = self.create_add_keys_script(keys=additional_keys)
+        unlock_ubuntu_user_script = "\npasswd -u ubuntu\n"
+        unlock_ubuntu_user_script = encodeutils.safe_encode(
+            unlock_ubuntu_user_script.encode("utf-8")
+        )
+        init_script = init_script + unlock_ubuntu_user_script
         return init_script
 
     def start_server(
