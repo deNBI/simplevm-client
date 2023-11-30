@@ -1160,7 +1160,7 @@ class OpenStackConnector:
             additional_keys: list[str],
     ) -> str:
 
-        unlock_ubuntu_user_script = "\npasswd -u ubuntu\n"
+        unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
             unlock_ubuntu_user_script.encode("utf-8")
         )
