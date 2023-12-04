@@ -69,6 +69,7 @@ class VmStates(Enum):
     ERROR = "error"
     SHELVED = "shelved"
     SHELVED_OFFLOADED = "shelved_offloaded"
+    DISABLED = "disabled"
 
     # Custom vm states
     NOT_FOUND = "not_found"

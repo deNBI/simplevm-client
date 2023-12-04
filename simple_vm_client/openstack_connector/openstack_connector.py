@@ -126,6 +126,9 @@ class OpenStackConnector:
                 "gateway_security_group_id"
             ]
 
+    def _get_default_security_groups(self):
+        return self.DEFAULT_SECURITY_GROUPS.copy()
+
     def load_env_config(self) -> None:
         logger.info("Load environment config: OpenStack")
 
@@ -135,7 +138,7 @@ class OpenStackConnector:
             sys.exit(1)
 
         self.USE_APPLICATION_CREDENTIALS = (
-            os.environ.get("USE_APPLICATION_CREDENTIALS", "False").lower() == "true"
+                os.environ.get("USE_APPLICATION_CREDENTIALS", "False").lower() == "true"
         )
 
         if self.USE_APPLICATION_CREDENTIALS:
@@ -177,15 +180,15 @@ class OpenStackConnector:
                 self.PROJECT_DOMAIN_ID = os.environ["OS_PROJECT_DOMAIN_ID"]
 
     def create_server(
-        self,
-        name: str,
-        image_id: str,
-        flavor_id: str,
-        network_id: str,
-        userdata: str,
-        key_name: str,
-        metadata: dict[str, str],
-        security_groups: list[str],
+            self,
+            name: str,
+            image_id: str,
+            flavor_id: str,
+            network_id: str,
+            userdata: str,
+            key_name: str,
+            metadata: dict[str, str],
+            security_groups: list[str],
     ) -> Server:
         logger.info(
             f"Create Server:\n\tname: {name}\n\timage_id:{image_id}\n\tflavor_id:{flavor_id}\n\tmetadata:{metadata}"
@@ -226,7 +229,7 @@ class OpenStackConnector:
             raise DefaultException(message=e.message)
 
     def create_volume_snapshot(
-        self, volume_id: str, name: str, description: str
+            self, volume_id: str, name: str, description: str
     ) -> str:
         try:
             logger.info(f"Create Snapshot for Volume {volume_id}")
@@ -266,7 +269,7 @@ class OpenStackConnector:
             raise DefaultException(message=e.message)
 
     def create_volume_by_source_volume(
-        self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
     ) -> Volume:
         logger.info(f"Creating volume from source volume with id {source_volume_id}")
         try:
@@ -282,7 +285,7 @@ class OpenStackConnector:
             raise ResourceNotAvailableException(message=e.message)
 
     def create_volume_by_volume_snap(
-        self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
+            self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
     ) -> Volume:
         logger.info(f"Creating volume from volume snapshot with id {volume_snap_id}")
         try:
@@ -316,7 +319,7 @@ class OpenStackConnector:
         return servers
 
     def attach_volume_to_server(
-        self, openstack_id: str, volume_id: str
+            self, openstack_id: str, volume_id: str
     ) -> dict[str, str]:
         server = self.get_server(openstack_id=openstack_id)
         volume = self.get_volume(name_or_id=volume_id)
@@ -357,7 +360,7 @@ class OpenStackConnector:
             raise DefaultException(message=str(e))
 
     def create_volume(
-        self, volume_name: str, volume_storage: int, metadata: dict[str, str]
+            self, volume_name: str, volume_storage: int, metadata: dict[str, str]
     ) -> Volume:
         logger.info(f"Creating volume with {volume_storage} GB storage")
         try:
@@ -474,9 +477,9 @@ class OpenStackConnector:
             image_os_distro = metadata.get("os_distro", None)
             base_image_ref = metadata.get("base_image_ref", None)
             if (
-                os_version == image_os_version
-                and image.status == "active"
-                and base_image_ref is None
+                    os_version == image_os_version
+                    and image.status == "active"
+                    and base_image_ref is None
             ):
                 if os_distro and os_distro == image_os_distro:
                     return image
@@ -488,11 +491,11 @@ class OpenStackConnector:
         )
 
     def get_image(
-        self,
-        name_or_id: str,
-        replace_inactive: bool = False,
-        ignore_not_active: bool = False,
-        ignore_not_found: bool = False,
+            self,
+            name_or_id: str,
+            replace_inactive: bool = False,
+            ignore_not_active: bool = False,
+            ignore_not_found: bool = False,
     ) -> Image:
         logger.info(f"Get Image {name_or_id}")
 
@@ -516,12 +519,12 @@ class OpenStackConnector:
         return image
 
     def create_snapshot(
-        self,
-        openstack_id: str,
-        name: str,
-        username: str,
-        base_tags: list[str],
-        description: str,
+            self,
+            openstack_id: str,
+            name: str,
+            username: str,
+            base_tags: list[str],
+            description: str,
     ) -> str:
         logger.info(
             f"Create Snapshot from Instance {openstack_id} with name {name} for {username}"
@@ -633,9 +636,9 @@ class OpenStackConnector:
         return {"gateway_ip": self.GATEWAY_IP}
 
     def create_mount_init_script(
-        self,
-        new_volumes: list[dict[str, str]] = None,  # type: ignore
-        attach_volumes: list[dict[str, str]] = None,  # type: ignore
+            self,
+            new_volumes: list[dict[str, str]] = None,  # type: ignore
+            attach_volumes: list[dict[str, str]] = None,  # type: ignore
     ) -> str:
         logger.info(f"Create init script for volume ids:{new_volumes}")
         if not new_volumes and not attach_volumes:
@@ -704,14 +707,74 @@ class OpenStackConnector:
                 description="Default SSH SimpleVM Security Group",
             )
 
+    def delete_security_group_rule(self, openstack_id):
+        logger.info(f"Delete Security Group Rule -- {openstack_id}")
+        deleted = self.openstack_connection.delete_security_group_rule(
+            rule_id=openstack_id
+        )
+        logger.info(f"Delete Result -- {deleted}")
+        if not deleted:
+            raise DefaultException(
+                message=f"Could not delete security group rule - {openstack_id}"
+            )
+
+    def open_port_range_for_vm_in_project(
+            self, range_start, range_stop, openstack_id, ethertype="IPV4", protocol="TCP"
+    ):
+        server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
+        if server is None:
+            logger.exception(f"Instance {openstack_id} not found")
+            raise ServerNotFoundException(
+                message=f"Instance {openstack_id} not found",
+                name_or_id=openstack_id,
+            )
+        project_name = server.metadata.get("project_name")
+        project_id = server.metadata.get("project_id")
+
+        project_security_group = self.get_or_create_project_security_group(
+            project_name=project_name, project_id=project_id
+        )
+        vm_security_group = self.get_or_create_vm_security_group(
+            openstack_id=openstack_id
+        )
+        current_vm_security_group_names = [
+            sec["name"] for sec in server["security_groups"]
+        ]
+        if openstack_id not in current_vm_security_group_names:
+            self.openstack_connection.add_server_security_groups(
+                server=server, security_groups=[vm_security_group]
+            )
+        if ethertype not in ["IPv4", "IPv6"]:
+            raise DefaultException(
+                message=f"Type {ethertype} does not exist for security group rules"
+            )
+
+        try:
+            security_rule = self.openstack_connection.create_security_group_rule(
+                direction="ingress",
+                ethertype=ethertype,
+                protocol=protocol,
+                port_range_max=range_stop,
+                port_range_min=range_start,
+                secgroup_name_or_id=vm_security_group,
+                remote_group_id=project_security_group,
+            )
+            return security_rule["id"]
+
+        except ConflictException as e:
+            logger.exception(
+                f"Could not create security group rule for instance {openstack_id}"
+            )
+            raise OpenStackConflictException(message=e.message)
+
     def create_security_group(
-        self,
-        name: str,
-        udp_port: int = None,  # type: ignore
-        ssh: bool = True,
-        udp: bool = False,
-        description: str = "",
-        research_environment_metadata: ResearchEnvironmentMetadata = None,
+            self,
+            name: str,
+            udp_port: int = None,  # type: ignore
+            ssh: bool = True,
+            udp: bool = False,
+            description: str = "",
+            research_environment_metadata: ResearchEnvironmentMetadata = None,
     ) -> SecurityGroup:
         logger.info(f"Create new security group {name}")
         sec: SecurityGroup = self.openstack_connection.get_security_group(
@@ -818,7 +881,7 @@ class OpenStackConnector:
         return False
 
     def get_or_create_research_environment_security_group(
-        self, resenv_metadata: ResearchEnvironmentMetadata
+            self, resenv_metadata: ResearchEnvironmentMetadata
     ):
         if not resenv_metadata.needs_forc_support:
             return None
@@ -848,6 +911,18 @@ class OpenStackConnector:
             port_range_min=resenv_metadata.port,
             security_group_id=new_security_group["id"],
             remote_group_id=self.FORC_SECURITY_GROUP_ID,
+        )
+        return new_security_group["id"]
+
+    def get_or_create_vm_security_group(self, openstack_id):
+        logger.info(f"Check if Security Group for vm - [{openstack_id}] exists... ")
+        sec = self.openstack_connection.get_security_group(name_or_id=openstack_id)
+        if sec:
+            logger.info(f"Security group [{openstack_id}]  already exists.")
+            return sec["id"]
+        logger.info(f"No security Group for [{openstack_id}]  exists. Creating.. ")
+        new_security_group = self.openstack_connection.create_security_group(
+            name=openstack_id, description=f"VM ID: {openstack_id} Security Group"
         )
         return new_security_group["id"]
 
@@ -1040,9 +1115,9 @@ class OpenStackConnector:
                         server=server, security_group=sec
                     )
                     if (
-                        sg["name"] != self.DEFAULT_SECURITY_GROUP_NAME
-                        and "bibigrid" not in sec.name
-                        and not self.is_security_group_in_use(security_group_id=sec.id)
+                            sg["name"] != self.DEFAULT_SECURITY_GROUP_NAME
+                            and ("bibigrid" not in sec.name or "master" not in server.name)
+                            and not self.is_security_group_in_use(security_group_id=sec.id)
                     ):
                         self.openstack_connection.delete_security_group(sg)
             self.openstack_connection.compute.delete_server(server.id, force=True)
@@ -1079,40 +1154,51 @@ class OpenStackConnector:
         return {"port": str(ssh_port), "udp": str(udp_port)}
 
     def create_userdata(
-        self,
-        volume_ids_path_new: list[dict[str, str]],
-        volume_ids_path_attach: list[dict[str, str]],
-        additional_keys: list[str],
+            self,
+            volume_ids_path_new: list[dict[str, str]],
+            volume_ids_path_attach: list[dict[str, str]],
+            additional_keys: list[str],
     ) -> str:
-        init_script = self.create_mount_init_script(
-            new_volumes=volume_ids_path_new,
-            attach_volumes=volume_ids_path_attach,
+
+        unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
+        unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
+            unlock_ubuntu_user_script.encode("utf-8")
         )
+        init_script = unlock_ubuntu_user_script_encoded
+
         if additional_keys:
-            if init_script:
-                add_key_script = self.create_add_keys_script(keys=additional_keys)
-                init_script = (
+            add_key_script = self.create_add_keys_script(keys=additional_keys)
+            init_script = (
                     add_key_script
                     + encodeutils.safe_encode("\n".encode("utf-8"))
                     + init_script
-                )
+            )
+        if volume_ids_path_new or volume_ids_path_attach:
+            mount_script = self.create_mount_init_script(
+                new_volumes=volume_ids_path_new,
+                attach_volumes=volume_ids_path_attach,
+            )
+            init_script = (
+                    init_script
+                    + encodeutils.safe_encode("\n".encode("utf-8"))
+                    + mount_script
 
-            else:
-                init_script = self.create_add_keys_script(keys=additional_keys)
+            )
+
         return init_script
 
     def start_server(
-        self,
-        flavor_name: str,
-        image_name: str,
-        servername: str,
-        metadata: dict[str, str],
-        public_key: str,
-        research_environment_metadata: Union[ResearchEnvironmentMetadata, None] = None,
-        volume_ids_path_new: Union[list[dict[str, str]], None] = None,
-        volume_ids_path_attach: Union[list[dict[str, str]], None] = None,
-        additional_keys: Union[list[str], None] = None,
-        additional_security_group_ids: Union[list[str], None] = None,
+            self,
+            flavor_name: str,
+            image_name: str,
+            servername: str,
+            metadata: dict[str, str],
+            public_key: str,
+            research_environment_metadata: Union[ResearchEnvironmentMetadata, None] = None,
+            volume_ids_path_new: Union[list[dict[str, str]], None] = None,
+            volume_ids_path_attach: Union[list[dict[str, str]], None] = None,
+            additional_keys: Union[list[str], None] = None,
+            additional_security_group_ids: Union[list[str], None] = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1123,7 +1209,7 @@ class OpenStackConnector:
             network: Network = self.get_network()
             key_name = f"{servername}_{metadata['project_name']}"
             logger.info(f"Key name {key_name}")
-            security_groups = self.DEFAULT_SECURITY_GROUPS
+            security_groups = self._get_default_security_groups()
             if research_environment_metadata:
                 security_groups.append(
                     self.get_or_create_research_environment_security_group(
@@ -1194,20 +1280,20 @@ class OpenStackConnector:
             raise DefaultException(message=str(e))
 
     def start_server_with_playbook(
-        self,
-        flavor_name: str,
-        image_name: str,
-        servername: str,
-        metadata: dict[str, str],
-        research_environment_metadata: ResearchEnvironmentMetadata,
-        volume_ids_path_new: list[dict[str, str]] = None,  # type: ignore
-        volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
-        additional_keys: list[str] = None,  # type: ignore
-        additional_security_group_ids=None,  # type: ignore
+            self,
+            flavor_name: str,
+            image_name: str,
+            servername: str,
+            metadata: dict[str, str],
+            research_environment_metadata: ResearchEnvironmentMetadata,
+            volume_ids_path_new: list[dict[str, str]] = None,  # type: ignore
+            volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
+            additional_keys: list[str] = None,  # type: ignore
+            additional_security_group_ids=None,  # type: ignore
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
-        security_groups = self.DEFAULT_SECURITY_GROUPS
+        security_groups = self._get_default_security_groups()
         if research_environment_metadata:
             security_groups.append(
                 self.get_or_create_research_environment_security_group(
@@ -1339,16 +1425,16 @@ class OpenStackConnector:
         return
 
     def add_cluster_machine(
-        self,
-        cluster_id: str,
-        cluster_user: str,
-        cluster_group_id: list[str],
-        image_name: str,
-        flavor_name: str,
-        name: str,
-        key_name: str,
-        batch_idx: int,
-        worker_idx: int,
+            self,
+            cluster_id: str,
+            cluster_user: str,
+            cluster_group_id: list[str],
+            image_name: str,
+            flavor_name: str,
+            name: str,
+            key_name: str,
+            batch_idx: int,
+            worker_idx: int,
     ) -> str:
         logger.info(f"Add machine to {cluster_id}")
         image: Image = self.get_image(name_or_id=image_name, replace_inactive=True)
