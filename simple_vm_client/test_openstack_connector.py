@@ -18,7 +18,7 @@ from openstack.test import fakes
 from openstack.compute.v2 import limits, server, keypair, flavor
 from openstack.compute.v2.image import Image
 from openstack.block_storage.v3.limits import Limit
-from openstack.image.v2 import image as image_module
+from openstack.image.v2 import image as image_module, image
 from ttypes import ImageNotFoundException, VolumeNotFoundException, DefaultException, SnapshotNotFoundException, \
     ResourceNotAvailableException, OpenStackConflictException
 from openstack.compute import compute_service
@@ -908,6 +908,62 @@ class TestOpenStackConnector(unittest.TestCase):
         mock_logger_info.assert_called_with(f"Get Servery by Bibigrid id: {bibigrid_id}")
         self.mock_openstack_connection.list_servers.assert_called_once_with(filters={"bibigrid_id": bibigrid_id, "name": bibigrid_id})
 
+    @mock.patch("openstack_connector.openstack_connector.logger.exception")
+    @mock.patch("openstack_connector.openstack_connector.logger.info")
+    def test_create_snapshot(self, mock_logger_info, mock_logger_exception):
+        # Replace with the actual parameters you want to test
+        openstack_id = "your_openstack_id"
+        name = "your_snapshot_name"
+        username = "your_username"
+        base_tags = ["tag1", "tag2"]
+        description = "your_description"
+        new_snapshot=fakes.generate_fake_resource(image.Image)
+
+        # Mock the create_image_snapshot and image.add_tag methods
+        self.mock_openstack_connection.create_image_snapshot.return_value = new_snapshot
+        self.mock_openstack_connection.image.add_tag.return_value = None
+
+        # Case 1: No exception
+        result_snapshot_id = self.openstack_connector.create_snapshot(
+            openstack_id, name, username, base_tags, description
+        )
+        self.assertEqual(result_snapshot_id, new_snapshot.id)
+
+        # Case 2: ConflictException
+        self.mock_openstack_connection.create_image_snapshot.side_effect = ConflictException(message="Conflict")
+        with self.assertRaises(OpenStackConflictException):
+            self.openstack_connector.create_snapshot(
+                openstack_id, name, username, base_tags, description
+            )
+        mock_logger_exception.assert_called_once_with("Create snapshot your_openstack_id failed!")
+
+        # Case 3: OpenStackCloudException
+        self.mock_openstack_connection.create_image_snapshot.side_effect = OpenStackCloudException(message="Cloud Exception")
+        with self.assertRaises(DefaultException):
+            self.openstack_connector.create_snapshot(
+                openstack_id, name, username, base_tags, description
+            )
+
+    @mock.patch("openstack_connector.openstack_connector.logger.exception")
+    @mock.patch("openstack_connector.openstack_connector.logger.info")
+    def test_delete_image(self, mock_logger_info, mock_logger_exception):
+        # Replace with the actual image_id you want to test
+        fake_image=fakes.generate_fake_resource(image.Image)
+
+        # Mock the get_image and compute.delete_image methods
+        self.mock_openstack_connection.get_image.return_value = fake_image
+        self.mock_openstack_connection.compute.delete_image.return_value = None
+
+        # Case 1: No exception
+        self.openstack_connector.delete_image(fake_image.id)
+        mock_logger_info.assert_any_call(f"Delete Image {fake_image.id}")
+        self.mock_openstack_connection.compute.delete_image.assert_called_once_with(fake_image.id)
+
+        # Case 2: Other exceptions
+        self.mock_openstack_connection.get_image.side_effect = Exception("Some error")
+        with self.assertRaises(DefaultException):
+            self.openstack_connector.delete_image(fake_image.id)
+        mock_logger_exception.assert_called_once_with(f"Delete Image {fake_image.id} failed!")
 
 if __name__ == "__main__":
     unittest.main()
