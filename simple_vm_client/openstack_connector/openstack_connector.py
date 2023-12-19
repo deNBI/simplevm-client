@@ -209,17 +209,18 @@ class OpenStackConnector:
         logger.info(f"Get Volume {name_or_id}")
         volume: Volume = self.openstack_connection.get_volume(name_or_id=name_or_id)
         if volume is None:
-            logger.exception(f"No Volume with id  {name_or_id} ")
+            logger.exception(f"No Volume with id {name_or_id}")
             raise VolumeNotFoundException(
-                message=f"No Volume with id  {name_or_id} ", name_or_id=name_or_id
+                message=f"No Volume with id {name_or_id}", name_or_id=name_or_id
             )
         return volume
 
     def delete_volume(self, volume_id: str) -> None:
         try:
-            logger.info(f"Delete Volume   {volume_id} ")
+            logger.info(f"Delete Volume {volume_id}")
             self.openstack_connection.delete_volume(name_or_id=volume_id)
         except ResourceNotFound as e:
+            logger.exception(f"No Volume with id {volume_id}")
             raise VolumeNotFoundException(message=e.message, name_or_id=volume_id)
 
         except ConflictException as e:
@@ -238,6 +239,7 @@ class OpenStackConnector:
             )
             return volume_snapshot["id"]
         except ResourceNotFound as e:
+            logger.error(f"No Volume with id {volume_id}")
             raise VolumeNotFoundException(message=e.message, name_or_id=volume_id)
         except OpenStackCloudException as e:
             raise DefaultException(message=e.message)
@@ -248,18 +250,20 @@ class OpenStackConnector:
             name_or_id=name_or_id
         )
         if snapshot is None:
-            logger.exception(f"No volume Snapshot with id  {name_or_id} ")
+            logger.exception(f"No volume Snapshot with id {name_or_id}")
             raise VolumeNotFoundException(
-                message=f"No volume Snapshot with id  {name_or_id} ",
+                message=f"No volume Snapshot with id {name_or_id}",
                 name_or_id=name_or_id,
             )
         return snapshot
 
     def delete_volume_snapshot(self, snapshot_id: str) -> None:
         try:
-            logger.info(f"Delete volume Snapshot   {snapshot_id} ")
+            logger.info(f"Delete volume Snapshot {snapshot_id}")
             self.openstack_connection.delete_volume_snapshot(name_or_id=snapshot_id)
         except ResourceNotFound as e:
+            logger.exception(f"Snapshot not found: {snapshot_id}")
+
             raise SnapshotNotFoundException(message=e.message, name_or_id=snapshot_id)
 
         except ConflictException as e:
@@ -312,7 +316,11 @@ class OpenStackConnector:
             logger.info(f"Get server {server_id}")
             try:
                 server = self.openstack_connection.get_server_by_id(server_id)
-                servers.append(server)
+                if server:
+                    servers.append(server)
+                else:
+                    logger.error(f"Requested VM {server_id} not found!")
+
             except Exception as e:
                 logger.exception(f"Requested VM {server_id} not found!\n {e}")
 
