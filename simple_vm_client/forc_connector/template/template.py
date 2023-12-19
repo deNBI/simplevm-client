@@ -7,8 +7,9 @@ from pathlib import Path
 
 import requests
 import yaml
-from ttypes import ResearchEnvironmentTemplate
-from util.logger import setup_custom_logger
+
+from simple_vm_client.ttypes import ResearchEnvironmentTemplate
+from simple_vm_client.util.logger import setup_custom_logger
 
 # from resenv.backend.Backend import Backend
 
@@ -116,7 +117,6 @@ class Template(object):
         for template_metadata in templates_metadata:
             try:
                 if template_metadata.get(NEEDS_FORC_SUPPORT, False):
-
                     metadata = ResearchEnvironmentMetadata(
                         name=template_metadata[TEMPLATE_NAME],
                         port=template_metadata[PORT],
