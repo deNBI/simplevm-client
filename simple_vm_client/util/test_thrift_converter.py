@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from openstack.block_storage.v2.snapshot import Snapshot as OpenStackVolumeSnapshot
 from openstack.block_storage.v3.volume import Volume as OpenStackVolume
@@ -9,6 +10,7 @@ from openstack.test import fakes
 
 from simple_vm_client.ttypes import VM, Flavor, Image, Snapshot, Volume
 from simple_vm_client.util import thrift_converter
+from simple_vm_client.util.state_enums import VmStates
 
 
 class TestThriftConverter(unittest.TestCase):
@@ -94,20 +96,36 @@ class TestThriftConverter(unittest.TestCase):
                 result_flavor.description, openstack_flavor.description or ""
             )
 
-    def test_os_to_thrift_volume(self):
+    def test_os_to_thrift_volume_none(self):
+        result_volume: Volume = thrift_converter.os_to_thrift_volume(
+            openstack_volume=None
+        )
+        self.assertIsInstance(result_volume, Volume)
+        self.assertEqual(result_volume.status, VmStates.NOT_FOUND)
+
+    def test_os_to_thrift_volume_without_device(self):
         openstack_volume: OpenStackVolume = fakes.generate_fake_resource(
             OpenStackVolume
         )
+        openstack_volume["attachments"] = None
         result_volume: Volume = thrift_converter.os_to_thrift_volume(
             openstack_volume=openstack_volume
         )
+        self.assertIsInstance(result_volume, Volume)
 
-        if isinstance(openstack_volume.get("attachments"), list):
-            device = openstack_volume.attachments[0]["device"]
-            server_id = openstack_volume.attachments[0]["server_id"]
-        else:
-            device = None
-            server_id = None
+        self.assertEqual(result_volume.device, None)
+        self.assertEqual(result_volume.server_id, None)
+
+    def test_os_to_thrift_volume_with_device(self):
+        openstack_volume: OpenStackVolume = fakes.generate_fake_resource(
+            OpenStackVolume
+        )
+        device = "/dev/vdb"
+        server_id = "1234"
+        openstack_volume["attachments"] = [{"device": device, "server_id": server_id}]
+        result_volume: Volume = thrift_converter.os_to_thrift_volume(
+            openstack_volume=openstack_volume
+        )
         self.assertIsInstance(result_volume, Volume)
         self.assertEqual(result_volume.status, openstack_volume.status)
         self.assertEqual(result_volume.id, openstack_volume.id)
@@ -116,6 +134,33 @@ class TestThriftConverter(unittest.TestCase):
         self.assertEqual(result_volume.size, openstack_volume.size)
         self.assertEqual(result_volume.device, device)
         self.assertEqual(result_volume.server_id, server_id)
+
+    def test_os_to_thrift_volume(self):
+        openstack_volume: OpenStackVolume = fakes.generate_fake_resource(
+            OpenStackVolume
+        )
+
+        result_volume: Volume = thrift_converter.os_to_thrift_volume(
+            openstack_volume=openstack_volume
+        )
+
+        device = None
+        server_id = None
+        self.assertIsInstance(result_volume, Volume)
+        self.assertEqual(result_volume.status, openstack_volume.status)
+        self.assertEqual(result_volume.id, openstack_volume.id)
+        self.assertEqual(result_volume.name, openstack_volume.name)
+        self.assertEqual(result_volume.description, openstack_volume.description)
+        self.assertEqual(result_volume.size, openstack_volume.size)
+        self.assertEqual(result_volume.device, device)
+        self.assertEqual(result_volume.server_id, server_id)
+
+    def test_os_to_thrift_volume_snapshot_none(self):
+        result_volume_snapshot: Snapshot = (
+            thrift_converter.os_to_thrift_volume_snapshot(openstack_snapshot=None)
+        )
+        self.assertIsInstance(result_volume_snapshot, Snapshot)
+        self.assertEqual(result_volume_snapshot.status, VmStates.NOT_FOUND)
 
     def test_os_to_thrift_volume_snapshot(self):
         openstack_volume_snapshot: OpenStackVolumeSnapshot = (
@@ -143,6 +188,30 @@ class TestThriftConverter(unittest.TestCase):
             result_volume_snapshot.volume_id, openstack_volume_snapshot.volume_id
         )
 
+    def test_os_to_thrift_server_no_image_and_addresses(self):
+        openstack_server = fakes.generate_fake_resource(OpenStackServer)
+        openstack_flavor: OpenStackFlavor = fakes.generate_fake_resource(
+            OpenStackFlavor
+        )
+        openstack_server.flavor = openstack_flavor
+        floating_ip = "127.0.0.1"
+        fixed = "192.168.0.1"
+        openstack_server.addresses = {
+            "network": [
+                {"OS-EXT-IPS:type": "floating", "addr": floating_ip},
+                {"OS-EXT-IPS:type": "fixed", "addr": fixed},
+            ]
+        }
+        openstack_server.image = None
+        result_server: VM = thrift_converter.os_to_thrift_server(
+            openstack_server=openstack_server
+        )
+        self.assertIsInstance(result_server, VM)
+        self.assertIsInstance(result_server.flavor, Flavor)
+        self.assertEqual(result_server.image, None)
+        self.assertEqual(result_server.fixed_ip, fixed)
+        self.assertEqual(result_server.floating_ip, floating_ip)
+
     def test_os_to_thrift_server(self):
         openstack_server = fakes.generate_fake_resource(OpenStackServer)
         openstack_flavor: OpenStackFlavor = fakes.generate_fake_resource(
@@ -166,6 +235,12 @@ class TestThriftConverter(unittest.TestCase):
         self.assertEqual(result_server.created_at, openstack_server.created_at)
         self.assertEqual(result_server.task_state, openstack_server.task_state)
         self.assertEqual(result_server.vm_state, openstack_server.vm_state)
+
+    @patch("simple_vm_client.util.thrift_converter.logger")
+    def test_os_to_trhift_server_none(self, mock_logger):
+        result_server: VM = thrift_converter.os_to_thrift_server(openstack_server=None)
+        self.assertEqual(result_server.vm_state, VmStates.NOT_FOUND)
+        mock_logger.info.assert_called_once_with("Openstack server not found")
 
     def test_os_to_thrift_servers(self):
         openstack_servers: list[OpenStackFlavor] = list(

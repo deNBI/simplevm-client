@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import logging
-
 from openstack.block_storage.v2.snapshot import Snapshot as OpenStack_Snapshot
 from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
 from openstack.compute.v2.flavor import Flavor as OpenStack_Flavor
@@ -62,13 +60,15 @@ def os_to_thrift_flavors(openstack_flavors: list[OpenStack_Flavor]) -> list[Flav
 def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
     if not openstack_volume:
         return Volume(status=VmStates.NOT_FOUND)
-
-    if isinstance(openstack_volume.get("attachments"), list):
-        device = openstack_volume.attachments[0]["device"]
-        server_id = openstack_volume.attachments[0]["server_id"]
-    else:
-        device = None
-        server_id = None
+    attachments = openstack_volume.attachments
+    device = None
+    server_id = None
+    if attachments:
+        try:
+            device = openstack_volume.attachments[0]["device"]
+            server_id = openstack_volume.attachments[0]["server_id"]
+        except Exception:
+            pass
     volume = Volume(
         status=openstack_volume.status,
         id=openstack_volume.id,
@@ -99,7 +99,7 @@ def os_to_thrift_volume_snapshot(openstack_snapshot: OpenStack_Snapshot) -> Snap
 
 def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     if not openstack_server:
-        logging.info("Openstack server not found")
+        logger.info("Openstack server not found")
 
         return VM(vm_state=VmStates.NOT_FOUND)
     fixed_ip = ""
