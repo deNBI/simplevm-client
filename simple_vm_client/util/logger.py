@@ -17,6 +17,11 @@ def setup_custom_logger(name):
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
+    # Create the log directory if it does not exist
+    log_dir = os.path.dirname(LOG_FILE)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     file_handler = RotatingFileHandler(
         maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT, filename=LOG_FILE
     )
