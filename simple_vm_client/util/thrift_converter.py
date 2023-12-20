@@ -62,7 +62,8 @@ def os_to_thrift_flavors(openstack_flavors: list[OpenStack_Flavor]) -> list[Flav
 def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
     if not openstack_volume:
         return Volume(status=VmStates.NOT_FOUND)
-    if openstack_volume.get("attachments"):
+
+    if isinstance(openstack_volume.get("attachments"), list):
         device = openstack_volume.attachments[0]["device"]
         server_id = openstack_volume.attachments[0]["server_id"]
     else:
@@ -103,7 +104,6 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         return VM(vm_state=VmStates.NOT_FOUND)
     fixed_ip = ""
     floating_ip = ""
-
     flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
     if openstack_server.image:
         image = os_to_thrift_image(openstack_image=openstack_server.image)
