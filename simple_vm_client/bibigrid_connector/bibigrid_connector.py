@@ -1,7 +1,8 @@
 import requests
 import yaml
-from ttypes import ClusterInfo, ClusterInstance
-from util.logger import setup_custom_logger
+
+from simple_vm_client.ttypes import ClusterInfo, ClusterInstance
+from simple_vm_client.util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
 

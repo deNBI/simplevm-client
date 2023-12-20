@@ -8,8 +8,9 @@ import yaml
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 from thrift.transport import TSocket, TSSLSocket, TTransport
-from VirtualMachineHandler import VirtualMachineHandler
-from VirtualMachineService import Processor
+
+from simple_vm_client.VirtualMachineHandler import VirtualMachineHandler
+from simple_vm_client.VirtualMachineService import Processor
 
 USERNAME = "OS_USERNAME"
 PASSWORD = "OS_PASSWORD"

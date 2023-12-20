@@ -7,12 +7,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bibigrid_connector.bibigrid_connector import BibigridConnector
-from forc_connector.forc_connector import ForcConnector
-from openstack_connector.openstack_connector import OpenStackConnector
-from util import thrift_converter
-from util.logger import setup_custom_logger
-from VirtualMachineService import Iface
+from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
+from simple_vm_client.forc_connector.forc_connector import ForcConnector
+from simple_vm_client.openstack_connector.openstack_connector import OpenStackConnector
+from simple_vm_client.util import thrift_converter
+from simple_vm_client.util.logger import setup_custom_logger
+
+from .VirtualMachineService import Iface
 
 if TYPE_CHECKING:
     from ttypes import (

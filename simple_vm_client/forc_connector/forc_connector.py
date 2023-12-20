@@ -7,7 +7,8 @@ import redis
 import requests
 import yaml
 from openstack.compute.v2.server import Server
-from ttypes import (
+
+from simple_vm_client.ttypes import (
     Backend,
     BackendNotFoundException,
     CondaPackage,
@@ -16,8 +17,8 @@ from ttypes import (
     PlaybookResult,
     TemplateNotFoundException,
 )
-from util.logger import setup_custom_logger
-from util.state_enums import VmTaskStates
+from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.state_enums import VmTaskStates
 
 from .playbook.playbook import Playbook
 from .template.template import ResearchEnvironmentMetadata, Template

@@ -6,9 +6,10 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import redis
 import ruamel.yaml
-from ttypes import CondaPackage
-from util.logger import setup_custom_logger
-from util.state_enums import VmTaskStates
+
+from simple_vm_client.ttypes import CondaPackage
+from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.state_enums import VmTaskStates
 
 CONDA = "conda"
 MOSH = "mosh"

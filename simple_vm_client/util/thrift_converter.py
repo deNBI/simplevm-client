@@ -7,9 +7,10 @@ from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
 from openstack.compute.v2.flavor import Flavor as OpenStack_Flavor
 from openstack.compute.v2.image import Image as OpenStack_Image
 from openstack.compute.v2.server import Server as OpenStack_Server
-from ttypes import VM, Flavor, Image, Snapshot, Volume
-from util.logger import setup_custom_logger
-from util.state_enums import VmStates
+
+from simple_vm_client.ttypes import VM, Flavor, Image, Snapshot, Volume
+from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.state_enums import VmStates
 
 logger = setup_custom_logger(__name__)
 
@@ -110,7 +111,6 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         image = None
     for values in openstack_server.addresses.values():
         for address in values:
-
             if address["OS-EXT-IPS:type"] == "floating":
                 floating_ip = address["addr"]
             elif address["OS-EXT-IPS:type"] == "fixed":
