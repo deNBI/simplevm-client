@@ -897,23 +897,23 @@ class OpenStackConnector:
         if not resenv_metadata.needs_forc_support:
             return None
         logger.info(
-            f"Check if Security Group for resenv - {resenv_metadata.security_group_name} exists... "
+            f"Check if Security Group for resenv - {resenv_metadata.securitygroup_name} exists... "
         )
         sec = self.openstack_connection.get_security_group(
-            name_or_id=resenv_metadata.security_group_name
+            name_or_id=resenv_metadata.securitygroup_name
         )
         if sec:
             logger.info(
-                f"Security group {resenv_metadata.security_group_name} already exists."
+                f"Security group {resenv_metadata.securitygroup_name} already exists."
             )
             return sec["id"]
 
         logger.info(
-            f"No security Group for {resenv_metadata.security_group_name} exists. Creating.. "
+            f"No security Group for {resenv_metadata.securitygroup_name} exists. Creating.. "
         )
 
         new_security_group = self.openstack_connection.create_security_group(
-            name=resenv_metadata.security_group_name, description=resenv_metadata.name
+            name=resenv_metadata.securitygroup_name, description=resenv_metadata.name
         )
         self.openstack_connection.network.create_security_group_rule(
             direction=resenv_metadata.direction,
