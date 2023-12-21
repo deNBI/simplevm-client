@@ -751,6 +751,141 @@ class TestTemplate(unittest.TestCase):
             new_metadata,
         )
 
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._load_resenv_metadata"
+    )
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._process_template_metadata"
+    )
+    @patch("simple_vm_client.forc_connector.template.template.logger.exception")
+    def test_load_and_update_resenv_metadata(
+        self,
+        mock_logger_exception,
+        mock_process_template_metadata,
+        mock_load_resenv_metadata,
+    ):
+        # Arrange
+        template = self.init_template(
+            github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
+            forc_url=TestTemplate.FORC_URL,
+        )
+        # Mocking the _load_resenv_metadata method to return a list of ResearchEnvironmentMetadata instances
+        mock_metadata1 = self.get_metadata_example()
+        mock_metadata2 = self.get_metadata_example()
+        mock_load_resenv_metadata.return_value = [mock_metadata1, mock_metadata2]
+
+        # Mocking the _process_template_metadata method to raise an exception for one of the metadata instances
+        mock_exception = Exception("Failed to parse Metadata yml")
+        mock_process_template_metadata.side_effect = [None, mock_exception]
+
+        # Act
+        template._load_and_update_resenv_metadata()
+
+        # Assert
+        mock_load_resenv_metadata.assert_called_once()  # Check if _load_resenv_metadata was called
+        mock_process_template_metadata.assert_has_calls(
+            [unittest.mock.call(mock_metadata1), unittest.mock.call(mock_metadata2)]
+        )  # Check if _process_template_metadata was called for each metadata instance
+        mock_logger_exception.assert_called_once_with(
+            f"Failed to parse Metadata yml: {mock_metadata2}\n{mock_exception}"
+        )  # Check if logger.exception was called for the exception case
+
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._download_and_extract_playbooks"
+    )
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._copy_resenvs_templates"
+    )
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._update_loaded_templates"
+    )
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._install_ansible_galaxy_requirements"
+    )
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template._load_and_update_resenv_metadata"
+    )
+    @patch("simple_vm_client.forc_connector.template.template.logger.error")
+    @patch("simple_vm_client.forc_connector.template.template.logger.info")
+    def test_update_playbooks(
+        self,
+        mock_logger_info,
+        mock_logger_error,
+        mock_load_and_update_resenv_metadata,
+        mock_install_ansible_galaxy_requirements,
+        mock_update_loaded_templates,
+        mock_copy_resenvs_templates,
+        mock_download_and_extract_playbooks,
+    ):
+        # Arrange
+        template = self.init_template(
+            github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
+            forc_url=TestTemplate.FORC_URL,
+        )
+
+        # Act
+        template.update_playbooks()
+
+        # Assert
+        mock_logger_error.assert_not_called()  # Check if logger.error was not called when GITHUB_PLAYBOOKS_REPO is not None
+        mock_download_and_extract_playbooks.assert_called_once()  # Check if _download_and_extract_playbooks was called
+        mock_copy_resenvs_templates.assert_called_once()  # Check if _copy_resenvs_templates was called
+        mock_update_loaded_templates.assert_called_once()  # Check if _update_loaded_templates was called
+        mock_install_ansible_galaxy_requirements.assert_called_once()  # Check if _install_ansible_galaxy_requirements was called
+        mock_load_and_update_resenv_metadata.assert_called_once()  # Check if _load_and_update_resenv_metadata was called
+        mock_logger_info.assert_any_call(
+            f"Loaded Template Names: {template._all_templates}"
+        )  # Check if logger.info was called
+
+    @patch(
+        "simple_vm_client.forc_connector.template.template.Template.update_playbooks"
+    )
+    def test_init(self, mock_update_playbooks):
+        # Arrange
+        github_playbook_repo = "https://github.com/playbooks"
+        forc_url = "https://forc.example.com/"
+        forc_api_key = "your-api-key"
+
+        # Act
+        instance = Template(github_playbook_repo, forc_url, forc_api_key)
+
+        # Assert
+        self.assertEqual(instance.GITHUB_PLAYBOOKS_REPO, github_playbook_repo)
+        self.assertEqual(instance.FORC_URL, forc_url)
+        self.assertEqual(instance.FORC_API_KEY, forc_api_key)
+        self.assertEqual(instance.TEMPLATES_URL, f"{forc_url}templates")
+        self.assertEqual(instance.BACKENDS_URL, f"{forc_url}backends")
+        self.assertEqual(instance.BACKENDS_BY_OWNER_URL, f"{forc_url}backends/byOwner")
+        self.assertEqual(
+            instance.BACKENDS_BY_TEMPLATE_URL, f"{forc_url}backends/byTemplate"
+        )
+        self.assertEqual(instance._forc_allowed, {})
+        self.assertEqual(instance._all_templates, [CONDA])
+        self.assertEqual(instance._loaded_resenv_metadata, {})
+        self.assertEqual(instance._allowed_forc_templates, [])
+        mock_update_playbooks.assert_called_once()
+
+    def test_loaded_research_env_metadata_property(self):
+        # Arrange
+        template = self.init_template(
+            github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
+            forc_url=TestTemplate.FORC_URL,
+        )
+        mock_metadata1 = self.get_metadata_example()
+        mock_metadata2 = self.get_metadata_example()
+
+        # Act
+        template._loaded_resenv_metadata = {
+            "template1": mock_metadata1,
+            "template2": mock_metadata2,
+        }
+        result = template.loaded_research_env_metadata
+
+        # Assert
+        self.assertEqual(
+            result, {"template1": mock_metadata1, "template2": mock_metadata2}
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
