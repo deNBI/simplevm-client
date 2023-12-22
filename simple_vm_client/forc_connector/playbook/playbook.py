@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 import redis
 import ruamel.yaml
 
+from simple_vm_client.forc_connector.template.template import Template
 from simple_vm_client.ttypes import CondaPackage
 from simple_vm_client.util.logger import setup_custom_logger
 from simple_vm_client.util.state_enums import VmTaskStates
@@ -52,7 +53,6 @@ class Playbook(object):
         self.research_environment_template = research_environment_template
         self.base_url = base_url
         # init temporary directories and mandatory generic files
-        from forc_connector.template.template import Template
 
         self.playbooks_dir: str = Template.get_playbook_dir()
         self.directory: TemporaryDirectory = TemporaryDirectory(
