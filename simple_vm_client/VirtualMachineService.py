@@ -13,7 +13,7 @@ from thrift.Thrift import TApplicationException, TMessageType, TProcessor, TType
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
 
-from simple_vm_client.ttypes import *
+from .ttypes import *
 
 all_structs = []
 
@@ -1344,6 +1344,8 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.e is not None:
             raise result.e
+        if result.f is not None:
+            raise result.f
         return
 
     def delete_server(self, openstack_id):
@@ -3980,6 +3982,9 @@ class Processor(Iface, TProcessor):
         except SecurityGroupRuleNotFoundException as e:
             msg_type = TMessageType.REPLY
             result.e = e
+        except DefaultException as f:
+            msg_type = TMessageType.REPLY
+            result.f = f
         except TApplicationException as ex:
             logging.exception("TApplication exception in handler")
             msg_type = TMessageType.EXCEPTION
@@ -8484,14 +8489,17 @@ class delete_security_group_rule_result(object):
     """
     Attributes:
      - e
+     - f
 
     """
 
     def __init__(
         self,
         e=None,
+        f=None,
     ):
         self.e = e
+        self.f = f
 
     def read(self, iprot):
         if (
@@ -8511,6 +8519,11 @@ class delete_security_group_rule_result(object):
                     self.e = SecurityGroupRuleNotFoundException.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.f = DefaultException.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -8526,6 +8539,10 @@ class delete_security_group_rule_result(object):
         if self.e is not None:
             oprot.writeFieldBegin("e", TType.STRUCT, 1)
             self.e.write(oprot)
+            oprot.writeFieldEnd()
+        if self.f is not None:
+            oprot.writeFieldBegin("f", TType.STRUCT, 2)
+            self.f.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -8554,6 +8571,13 @@ delete_security_group_rule_result.thrift_spec = (
         [SecurityGroupRuleNotFoundException, None],
         None,
     ),  # 1
+    (
+        2,
+        TType.STRUCT,
+        "f",
+        [DefaultException, None],
+        None,
+    ),  # 2
 )
 
 
