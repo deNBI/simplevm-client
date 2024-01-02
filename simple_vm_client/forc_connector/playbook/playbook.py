@@ -55,14 +55,12 @@ class Playbook(object):
         # init temporary directories and mandatory generic files
 
         self.playbooks_dir: str = Template.get_playbook_dir()
-        logger.info(self.playbooks_dir)
         self.directory: TemporaryDirectory = TemporaryDirectory(
             dir=f"{self.playbooks_dir}"
         )
         self.private_key = NamedTemporaryFile(
             mode="w+", dir=self.directory.name, delete=False, prefix="private_key_"
         )
-        logger.info(self.private_key)
         self.private_key.write(osi_private_key)
         self.private_key.close()
 
@@ -163,53 +161,60 @@ class Playbook(object):
                 data[self.research_environment_template + "_vars"][
                     "base_url"
                 ] = self.base_url
-                with open(
-                    self.directory.name + playbook_var_yml, mode="w"
-                ) as variables:
-                    self.yaml_exec.dump(data, variables)
+            with open(self.directory.name + playbook_var_yml, mode="w") as variables:
+                self.yaml_exec.dump(data, variables)
                 self.add_to_playbook_lists(
                     playbook_name_local, self.research_environment_template
                 )
-        except shutil.Error as e:
-            logger.exception(e)
-            self.add_tasks_only(playbook_name_local)
-        except IOError as e:
-            logger.exception(e)
+        except (shutil.Error, IOError):
+            logger.exception("Could not copy research environment template data")
             self.add_tasks_only(playbook_name_local)
 
     def copy_and_init_apt_packages(self) -> None:
         if not self.apt_packages:
             return
-        site_specific_yml = f"/{OPTIONAL}{'-' + self.cloud_site}.yml"
+
+        site_specific_yml = f"{OPTIONAL}{'-' + self.cloud_site}.yml"
         playbook_name_local = OPTIONAL
+
         if os.path.isfile(self.playbooks_dir + site_specific_yml):
             playbook_name_local = OPTIONAL + "-" + self.cloud_site
-        playbook_yml = f"/{playbook_name_local}.yml"
-        playbook_var_yml = f"/{OPTIONAL}_vars_file.yml"
+
+        playbook_yml = f"{playbook_name_local}.yml"
+        playbook_var_yml = f"{OPTIONAL}_vars_file.yml"
+
         try:
-            shutil.copy(self.playbooks_dir + playbook_yml, self.directory.name)
+            full_playbook_path = os.path.join(self.playbooks_dir, playbook_yml)
+            # Copy playbook YAML
+            shutil.copy(full_playbook_path, self.directory.name)
+
             try:
-                shutil.copy(self.playbooks_dir + playbook_var_yml, self.directory.name)
+                full_vars_path = os.path.join(self.playbooks_dir, playbook_var_yml)
+                # Copy playbook vars YAML
+                shutil.copy(full_vars_path, self.directory.name)
+
+                # Update apt_packages in playbook vars YAML
                 with open(
-                    self.directory.name + playbook_var_yml, mode="r"
+                    os.path.join(self.directory.name, playbook_var_yml), mode="r"
                 ) as variables:
                     data = self.yaml_exec.load(variables)
                     data["apt_packages"] = self.apt_packages
-                    with open(
-                        self.directory.name + playbook_var_yml, mode="w"
-                    ) as variables:
-                        self.yaml_exec.dump(data, variables)
-                    self.add_to_playbook_lists(playbook_name_local, OPTIONAL)
-            except shutil.Error as e:
-                logger.exception(e)
+
+                # Save updated playbook vars YAML
+                with open(
+                    os.path.join(self.directory.name, playbook_var_yml), mode="w"
+                ) as variables:
+                    self.yaml_exec.dump(data, variables)
+
+                # Add to playbook lists
+                self.add_to_playbook_lists(playbook_name_local, OPTIONAL)
+
+            except (shutil.Error, IOError):
+                logger.exception("Could not copy apt packages")
                 self.add_tasks_only(playbook_name_local)
-            except IOError as e:
-                logger.exception(e)
-                self.add_tasks_only(playbook_name_local)
-        except shutil.Error as e:
-            logger.exception(e)
-        except IOError as e:
-            logger.exception(e)
+
+        except (shutil.Error, IOError):
+            logger.exception("Could not copy apt packages")
 
     def copy_and_init_conda_packages(self) -> None:
         if not self.conda_packages:
@@ -240,16 +245,13 @@ class Playbook(object):
                         }
                     )
                 data[CONDA + "_vars"]["packages"] = p_dict
-                with open(
-                    self.directory.name + playbook_var_yml, mode="w"
-                ) as variables:
-                    self.yaml_exec.dump(data, variables)
-                self.add_to_playbook_lists(playbook_name_local, CONDA)
-        except shutil.Error as e:
-            logger.exception(e)
-            self.add_tasks_only(playbook_name_local)
-        except IOError as e:
-            logger.exception(e)
+            with open(self.directory.name + playbook_var_yml, mode="w") as variables:
+                self.yaml_exec.dump(data, variables)
+            self.add_to_playbook_lists(playbook_name_local, CONDA)
+        except (shutil.Error, IOError):
+            logger.exception(
+                f"Could not open - {self.directory.name + playbook_var_yml}"
+            )
             self.add_tasks_only(playbook_name_local)
 
     def add_to_playbook_lists(
@@ -297,6 +299,7 @@ class Playbook(object):
         )
 
     def run_it(self) -> None:
+        logger.info("RUN ITTT")
         command_string = f"/usr/local/bin/ansible-playbook -v -i {self.inventory.name} {self.directory.name}/{self.playbook_exec_name}"
         command_string = shlex.split(command_string)  # type: ignore
         logger.info(f"Run Playbook for {self.playbook_exec_name} - [{command_string}]")
