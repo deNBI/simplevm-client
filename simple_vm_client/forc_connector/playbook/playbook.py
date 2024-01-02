@@ -55,12 +55,14 @@ class Playbook(object):
         # init temporary directories and mandatory generic files
 
         self.playbooks_dir: str = Template.get_playbook_dir()
+        logger.info(self.playbooks_dir)
         self.directory: TemporaryDirectory = TemporaryDirectory(
             dir=f"{self.playbooks_dir}"
         )
         self.private_key = NamedTemporaryFile(
             mode="w+", dir=self.directory.name, delete=False, prefix="private_key_"
         )
+        logger.info(self.private_key)
         self.private_key.write(osi_private_key)
         self.private_key.close()
 
@@ -308,7 +310,7 @@ class Playbook(object):
     def check_status(self, openstack_id: str) -> int:
         logger.info(f"Check Status Playbook for VM {openstack_id}")
         done = self.process.poll()
-        logger.info(f" Status Playbook for VM {openstack_id}: {done}")
+        logger.info(f"Status Playbook for VM {openstack_id}: {done}")
 
         if done is None:
             logger.info(
@@ -325,6 +327,7 @@ class Playbook(object):
             self.redis.hset(
                 openstack_id, "status", VmTaskStates.PLAYBOOK_SUCCESSFUL.value
             )
+
             self.returncode = self.process.returncode
             self.process.wait()
         return done
@@ -332,6 +335,7 @@ class Playbook(object):
     def get_logs(self) -> tuple[int, str, str]:
         self.log_file_stdout.seek(0, 0)
         lines_stdout = self.log_file_stdout.readlines()
+        logger.info(lines_stdout)
         for line in lines_stdout:
             self.stdout += line
         self.log_file_stderr.seek(0, 0)

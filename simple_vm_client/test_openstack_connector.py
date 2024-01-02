@@ -409,7 +409,6 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Mock the create_server method to return a fake server object
         fake_server = Server(**{"id": "fake_server_id", "name": name})
-        print(f"test : {fake_server}")
         self.mock_openstack_connection.create_server.return_value = fake_server
 
         # Call the create_server method
