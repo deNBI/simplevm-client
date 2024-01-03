@@ -54,27 +54,32 @@ class BibigridConnector:
 
     def get_cluster_status(self, cluster_id: str) -> dict[str, str]:
         logger.info(f"Get Cluster {cluster_id} status")
+
         headers = {"content-Type": "application/json"}
         body = {"mode": "openstack"}
-        request_url = self._BIBIGRID_URL + "info/" + cluster_id
-        response = requests.get(
-            url=request_url,
-            json=body,
-            headers=headers,
-            verify=self._PRODUCTION,
-        )
-        logger.info(f"Cluster {cluster_id} status: {str(response.content)} ")
-        json_resp: dict[str, str] = response.json(strict=False)
-        try:
-            json_resp["log"] = str(json_resp["log"])
-        except Exception:
-            logger.info(f"No Logs for Cluster - {cluster_id}")
-        try:
-            json_resp["msg"] = str(json_resp["msg"])
-        except Exception:
-            logger.info(f"No msg for Cluster - {cluster_id}")
+        request_url = f"{self._BIBIGRID_URL}info/{cluster_id}"
 
-        return json_resp
+        try:
+            response = requests.get(
+                url=request_url,
+                json=body,
+                headers=headers,
+                verify=self._PRODUCTION,
+            )
+            response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
+            json_resp = response.json(strict=False)
+
+            # Convert log and msg keys to strings, handling the case where they might not exist
+            json_resp["log"] = str(json_resp.get("log", ""))
+            json_resp["msg"] = str(json_resp.get("msg", ""))
+
+            logger.info(f"Cluster {cluster_id} status: {json_resp}")
+
+            return json_resp
+
+        except requests.RequestException as e:
+            logger.exception("Error while getting Cluster status")
+            return {"error": str(e)}
 
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
@@ -128,7 +133,7 @@ class BibigridConnector:
                 logger.error(f"Bibigrid returned status code {response.status_code}")
                 return False
 
-        except requests.RequestException as e:
+        except requests.RequestException:
             logger.exception("Error while checking Bibigrid availability")
             return False
 
