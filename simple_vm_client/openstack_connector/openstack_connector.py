@@ -79,6 +79,7 @@ class OpenStackConnector:
         self.USE_APPLICATION_CREDENTIALS: bool = False
 
         self.load_env_config()
+        print("loading config file")
         self.load_config_yml(config_file)
 
         try:
@@ -462,15 +463,9 @@ class OpenStackConnector:
 
     def get_flavors(self) -> list[Flavor]:
         logger.info("Get Flavors")
-        if self.openstack_connection:
-            flavors: list[Flavor] = self.openstack_connection.list_flavors(
-                get_extra=True
-            )
-            logger.info([flav["name"] for flav in flavors])
-            return flavors
-        else:
-            logger.info("no connection")
-            return []
+        flavors: list[Flavor] = self.openstack_connection.list_flavors(get_extra=True)
+        logger.info([flav["name"] for flav in flavors])
+        return flavors
 
     def get_servers_by_bibigrid_id(self, bibigrid_id: str) -> list[Server]:
         logger.info(f"Get Servery by Bibigrid id: {bibigrid_id}")
@@ -575,58 +570,44 @@ class OpenStackConnector:
 
     def get_public_images(self) -> list[Image]:
         logger.info("Get public images")
-        if self.openstack_connection:
-            # Use compute.images() method with filters and extra_info
-            images = self.openstack_connection.image.images(
-                status="active", visibility="public"
-            )
-            # Use list comprehension to filter images based on tags
-            images = [
-                image for image in images if "tags" in image and len(image["tags"]) > 0
-            ]
-            image_names = [image.name for image in images]
-            logger.info(f"Found public images - {image_names}")
+        # Use compute.images() method with filters and extra_info
+        images = self.openstack_connection.image.images(
+            status="active", visibility="public"
+        )
+        # Use list comprehension to filter images based on tags
+        images = [
+            image for image in images if "tags" in image and len(image["tags"]) > 0
+        ]
+        image_names = [image.name for image in images]
+        logger.info(f"Found public images - {image_names}")
 
-            return images
-
-        else:
-            logger.info("no connection")
-            return []
+        return images
 
     def get_private_images(self) -> list[Image]:
         logger.info("Get private images")
-        if self.openstack_connection:
-            # Use compute.images() method with filters and extra_info
-            images = self.openstack_connection.image.images(
-                status="active", visibility="private"
-            )
-            # Use list comprehension to filter images based on tags
-            images = [
-                image for image in images if "tags" in image and len(image["tags"]) > 0
-            ]
-            image_names = [image.name for image in images]
-            logger.info(f"Found private images - {image_names}")
+        # Use compute.images() method with filters and extra_info
+        images = self.openstack_connection.image.images(
+            status="active", visibility="private"
+        )
+        # Use list comprehension to filter images based on tags
+        images = [
+            image for image in images if "tags" in image and len(image["tags"]) > 0
+        ]
+        image_names = [image.name for image in images]
+        logger.info(f"Found private images - {image_names}")
 
-            return images
-        else:
-            logger.info("no connection")
-            return []
+        return images
 
     def get_images(self) -> list[Image]:
         logger.info("Get Images")
-        if self.openstack_connection:
-            images = self.openstack_connection.image.images(status="active")
-            images = [
-                image for image in images if "tags" in image and len(image["tags"]) > 0
-            ]
-            image_names = [image.name for image in images]
+        images = self.openstack_connection.image.images(status="active")
+        images = [
+            image for image in images if "tags" in image and len(image["tags"]) > 0
+        ]
+        image_names = [image.name for image in images]
 
-            logger.info(f"Found  images - {image_names}")
-
-            return images
-        else:
-            logger.info("no connection")
-            return []
+        logger.info(f"Found  images - {image_names}")
+        return images
 
     def get_calculation_values(self) -> dict[str, str]:
         logger.info("Get Client Calculation Values")
@@ -712,11 +693,12 @@ class OpenStackConnector:
         if not sec:
             logger.info("Default SimpleVM SSH Security group not found... Creating")
 
-            self.create_security_group(
+            sec = self.create_security_group(
                 name=self.DEFAULT_SECURITY_GROUP_NAME,
                 ssh=True,
                 description="Default SSH SimpleVM Security Group",
             )
+        return sec
 
     def delete_security_group_rule(self, openstack_id):
         logger.info(f"Delete Security Group Rule -- {openstack_id}")
@@ -730,15 +712,10 @@ class OpenStackConnector:
             )
 
     def open_port_range_for_vm_in_project(
-        self, range_start, range_stop, openstack_id, ethertype="IPV4", protocol="TCP"
+        self, range_start, range_stop, openstack_id, ethertype="IPv4", protocol="TCP"
     ):
-        server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
-        if server is None:
-            logger.exception(f"Instance {openstack_id} not found")
-            raise ServerNotFoundException(
-                message=f"Instance {openstack_id} not found",
-                name_or_id=openstack_id,
-            )
+        server: Server = self.get_server(openstack_id=openstack_id)
+
         project_name = server.metadata.get("project_name")
         project_id = server.metadata.get("project_id")
 
