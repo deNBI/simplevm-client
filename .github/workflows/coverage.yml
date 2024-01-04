@@ -24,7 +24,7 @@ jobs:
 
       - name: Build coverage file
         run: |
-          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=simple_vm_client/openstack_connector --cov=simple_vm_client/bibigrid_connector --cov=simple_vm_client/util --cov=simple_vm_client/forc_connector | tee pytest-coverage.txt
+          pytest --junitxml=pytest.xml | tee pytest-coverage.txt
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main

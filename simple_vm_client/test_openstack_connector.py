@@ -2909,7 +2909,7 @@ class TestOpenStackConnector(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
             temp_file.write(CONFIG_DATA)
             # Call the __init__ method
-            OpenStackConnector(config_file=temp_file.name)
+        OpenStackConnector(config_file=temp_file.name)
         os.remove(temp_file.name)
         # Assertions
 
@@ -2922,7 +2922,7 @@ class TestOpenStackConnector(unittest.TestCase):
             temp_file.write(CONFIG_DATA)
             # Call the __init__ method
         with self.assertRaises(Exception):
-            openstack_connector = OpenStackConnector(config_file=temp_file.name)
+            OpenStackConnector(config_file=temp_file.name)
         os.remove(temp_file.name)
         # Assertions
 
@@ -2941,7 +2941,7 @@ class TestOpenStackConnector(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
             temp_file.write(CONFIG_DATA)
             # Call the __init__ method
-            OpenStackConnector(config_file=temp_file.name)
+        OpenStackConnector(config_file=temp_file.name)
         os.remove(temp_file.name)
         # Assertions
 

@@ -1,0 +1,14 @@
+[run]
+omit =
+    simple_vm_client/VirtualMachineService.py
+    simple_vm_client/constants.py
+    simple_vm_client/test_openstack_connector.py
+    simple_vm_client/ttypes.py
+    simple_vm_client/forc_connector/template/test_templates.py
+    simple_vm_client/util/logger.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
