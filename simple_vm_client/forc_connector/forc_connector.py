@@ -177,12 +177,11 @@ class ForcConnector:
             logger.exception(e)
             raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
 
-    def create_backend(
-        self, owner: str, user_key_url: str, template: str, upstream_url: str
-    ) -> Backend:
+    def create_backend(self, owner: str, user_key_url: str, template: str, upstream_url: str) -> Backend:
         logger.info(
             f"Create Backend - [Owner:{owner}, user_key_url:{user_key_url}, template:{template}, upstream_url:{upstream_url}"
         )
+
         template_version = self.template.get_template_version_for(template=template)
         if template_version is None:
             logger.warning(
@@ -192,18 +191,16 @@ class ForcConnector:
                 message=f"No suitable template version found for {template}. Aborting backend creation!",
                 template=template,
             )
-        try:
-            post_url = f"{self.FORC_URL}backends"
-            backend_info = {
-                "owner": owner,
-                "user_key_url": user_key_url,
-                "template": template,
-                "template_version": template_version,
-                "upstream_url": upstream_url,
-            }
-        except Exception as e:
-            logger.exception(e)
-            raise DefaultException(message=e)
+
+        post_url = f"{self.FORC_URL}backends"
+        backend_info = {
+            "owner": owner,
+            "user_key_url": user_key_url,
+            "template": template,
+            "template_version": template_version,
+            "upstream_url": upstream_url,
+        }
+
         try:
             response = requests.post(
                 post_url,
@@ -212,12 +209,10 @@ class ForcConnector:
                 headers={"X-API-KEY": self.FORC_API_KEY},
                 verify=True,
             )
-            try:
-                data = response.json()
-            except Exception as e:
-                logger.exception(e)
-                raise DefaultException(message=e)
+
+            data = response.json()
             logger.info(f"Backend created {data}")
+
             new_backend = Backend(
                 id=int(data["id"]),
                 owner=data["owner"],
@@ -228,7 +223,7 @@ class ForcConnector:
             return new_backend
 
         except requests.Timeout as e:
-            logger.info(msg=f"create_backend timed out. {e}")
+            logger.info(f"create_backend timed out. {e}")
             raise DefaultException(message=e)
 
         except Exception as e:
@@ -484,6 +479,7 @@ class ForcConnector:
             cloud_site=cloud_site,
             base_url=base_url,
         )
+        logger.info(playbook)
         self.redis_connection.hset(
             openstack_id, "status", VmTaskStates.BUILD_PLAYBOOK.value
         )
