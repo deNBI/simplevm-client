@@ -424,6 +424,36 @@ class TestVirtualMachineHandler(unittest.TestCase):
             server_id=OPENSTACK_ID
         )
 
+    def test_start_server_with_res(self):
+        self.handler.forc_connector.get_metadata_by_research_environment.return_value = (
+            "res_metadata"
+        )
+
+        self.handler.start_server(
+            flavor_name=FLAVOR.name,
+            image_name=IMAGE.name,
+            public_key="pub",
+            servername=SERVER.name,
+            metadata=METADATA,
+            volume_ids_path_new=[],
+            volume_ids_path_attach=[],
+            additional_keys=[],
+            research_environment="de",
+            additional_security_group_ids=[],
+        )
+        self.handler.openstack_connector.start_server.assert_called_once_with(
+            flavor_name=FLAVOR.name,
+            image_name=IMAGE.name,
+            public_key="pub",
+            servername=SERVER.name,
+            metadata=METADATA,
+            volume_ids_path_new=[],
+            volume_ids_path_attach=[],
+            additional_keys=[],
+            research_environment_metadata="res_metadata",
+            additional_security_group_ids=[],
+        )
+
     def test_start_server(self):
         self.handler.start_server(
             flavor_name=FLAVOR.name,
@@ -474,6 +504,38 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             additional_security_group_ids=[],
             research_environment_metadata=None,
+        )
+        self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
+            openstack_id=SERVER.id, private_key="priv", name=SERVER.name
+        )
+
+    def test_start_server_with_custom_key_and_res(self):
+        self.handler.openstack_connector.start_server_with_playbook.return_value = (
+            SERVER.id,
+            "priv",
+        )
+        self.handler.forc_connector.get_metadata_by_research_environment.return_value = (
+            "res_metadata"
+        )
+        self.handler.start_server_with_custom_key(
+            flavor_name=FLAVOR.name,
+            image_name=IMAGE.name,
+            servername=SERVER.name,
+            metadata=METADATA,
+            volume_ids_path_new=[],
+            volume_ids_path_attach=[],
+            research_environment="de",
+            additional_security_group_ids=[],
+        )
+        self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
+            flavor_name=FLAVOR.name,
+            image_name=IMAGE.name,
+            servername=SERVER.name,
+            metadata=METADATA,
+            volume_ids_path_new=[],
+            volume_ids_path_attach=[],
+            additional_security_group_ids=[],
+            research_environment_metadata="res_metadata",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -577,3 +639,31 @@ class TestVirtualMachineHandler(unittest.TestCase):
             batch_idx=1,
             worker_idx=1,
         )
+
+    def test_keyboard_interrupt_handler_playbooks(self):
+        mock_stop_a = MagicMock()
+        mock_stop_b = MagicMock()
+        mock_stop_c = MagicMock()
+
+        self.handler.forc_connector._active_playbooks = {
+            "a": mock_stop_a,
+            "b": mock_stop_b,
+            "c": mock_stop_c,
+        }
+        self.handler.forc_connector.redis_connection.hget.side_effect = [
+            "a".encode("utf-8"),
+            "b".encode("utf-8"),
+            "c".encode("utf-8"),
+        ]
+        with self.assertRaises(SystemExit):
+            self.handler.keyboard_interrupt_handler_playbooks()
+        for key in self.handler.forc_connector._active_playbooks.keys():
+            self.handler.openstack_connector.delete_keypair.assert_any_call(
+                key_name=key
+            )
+            self.handler.openstack_connector.delete_server.assert_any_call(
+                openstack_id=key
+            )
+        mock_stop_a.stop.assert_called_once()
+        mock_stop_b.stop.assert_called_once()
+        mock_stop_c.stop.assert_called_once()

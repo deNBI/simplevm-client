@@ -5,7 +5,6 @@ Which can be used for the PortalClient.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 
 from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
 from simple_vm_client.forc_connector.forc_connector import ForcConnector
@@ -13,22 +12,20 @@ from simple_vm_client.openstack_connector.openstack_connector import OpenStackCo
 from simple_vm_client.util import thrift_converter
 from simple_vm_client.util.logger import setup_custom_logger
 
+from .ttypes import (
+    VM,
+    Backend,
+    ClusterInfo,
+    ClusterInstance,
+    CondaPackage,
+    Flavor,
+    Image,
+    PlaybookResult,
+    ResearchEnvironmentTemplate,
+    Snapshot,
+    Volume,
+)
 from .VirtualMachineService import Iface
-
-if TYPE_CHECKING:
-    from ttypes import (
-        VM,
-        Backend,
-        ClusterInfo,
-        ClusterInstance,
-        CondaPackage,
-        Flavor,
-        Image,
-        PlaybookResult,
-        ResearchEnvironmentTemplate,
-        Snapshot,
-        Volume,
-    )
 
 logger = setup_custom_logger(__name__)
 
@@ -144,15 +141,12 @@ class VirtualMachineHandler(Iface):
         return server
 
     def get_servers(self) -> list[VM]:
-
         servers = openstack_servers = self.openstack_connector.get_servers()
-        servers_full=[]
+        servers_full = []
 
         for server in servers:
             servers_full.append(self.forc_connector.get_playbook_status(server=server))
-        serv = thrift_converter.os_to_thrift_servers(
-            openstack_servers=servers
-        )
+        serv = thrift_converter.os_to_thrift_servers(openstack_servers=servers)
         return servers_full
 
     def get_servers_by_ids(self, server_ids: list[str]) -> list[VM]:
@@ -179,12 +173,12 @@ class VirtualMachineHandler(Iface):
         return self.forc_connector.get_forc_access_url()
 
     def create_snapshot(
-            self,
-            openstack_id: str,
-            name: str,
-            username: str,
-            base_tags: list[str],
-            description: str,
+        self,
+        openstack_id: str,
+        name: str,
+        username: str,
+        base_tags: list[str],
+        description: str,
     ) -> str:
         return self.openstack_connector.create_snapshot(
             openstack_id=openstack_id,
@@ -198,7 +192,7 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.delete_image(image_id=image_id)
 
     def create_volume(
-            self, volume_name: str, volume_storage: int, metadata: dict[str, str]
+        self, volume_name: str, volume_storage: int, metadata: dict[str, str]
     ) -> Volume:
         return thrift_converter.os_to_thrift_volume(
             openstack_volume=self.openstack_connector.create_volume(
@@ -209,7 +203,7 @@ class VirtualMachineHandler(Iface):
         )
 
     def create_volume_by_source_volume(
-            self, volume_name: str, metadata: dict[str, str], source_volume_id: str
+        self, volume_name: str, metadata: dict[str, str], source_volume_id: str
     ) -> Volume:
         return thrift_converter.os_to_thrift_volume(
             openstack_volume=self.openstack_connector.create_volume_by_source_volume(
@@ -220,7 +214,7 @@ class VirtualMachineHandler(Iface):
         )
 
     def create_volume_by_volume_snap(
-            self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
+        self, volume_name: str, metadata: dict[str, str], volume_snap_id: str
     ) -> Volume:
         return thrift_converter.os_to_thrift_volume(
             openstack_volume=self.openstack_connector.create_volume_by_volume_snap(
@@ -231,7 +225,7 @@ class VirtualMachineHandler(Iface):
         )
 
     def create_volume_snapshot(
-            self, volume_id: str, name: str, description: str
+        self, volume_id: str, name: str, description: str
     ) -> str:
         return self.openstack_connector.create_volume_snapshot(
             volume_id=volume_id, name=name, description=description
@@ -256,7 +250,7 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.delete_volume(volume_id=volume_id)
 
     def attach_volume_to_server(
-            self, openstack_id: str, volume_id: str
+        self, openstack_id: str, volume_id: str
     ) -> dict[str, str]:
         return self.openstack_connector.attach_volume_to_server(
             openstack_id=openstack_id, volume_id=volume_id
@@ -266,7 +260,7 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.get_limits()
 
     def create_backend(
-            self, owner: str, user_key_url: str, template: str, upstream_url: str
+        self, owner: str, user_key_url: str, template: str, upstream_url: str
     ) -> Backend:
         return self.forc_connector.create_backend(
             owner=owner,
@@ -312,12 +306,12 @@ class VirtualMachineHandler(Iface):
         )
 
     def open_port_range_for_vm_in_project(
-            self,
-            range_start,
-            range_stop,
-            openstack_id,
-            ethertype: str = "IPv4",
-            protocol: str = "TCP",
+        self,
+        range_start,
+        range_stop,
+        openstack_id,
+        ethertype: str = "IPv4",
+        protocol: str = "TCP",
     ) -> str:
         return self.openstack_connector.open_port_range_for_vm_in_project(
             range_start=range_start,
@@ -331,17 +325,17 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.add_udp_security_group(server_id=server_id)
 
     def start_server(
-            self,
-            flavor_name: str,
-            image_name: str,
-            public_key: str,
-            servername: str,
-            metadata: dict[str, str],
-            volume_ids_path_new: list[dict[str, str]],
-            volume_ids_path_attach: list[dict[str, str]],
-            additional_keys: list[str],
-            research_environment: str,
-            additional_security_group_ids: list[str],
+        self,
+        flavor_name: str,
+        image_name: str,
+        public_key: str,
+        servername: str,
+        metadata: dict[str, str],
+        volume_ids_path_new: list[dict[str, str]],
+        volume_ids_path_attach: list[dict[str, str]],
+        additional_keys: list[str],
+        research_environment: str,
+        additional_security_group_ids: list[str],
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -365,15 +359,15 @@ class VirtualMachineHandler(Iface):
         )
 
     def start_server_with_custom_key(
-            self,
-            flavor_name: str,
-            image_name: str,
-            servername: str,
-            metadata: dict[str, str],
-            research_environment: str,
-            volume_ids_path_new: list[dict[str, str]],
-            volume_ids_path_attach: list[dict[str, str]],
-            additional_security_group_ids: list[str],
+        self,
+        flavor_name: str,
+        image_name: str,
+        servername: str,
+        metadata: dict[str, str],
+        research_environment: str,
+        volume_ids_path_new: list[dict[str, str]],
+        volume_ids_path_attach: list[dict[str, str]],
+        additional_security_group_ids: list[str],
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -399,14 +393,14 @@ class VirtualMachineHandler(Iface):
         return openstack_id
 
     def create_and_deploy_playbook(
-            self,
-            public_key: str,
-            openstack_id: str,
-            conda_packages: list[CondaPackage],
-            research_environment_template: str,
-            apt_packages: list[str],
-            create_only_backend: bool,
-            base_url: str = "",
+        self,
+        public_key: str,
+        openstack_id: str,
+        conda_packages: list[CondaPackage],
+        research_environment_template: str,
+        apt_packages: list[str],
+        create_only_backend: bool,
+        base_url: str = "",
     ) -> int:
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
@@ -436,11 +430,11 @@ class VirtualMachineHandler(Iface):
         return self.bibigrid_connector.get_cluster_status(cluster_id=cluster_id)
 
     def start_cluster(
-            self,
-            public_key: str,
-            master_instance: ClusterInstance,
-            worker_instances: list[ClusterInstance],
-            user: str,
+        self,
+        public_key: str,
+        master_instance: ClusterInstance,
+        worker_instances: list[ClusterInstance],
+        user: str,
     ) -> dict[str, str]:
         return self.bibigrid_connector.start_cluster(
             public_key=public_key,
@@ -453,16 +447,16 @@ class VirtualMachineHandler(Iface):
         return self.bibigrid_connector.terminate_cluster(cluster_id=cluster_id)
 
     def add_cluster_machine(
-            self,
-            cluster_id: str,
-            cluster_user: str,
-            cluster_group_id: list[str],
-            image_name: str,
-            flavor_name: str,
-            name: str,
-            key_name: str,
-            batch_idx: int,
-            worker_idx: int,
+        self,
+        cluster_id: str,
+        cluster_user: str,
+        cluster_group_id: list[str],
+        image_name: str,
+        flavor_name: str,
+        name: str,
+        key_name: str,
+        batch_idx: int,
+        worker_idx: int,
     ) -> str:
         return self.openstack_connector.add_cluster_machine(
             cluster_id=cluster_id,
