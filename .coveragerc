@@ -6,6 +6,10 @@ omit =
     simple_vm_client/ttypes.py
     simple_vm_client/forc_connector/template/test_templates.py
     simple_vm_client/util/logger.py
+    simple_vm_client/forc_connector/test_forc_connector.py
+    simple_vm_client/VirtualMachineServer.py
+
+    check_env.py
 
 [report]
 exclude_lines =

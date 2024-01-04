@@ -130,11 +130,12 @@ class ForcConnector:
             if response.status_code:
                 if response.status_code == 404 or response.status_code == 500:
                     try:
+                        response_data = response.json()
                         raise BackendNotFoundException(
-                            message=str(json.dumps(response.json())),
+                            message=str(json.dumps(response_data)),
                             name_or_id=str(backend_id),
                         )
-                    except json.JSONDecodeError:
+                    except ValueError:
                         logger.exception(str(response.content))
                         raise BackendNotFoundException(
                             message=str(response.content), name_or_id=str(backend_id)
@@ -146,14 +147,11 @@ class ForcConnector:
 
     def add_user_to_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
-        try:
-            post_url = f"{self.FORC_URL}users/{backend_id}"
-            user_info = {
-                "user": user_id,
-            }
-        except Exception as e:
-            logger.exception(e)
-            return {"Error": "Could not create url or json body."}
+        post_url = f"{self.FORC_URL}users/{backend_id}"
+        user_info = {
+            "user": user_id,
+        }
+
         try:
             response = requests.post(
                 post_url,
@@ -177,7 +175,9 @@ class ForcConnector:
             logger.exception(e)
             raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
 
-    def create_backend(self, owner: str, user_key_url: str, template: str, upstream_url: str) -> Backend:
+    def create_backend(
+        self, owner: str, user_key_url: str, template: str, upstream_url: str
+    ) -> Backend:
         logger.info(
             f"Create Backend - [Owner:{owner}, user_key_url:{user_key_url}, template:{template}, upstream_url:{upstream_url}"
         )
@@ -362,19 +362,17 @@ class ForcConnector:
         logger.info("Load env: FORC")
         self.FORC_API_KEY = os.environ.get("FORC_API_KEY", None)
 
-    def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
-        logger.warning(f"Get Playbook logs {openstack_id}")
-        if (
+    def is_playbook_active(self, openstack_id: str) -> bool:
+        return (
             self.redis_connection.exists(openstack_id) == 1
             and openstack_id in self._active_playbooks
-        ):
-            playbook = self._active_playbooks.get(openstack_id)
-            logger.warning(f"playbook {playbook}")
-            if not playbook:
-                raise PlaybookNotFoundException(
-                    message=f"No active Playbook found for {openstack_id}!",
-                    name_or_id=openstack_id,
-                )
+        )
+
+    def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
+        logger.warning(f"Get Playbook logs {openstack_id}")
+
+        if self.is_playbook_active(openstack_id):
+            playbook = self._active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
 

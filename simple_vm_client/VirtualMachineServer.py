@@ -1,4 +1,3 @@
-import os
 import signal
 import ssl
 import sys
@@ -71,16 +70,6 @@ def startServer(config: str) -> None:
     click.echo(f"Started with {THREADS} threads!")
 
     server.serve()
-
-
-def check_environment_variables(envs: list[str]) -> None:
-    def check_env(var: str) -> None:
-        if var not in os.environ:
-            click.echo(f"ERROR: There is no {var} set in environment.")
-            click.echo("Please make sure you have sourced your OpenStack rc file")
-            sys.exit()
-
-    list(map(lambda var: check_env(var), envs))
 
 
 if __name__ == "__main__":
