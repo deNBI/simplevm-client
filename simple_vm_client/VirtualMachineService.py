@@ -10,11 +10,10 @@ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplica
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-from .ttypes import *
 
 import sys
 import logging
-from ttypes import *
+from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
 all_structs = []
