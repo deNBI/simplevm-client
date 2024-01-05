@@ -969,10 +969,10 @@ class OpenStackConnector:
             "current_used_cores": str(limits["total_cores_used"]),
             "current_used_vms": str(limits["total_instances_used"]),
             "current_used_ram": str(math.ceil(limits["total_ram_used"] / 1024)),
-            "volume_counter_limit": str(limits["maxTotalVolumes"]),
-            "volume_storage_limit": str(limits["maxTotalVolumeGigabytes"]),
-            "current_used_volumes": str(limits["totalVolumesUsed"]),
-            "current_used_volume_storage": str(limits["totalGigabytesUsed"]),
+            "volume_counter_limit": str(limits["max_total_volumes"]),
+            "volume_storage_limit": str(limits["max_total_volume_gigabytes"]),
+            "current_used_volumes": str(limits["total_volumes_used"]),
+            "current_used_volume_storage": str(limits["total_gigabytes_used"]),
         }
 
     def exist_server(self, name: str) -> bool:
