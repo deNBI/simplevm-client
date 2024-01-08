@@ -5,29 +5,27 @@ Which can be used for the PortalClient.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 
-from bibigrid_connector.bibigrid_connector import BibigridConnector
-from forc_connector.forc_connector import ForcConnector
-from openstack_connector.openstack_connector import OpenStackConnector
-from util import thrift_converter
-from util.logger import setup_custom_logger
-from VirtualMachineService import Iface
+from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
+from simple_vm_client.forc_connector.forc_connector import ForcConnector
+from simple_vm_client.openstack_connector.openstack_connector import OpenStackConnector
+from simple_vm_client.util import thrift_converter
+from simple_vm_client.util.logger import setup_custom_logger
 
-if TYPE_CHECKING:
-    from ttypes import (
-        VM,
-        Backend,
-        ClusterInfo,
-        ClusterInstance,
-        CondaPackage,
-        Flavor,
-        Image,
-        PlaybookResult,
-        ResearchEnvironmentTemplate,
-        Snapshot,
-        Volume,
-    )
+from .ttypes import (
+    VM,
+    Backend,
+    ClusterInfo,
+    ClusterInstance,
+    CondaPackage,
+    Flavor,
+    Image,
+    PlaybookResult,
+    ResearchEnvironmentTemplate,
+    Snapshot,
+    Volume,
+)
+from .VirtualMachineService import Iface
 
 logger = setup_custom_logger(__name__)
 
@@ -143,10 +141,13 @@ class VirtualMachineHandler(Iface):
         return server
 
     def get_servers(self) -> list[VM]:
-        serv = thrift_converter.os_to_thrift_servers(
-            openstack_servers=self.openstack_connector.get_servers()
-        )
-        return serv
+        servers = openstack_servers = self.openstack_connector.get_servers()
+        servers_full = []
+
+        for server in servers:
+            servers_full.append(self.forc_connector.get_playbook_status(server=server))
+        serv = thrift_converter.os_to_thrift_servers(openstack_servers=servers)
+        return servers_full
 
     def get_servers_by_ids(self, server_ids: list[str]) -> list[VM]:
         return thrift_converter.os_to_thrift_servers(

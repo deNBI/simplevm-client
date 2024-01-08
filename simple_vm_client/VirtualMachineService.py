@@ -10,9 +10,10 @@ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplica
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
+
 import sys
 import logging
-from ttypes import *
+from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
 all_structs = []
@@ -7155,8 +7156,11 @@ class delete_security_group_rule_result(object):
 
     """
 
-
-    def __init__(self, e=None, f=None,):
+    def __init__(
+        self,
+        e=None,
+        f=None,
+    ):
         self.e = e
         self.f = f
 
@@ -7194,7 +7198,7 @@ class delete_security_group_rule_result(object):
             self.e.write(oprot)
             oprot.writeFieldEnd()
         if self.f is not None:
-            oprot.writeFieldBegin('f', TType.STRUCT, 2)
+            oprot.writeFieldBegin("f", TType.STRUCT, 2)
             self.f.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -7216,8 +7220,20 @@ class delete_security_group_rule_result(object):
 all_structs.append(delete_security_group_rule_result)
 delete_security_group_rule_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'e', [SecurityGroupRuleNotFoundException, None], None, ),  # 1
-    (2, TType.STRUCT, 'f', [DefaultException, None], None, ),  # 2
+    (
+        1,
+        TType.STRUCT,
+        "e",
+        [SecurityGroupRuleNotFoundException, None],
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRUCT,
+        "f",
+        [DefaultException, None],
+        None,
+    ),  # 2
 )
 
 
