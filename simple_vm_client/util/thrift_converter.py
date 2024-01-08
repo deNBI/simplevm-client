@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import logging
-
 from openstack.block_storage.v2.snapshot import Snapshot as OpenStack_Snapshot
 from openstack.block_storage.v2.volume import Volume as OpenStack_Volume
 from openstack.compute.v2.flavor import Flavor as OpenStack_Flavor
 from openstack.compute.v2.image import Image as OpenStack_Image
 from openstack.compute.v2.server import Server as OpenStack_Server
-from ttypes import VM, Flavor, Image, Snapshot, Volume
-from util.logger import setup_custom_logger
-from util.state_enums import VmStates
+
+from simple_vm_client.ttypes import VM, Flavor, Image, Snapshot, Volume
+from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.state_enums import VmStates
 
 logger = setup_custom_logger(__name__)
 
@@ -61,12 +60,15 @@ def os_to_thrift_flavors(openstack_flavors: list[OpenStack_Flavor]) -> list[Flav
 def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
     if not openstack_volume:
         return Volume(status=VmStates.NOT_FOUND)
-    if openstack_volume.get("attachments"):
-        device = openstack_volume.attachments[0]["device"]
-        server_id = openstack_volume.attachments[0]["server_id"]
-    else:
-        device = None
-        server_id = None
+    attachments = openstack_volume.attachments
+    device = None
+    server_id = None
+    if attachments:
+        try:
+            device = openstack_volume.attachments[0]["device"]
+            server_id = openstack_volume.attachments[0]["server_id"]
+        except Exception:
+            pass
     volume = Volume(
         status=openstack_volume.status,
         id=openstack_volume.id,
@@ -97,12 +99,11 @@ def os_to_thrift_volume_snapshot(openstack_snapshot: OpenStack_Snapshot) -> Snap
 
 def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
     if not openstack_server:
-        logging.info("Openstack server not found")
+        logger.info("Openstack server not found")
 
         return VM(vm_state=VmStates.NOT_FOUND)
     fixed_ip = ""
     floating_ip = ""
-
     flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
     if openstack_server.image:
         image = os_to_thrift_image(openstack_image=openstack_server.image)
@@ -110,7 +111,6 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         image = None
     for values in openstack_server.addresses.values():
         for address in values:
-
             if address["OS-EXT-IPS:type"] == "floating":
                 floating_ip = address["addr"]
             elif address["OS-EXT-IPS:type"] == "fixed":

@@ -7,7 +7,8 @@ import redis
 import requests
 import yaml
 from openstack.compute.v2.server import Server
-from ttypes import (
+
+from simple_vm_client.ttypes import (
     Backend,
     BackendNotFoundException,
     CondaPackage,
@@ -16,8 +17,8 @@ from ttypes import (
     PlaybookResult,
     TemplateNotFoundException,
 )
-from util.logger import setup_custom_logger
-from util.state_enums import VmTaskStates
+from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.state_enums import VmTaskStates
 
 from .playbook.playbook import Playbook
 from .template.template import ResearchEnvironmentMetadata, Template
@@ -129,11 +130,12 @@ class ForcConnector:
             if response.status_code:
                 if response.status_code == 404 or response.status_code == 500:
                     try:
+                        response_data = response.json()
                         raise BackendNotFoundException(
-                            message=str(json.dumps(response.json())),
+                            message=str(json.dumps(response_data)),
                             name_or_id=str(backend_id),
                         )
-                    except json.JSONDecodeError:
+                    except ValueError:
                         logger.exception(str(response.content))
                         raise BackendNotFoundException(
                             message=str(response.content), name_or_id=str(backend_id)
@@ -145,14 +147,11 @@ class ForcConnector:
 
     def add_user_to_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
-        try:
-            post_url = f"{self.FORC_URL}users/{backend_id}"
-            user_info = {
-                "user": user_id,
-            }
-        except Exception as e:
-            logger.exception(e)
-            return {"Error": "Could not create url or json body."}
+        post_url = f"{self.FORC_URL}users/{backend_id}"
+        user_info = {
+            "user": user_id,
+        }
+
         try:
             response = requests.post(
                 post_url,
@@ -182,6 +181,7 @@ class ForcConnector:
         logger.info(
             f"Create Backend - [Owner:{owner}, user_key_url:{user_key_url}, template:{template}, upstream_url:{upstream_url}"
         )
+
         template_version = self.template.get_template_version_for(template=template)
         if template_version is None:
             logger.warning(
@@ -191,18 +191,16 @@ class ForcConnector:
                 message=f"No suitable template version found for {template}. Aborting backend creation!",
                 template=template,
             )
-        try:
-            post_url = f"{self.FORC_URL}backends"
-            backend_info = {
-                "owner": owner,
-                "user_key_url": user_key_url,
-                "template": template,
-                "template_version": template_version,
-                "upstream_url": upstream_url,
-            }
-        except Exception as e:
-            logger.exception(e)
-            raise DefaultException(message=e)
+
+        post_url = f"{self.FORC_URL}backends"
+        backend_info = {
+            "owner": owner,
+            "user_key_url": user_key_url,
+            "template": template,
+            "template_version": template_version,
+            "upstream_url": upstream_url,
+        }
+
         try:
             response = requests.post(
                 post_url,
@@ -211,12 +209,10 @@ class ForcConnector:
                 headers={"X-API-KEY": self.FORC_API_KEY},
                 verify=True,
             )
-            try:
-                data = response.json()
-            except Exception as e:
-                logger.exception(e)
-                raise DefaultException(message=e)
+
+            data = response.json()
             logger.info(f"Backend created {data}")
+
             new_backend = Backend(
                 id=int(data["id"]),
                 owner=data["owner"],
@@ -227,7 +223,7 @@ class ForcConnector:
             return new_backend
 
         except requests.Timeout as e:
-            logger.info(msg=f"create_backend timed out. {e}")
+            logger.info(f"create_backend timed out. {e}")
             raise DefaultException(message=e)
 
         except Exception as e:
@@ -366,19 +362,17 @@ class ForcConnector:
         logger.info("Load env: FORC")
         self.FORC_API_KEY = os.environ.get("FORC_API_KEY", None)
 
-    def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
-        logger.warning(f"Get Playbook logs {openstack_id}")
-        if (
+    def is_playbook_active(self, openstack_id: str) -> bool:
+        return (
             self.redis_connection.exists(openstack_id) == 1
             and openstack_id in self._active_playbooks
-        ):
-            playbook = self._active_playbooks.get(openstack_id)
-            logger.warning(f"playbook {playbook}")
-            if not playbook:
-                raise PlaybookNotFoundException(
-                    message=f"No active Playbook found for {openstack_id}!",
-                    name_or_id=openstack_id,
-                )
+        )
+
+    def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
+        logger.warning(f"Get Playbook logs {openstack_id}")
+
+        if self.is_playbook_active(openstack_id):
+            playbook = self._active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
 
@@ -483,6 +477,7 @@ class ForcConnector:
             cloud_site=cloud_site,
             base_url=base_url,
         )
+        logger.info(playbook)
         self.redis_connection.hset(
             openstack_id, "status", VmTaskStates.BUILD_PLAYBOOK.value
         )
