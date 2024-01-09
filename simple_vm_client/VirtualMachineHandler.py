@@ -141,13 +141,13 @@ class VirtualMachineHandler(Iface):
         return server
 
     def get_servers(self) -> list[VM]:
-        servers = openstack_servers = self.openstack_connector.get_servers()
+        servers = self.openstack_connector.get_servers()
         servers_full = []
 
         for server in servers:
             servers_full.append(self.forc_connector.get_playbook_status(server=server))
         serv = thrift_converter.os_to_thrift_servers(openstack_servers=servers)
-        return servers_full
+        return serv
 
     def get_servers_by_ids(self, server_ids: list[str]) -> list[VM]:
         return thrift_converter.os_to_thrift_servers(
