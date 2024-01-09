@@ -1,3 +1,4 @@
+
 # This workflow will install dependencies, create coverage tests and run Pytest Coverage Comment
 # For more information see: https://github.com/MishaKav/pytest-coverage-comment/
 name: pytest-coverage-comment
@@ -31,3 +32,4 @@ jobs:
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
+
