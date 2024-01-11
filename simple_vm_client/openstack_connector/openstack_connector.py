@@ -77,6 +77,7 @@ class OpenStackConnector:
         self.APPLICATION_CREDENTIAL_ID = ""
         self.APPLICATION_CREDENTIAL_SECRET = ""
         self.USE_APPLICATION_CREDENTIALS: bool = False
+        self.NOVA_MICROVERSION = '2.1'
 
         self.load_env_config()
         print("loading config file")
@@ -101,6 +102,7 @@ class OpenStackConnector:
                     project_name=self.PROJECT_NAME,
                     user_domain_name=self.USER_DOMAIN_NAME,
                     project_domain_id=self.PROJECT_DOMAIN_ID,
+                    compute_api_version=self.NOVA_MICROVERSION
                 )
             self.openstack_connection.authorize()
             logger.info("Connected to Openstack")
@@ -129,6 +131,8 @@ class OpenStackConnector:
             self.GATEWAY_SECURITY_GROUP_ID = cfg["openstack"][
                 "gateway_security_group_id"
             ]
+            if "compute_api_version" in cfg["openstack"]:
+                self.NOVA_MICROVERSION = cfg["openstack"]["compute_api_version"]
 
     def _get_default_security_groups(self):
         return self.DEFAULT_SECURITY_GROUPS.copy()
