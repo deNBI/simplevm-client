@@ -137,7 +137,7 @@
       tags: always
     # Start
     - name: Start client docker container without bibigrid
-      docker_compose:
+      community.docker.docker_compose:
         recreate: always
         pull: yes
         project_src: "{{ client.REPO_PATH }}"
@@ -147,7 +147,7 @@
       when: "'bibigrid' not in ansible_run_tags"
 
     - name: Start docker container with bibigrid
-      docker_compose:
+      community.docker.docker_compose:
         recreate: always
         pull: yes
         project_src: "{{ client.REPO_PATH }}"
