@@ -67,8 +67,8 @@ def os_to_thrift_volume(openstack_volume: OpenStack_Volume) -> Volume:
         try:
             device = openstack_volume.attachments[0]["device"]
             server_id = openstack_volume.attachments[0]["server_id"]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.log(f"Exception on os_to_thrift_volume:\n{e}")
     volume = Volume(
         status=openstack_volume.status,
         id=openstack_volume.id,
