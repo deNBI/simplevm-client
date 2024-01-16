@@ -136,22 +136,14 @@
       when: existing_content is defined
       tags: always
     # Start
+
     - name: Start client docker container without bibigrid
-      community.docker.docker_compose:
-        recreate: always
-        pull: yes
-        project_src: "{{ client.REPO_PATH }}"
-        files:
-          - docker-compose.yml
+      shell: docker compose -f docker-compose.yml up -d
       become: yes
       when: "'bibigrid' not in ansible_run_tags"
 
     - name: Start docker container with bibigrid
-      community.docker.docker_compose:
-        recreate: always
-        pull: yes
-        project_src: "{{ client.REPO_PATH }}"
-        files:
-          - docker-compose.bibigrid.yml
+      shell: docker compose -f docker-compose.bibigrid.yml up -d
+
       become: yes
       tags: [ 'never', 'bibigrid' ]
