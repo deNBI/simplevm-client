@@ -77,10 +77,10 @@ class OpenStackConnector:
         self.APPLICATION_CREDENTIAL_ID = ""
         self.APPLICATION_CREDENTIAL_SECRET = ""
         self.USE_APPLICATION_CREDENTIALS: bool = False
-        self.NOVA_MICROVERSION = '2.1'
+        self.NOVA_MICROVERSION = "2.1"
 
         self.load_env_config()
-        print("loading config file")
+        logger.info(f"Loading config file -- {config_file}")
         self.load_config_yml(config_file)
 
         try:
@@ -102,9 +102,11 @@ class OpenStackConnector:
                     project_name=self.PROJECT_NAME,
                     user_domain_name=self.USER_DOMAIN_NAME,
                     project_domain_id=self.PROJECT_DOMAIN_ID,
-                    compute_api_version=self.NOVA_MICROVERSION
+                    compute_api_version=self.NOVA_MICROVERSION,
                 )
             self.openstack_connection.authorize()
+            self.get_network()
+
             logger.info("Connected to Openstack")
             self.create_or_get_default_ssh_security_group()
         except Exception:
@@ -392,10 +394,13 @@ class OpenStackConnector:
             raise ResourceNotAvailableException(message=e.message)
 
     def get_network(self) -> Network:
-        network: Network = self.openstack_connection.network.find_network(self.NETWORK)
+        logger.info(f"Getting Network: {self.NETWORK}")
+        network: Network = self.openstack_connection.get_network(
+            name_or_id=self.NETWORK
+        )
         if network is None:
-            logger.exception(f"Network {network} not found!")
-            raise Exception(f"Network {network} not found!")
+            logger.exception(f"Network {self.NETWORK} not found!")
+            raise Exception(f"Network {self.NETWORK} not found!")
         return network
 
     def import_keypair(self, keyname: str, public_key: str) -> dict[str, str]:
