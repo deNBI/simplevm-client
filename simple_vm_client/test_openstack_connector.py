@@ -956,9 +956,7 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     def test_network_not_found(self):
-        self.openstack_connector.openstack_connection.network.find_network.return_value = (
-            None
-        )
+        self.openstack_connector.openstack_connection.get_network.return_value = None
         with self.assertRaises(Exception):
             self.openstack_connector.get_network()
 
@@ -969,20 +967,19 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Call the load_config_yml method with the temporary file path
         self.openstack_connector.load_config_yml(temp_file.name)
+        network = fakes.generate_fake_resource(Network)
 
         # Mock the find_network method
-        self.mock_openstack_connection.network.find_network.return_value = Network(
-            id="my_network"
-        )
+        self.mock_openstack_connection.get_network.return_value = network
 
         # Call the get_network method
         result_network = self.openstack_connector.get_network()
 
         # Assertions
         self.assertIsInstance(result_network, Network)
-        self.assertEqual(result_network.id, "my_network")
-        self.mock_openstack_connection.network.find_network.assert_called_once_with(
-            self.openstack_connector.NETWORK
+        self.assertEqual(result_network.id, network.id)
+        self.mock_openstack_connection.get_network.assert_called_once_with(
+            name_or_id=self.openstack_connector.NETWORK
         )
         mock_logger_exception.assert_not_called()  # Ensure no exception is logged
 
@@ -1509,7 +1506,7 @@ class TestOpenStackConnector(unittest.TestCase):
         self.openstack_connector.openstack_connection.get_flavor.return_value = (
             fake_flavor
         )
-        self.openstack_connector.openstack_connection.network.find_network.return_value = (
+        self.openstack_connector.openstack_connection.get_network.return_value = (
             fake_network
         )
         mock_get_volumes.return_value = ["volume1", "volume2"]
@@ -1787,7 +1784,7 @@ class TestOpenStackConnector(unittest.TestCase):
         self.openstack_connector.openstack_connection.get_flavor.return_value = (
             fake_flavor
         )
-        self.openstack_connector.openstack_connection.network.find_network.return_value = (
+        self.openstack_connector.openstack_connection.get_network.return_value = (
             fake_network
         )
         self.openstack_connector.openstack_connection.compute.find_keypair.return_value = (
