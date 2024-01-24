@@ -24,7 +24,7 @@
 
     - name: Check if ca pem file exists already
       stat:
-        path: "{{ client.PERSISTENT_PATH }}/ca.pem"
+        path: "{{ client.PERSISTENT_PATH }}/CA.pem"
       register: stat_ca_pem
       tags: always
 

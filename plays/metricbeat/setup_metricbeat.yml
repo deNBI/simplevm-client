@@ -1,0 +1,46 @@
+- name: Setup metricbeat
+  hosts: all
+  become: yes
+  vars_files:
+    - setup_metricbeat_variables.yml
+    - ../general_variables.yml
+
+  tasks:
+
+    - name: Download and install metricbeat.deb
+      apt:
+        deb: "{{ metricbeat.DOWNLOAD_URL }}"
+      tags: [ 'metricbeat' ]
+
+    - name: Copy metricbeat config file
+      copy:
+        src: "{{ general.REPO_PATH }}plays/metricbeat/metricbeat.yml"
+        dest: "{{ metricbeat.CONFIG_FILE_PATH }}/metricbeat.yml"
+        remote_src: True
+      tags: [  'production', 'dev', 'post-release', 'never' ]
+
+    - name: Create metricbeat dropin dir
+      file:
+        state: directory
+        path: "{{ metricbeat.OVERRIDE_CONFIG_PATH }}"
+        recurse: yes
+      tags: [ 'metricbeat' ]
+
+    - name: Copy metricbeat override config file
+      copy:
+        src: "{{ general.REPO_PATH }}plays/metricbeat/restart-on-failure.conf"
+        dest: "{{ metricbeat.OVERRIDE_CONFIG_PATH }}/restart-on-failure.conf"
+        remote_src: True
+      tags: [ 'metricbeat' ]
+
+    - name: Just force systemd to reread configs (2.4 and above)
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      tags: [ 'metricbeat' ]
+
+
+    - name: Start Metricbeat service
+      service:
+        name: metricbeat
+        state: restarted
+      tags: [ 'metricbeat' ]

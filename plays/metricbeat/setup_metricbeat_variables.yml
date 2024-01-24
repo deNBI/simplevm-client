@@ -1,0 +1,4 @@
+metricbeat:
+  DOWNLOAD_URL: "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-8.12.0-amd64.deb"
+  CONFIG_FILE_PATH: /etc/metricbeat
+  OVERRIDE_CONFIG_PATH: /etc/systemd/system/metricbeat.service.d
