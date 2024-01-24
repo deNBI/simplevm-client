@@ -1,4 +1,10 @@
 #!/usr/bin/expect
+# Check if a parameter is provided
+# Check if a parameter is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <IP or DNS-Name>"
+  exit 0  # Exit without an error code
+fi
 echo Creating new dir "new_pem"
 mkdir $1
 cd $1
