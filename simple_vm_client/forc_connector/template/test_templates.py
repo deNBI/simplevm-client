@@ -266,11 +266,11 @@ class TestTemplate(unittest.TestCase):
         expected_templates = ["template1", "template2"]
         self.assertEqual(template._all_templates, expected_templates)
 
-    @patch("simple_vm_client.forc_connector.template.template.logger.error")
-    def test_update_playbooks_no_github_repo(self, mock_logger_error):
+    @patch("simple_vm_client.forc_connector.template.template.logger.warning")
+    def test_update_playbooks_no_github_repo(self, mock_logger_warning):
         template = self.init_template()
         template.update_playbooks()
-        mock_logger_error.assert_called_once_with(
+        mock_logger_warning.assert_called_once_with(
             "Github playbooks repo URL is None. Aborting download of playbooks."
         )
 

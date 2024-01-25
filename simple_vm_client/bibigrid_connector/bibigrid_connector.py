@@ -24,8 +24,16 @@ class BibigridConnector:
     def load_config_yml(self, config_file: str) -> None:
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
+            # Check if "bibigrid" key is present in the loaded YAML
+            if "bibigrid" not in cfg:
+                # Optionally, you can log a message or take other actions here
+                logger.info("Bibigrid configuration not found. Skipping.")
+                return
 
             bibigrid_cfg = cfg["bibigrid"]
+            if not bibigrid_cfg.get("activated", True):
+                logger.info("Bibigrid Config available but deactivated. Skipping..")
+                return
             self._BIBIGRID_HOST = bibigrid_cfg["host"]
             self._BIBIGRID_PORT = bibigrid_cfg["port"]
             self._BIBIGRID_USE_HTTPS = bibigrid_cfg.get("https", False)
@@ -33,12 +41,13 @@ class BibigridConnector:
             self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP = bibigrid_cfg.get(
                 "use_master_with_public_ip", False
             )
+            self._SUB_NETWORK = bibigrid_cfg["sub_network"]
+
             self._BIBIGRID_LOCAL_DNS_LOOKUP = bibigrid_cfg.get("localDnsLookup", False)
             self._BIBIGRID_ANSIBLE_ROLES = bibigrid_cfg.get("ansibleGalaxyRoles", [])
 
             openstack_cfg = cfg["openstack"]
             self._NETWORK = openstack_cfg["network"]
-            self._SUB_NETWORK = openstack_cfg["sub_network"]
             self._PRODUCTION = cfg["production"]
 
             protocol = "https" if self._BIBIGRID_USE_HTTPS else "http"
@@ -116,7 +125,7 @@ class BibigridConnector:
         return infos
 
     def is_bibigrid_available(self) -> bool:
-        logger.info("Checking if Bibigrid is available")
+        logger.info(f"Checking if Bibigrid is available via:  {self._BIBIGRID_EP}")
 
         if not self._BIBIGRID_EP:
             logger.info("Bibigrid Url is not set")

@@ -33,15 +33,14 @@ class ForcConnector:
 
         self.FORC_URL: str = ""  # type: ignore
         self.FORC_ACCESS_URL: str = ""  # type: ignore
-        self.FORC_REMOTE_ID: str = ""  # type: ignore
         self.GITHUB_PLAYBOOKS_REPO: str = ""  # type: ignore
         self.REDIS_HOST: str = ""  # type: ignore
         self.REDIS_PORT: int = None  # type: ignore
+        self.FORC_API_KEY: str = ""
         self.redis_pool: redis.ConnectionPool = None  # type: ignore
         self.redis_connection: redis.Redis.connection_pool = None
         self._active_playbooks: dict[str, Playbook] = {}
         self.load_config(config_file=config_file)
-        self.load_env()
         self.connect_to_redis()
         self.template = Template(
             github_playbook_repo=self.GITHUB_PLAYBOOKS_REPO,
@@ -53,15 +52,24 @@ class ForcConnector:
         logger.info("Load config file: FORC")
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
+            # Check if "bibigrid" key is present in the loaded YAML
+            self.REDIS_HOST = cfg["redis"]["host"]
+            self.REDIS_PORT = cfg["redis"]["port"]
+            if "forc" not in cfg:
+                # Optionally, you can log a message or take other actions here
+                logger.info("Forc configuration not found. Skipping.")
+                return
+            if not cfg["forc"].get("activated", True):
+                logger.info("Forc Config available but deactivated. Skipping..")
+                return
             self.FORC_URL = cfg["forc"]["forc_url"]
             url_components = urlparse(cfg["forc"]["forc_url"])
             path = url_components.netloc.split(":")[0]
 
             self.FORC_ACCESS_URL = f"{url_components.scheme}://{path}/"
-            self.FORC_REMOTE_ID = cfg["forc"]["forc_security_group_id"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
-            self.REDIS_HOST = cfg["redis"]["host"]
-            self.REDIS_PORT = cfg["redis"]["port"]
+
+        self.load_env()
 
     def connect_to_redis(self) -> None:
         logger.info("Connect to redis")

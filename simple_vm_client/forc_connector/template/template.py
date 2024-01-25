@@ -84,8 +84,10 @@ class Template(object):
         self.GITHUB_PLAYBOOKS_REPO = github_playbook_repo
         self.FORC_URL = forc_url
         self.FORC_API_KEY = forc_api_key
-        self.TEMPLATES_URL = f"{self.FORC_URL}templates"
-        self.BACKENDS_URL = f"{self.FORC_URL}backends"
+        if not self.FORC_URL:
+            logger.info("No FORC URL defined. Skipping Forc...")
+        self.TEMPLATES_URL = f"{self.FORC_URL}templates" if self.FORC_URL else ""
+        self.BACKENDS_URL = f"{self.FORC_URL}backends" if self.FORC_URL else ""
         self.BACKENDS_BY_OWNER_URL = f"{self.BACKENDS_URL}/byOwner"
         self.BACKENDS_BY_TEMPLATE_URL = f"{self.BACKENDS_URL}/byTemplate"
         self._forc_allowed: dict[str, list[str]] = {}
@@ -158,8 +160,8 @@ class Template(object):
                 ] = template_metadata
 
     def update_playbooks(self) -> None:
-        if self.GITHUB_PLAYBOOKS_REPO is None:
-            logger.error(
+        if not self.GITHUB_PLAYBOOKS_REPO:
+            logger.warning(
                 "Github playbooks repo URL is None. Aborting download of playbooks."
             )
             return
@@ -179,18 +181,19 @@ class Template(object):
         logger.info(f"Allowed Forc {self._forc_allowed}")
 
     def _get_forc_templates(self) -> list[dict]:
-        try:
-            response = requests.get(
-                self.TEMPLATES_URL,
-                timeout=(30, 30),
-                headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
-            )
-            response.raise_for_status()  # Raise HTTPError for bad responses
-            return response.json()
-        except requests.RequestException as e:
-            logger.exception(f"Error while fetching FORC templates: {e}")
-            return []
+        if self.TEMPLATES_URL:
+            try:
+                response = requests.get(
+                    self.TEMPLATES_URL,
+                    timeout=(30, 30),
+                    headers={"X-API-KEY": self.FORC_API_KEY},
+                    verify=True,
+                )
+                response.raise_for_status()  # Raise HTTPError for bad responses
+                return response.json()
+            except requests.RequestException as e:
+                logger.exception(f"Error while fetching FORC templates: {e}")
+        return []
 
     def cross_check_forc_image(self, tags: list[str]) -> bool:
         try:

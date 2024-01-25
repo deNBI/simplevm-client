@@ -57,7 +57,6 @@ class OpenStackConnector:
         logger.info("Initializing OpenStack Connector")
         self.GATEWAY_IP: str = ""
         self.NETWORK: str = ""
-        self.SUB_NETWORK: str = ""
         self.PRODUCTION: bool = True
         self.CLOUD_SITE: str = ""
         self.SSH_MULTIPLICATION_PORT: int = 1
@@ -122,12 +121,15 @@ class OpenStackConnector:
 
             self.GATEWAY_IP = cfg["openstack"]["gateway_ip"]
             self.NETWORK = cfg["openstack"]["network"]
-            self.SUB_NETWORK = cfg["openstack"]["sub_network"]
             self.PRODUCTION = cfg["production"]
             self.CLOUD_SITE = cfg["openstack"]["cloud_site"]
             self.SSH_PORT_CALCULATION = cfg["openstack"]["ssh_port_calculation"]
             self.UDP_PORT_CALCULATION = cfg["openstack"]["udp_port_calculation"]
-            self.FORC_SECURITY_GROUP_ID = cfg["forc"]["forc_security_group_id"]
+            self.FORC_SECURITY_GROUP_ID = cfg["openstack"].get(
+                "forc_security_group_id", None
+            )
+            if not self.FORC_SECURITY_GROUP_ID:
+                logger.info("No Forc Security Group defined")
             self.DEFAULT_SECURITY_GROUP_NAME = "defaultSimpleVM"
             self.DEFAULT_SECURITY_GROUPS = [self.DEFAULT_SECURITY_GROUP_NAME]
             self.GATEWAY_SECURITY_GROUP_ID = cfg["openstack"][

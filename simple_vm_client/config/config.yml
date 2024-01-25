@@ -1,63 +1,82 @@
+# Configuration for production environment
 production: False
+# Set to True if this configuration is intended for a production environment, otherwise set to False for development/testing.
 
-
-
+# Redis configuration
 redis:
   host: simplevm_client_redis
+  # Hostname or IP address of the Redis server.
   port: 6379
+  # Port number on which the Redis server is running.
   password: ""
+  # Password for authenticating to the Redis server. Leave empty if no password is required.
 
+# Logger configuration
+logger:
+  level: INFO
+  # Logging level, e.g., INFO, DEBUG, WARNING, ERROR.
+  file: log/portal_client.log
+  # Path to the log file.
+  file_backup_count: 5
+  # Number of backup log files to keep.
+  max_bytes: 1073741824
+  # Maximum size (in bytes) of each log file before it's rotated.
 
+# Server configuration
 server:
   threads: 30
+  # Number of threads to use for the server.
   host: 0.0.0.0
+  # Host IP address to bind the server to.
   port: 9090
-  # If you use docker-compose this path needs to be the path you mount the server.pem into
+  # Port number on which the server will listen.
   certfile: /code/VirtualMachineService/keys/server.pem
-  use_ssl: True
+  # Path to the SSL certificate file. Used if use_ssl is set to True.
+  use_ssl: False
+  # Set to True if SSL should be used, otherwise False.
 
-
-
+# OpenStack configuration
 openstack:
-  gateway_security_group_id:  88b530b3-0b62-4edc-b5f6-d80fbbba0830
+  gateway_security_group_id: 88b530b3-0b62-4edc-b5f6-d80fbbba0830
+  # Security group ID for the gateway.
+  forc_security_group_id: 9a08eecc-d9a5-405b-aeda-9d4180fc94d6
+  # Security group ID for FORC
   cloud_site: bielefeld
-  #Calculation for Ports - 30000 Base Port (192.168.1.20 - 1 = y , 20 =x)
+  # Name or identifier of the OpenStack cloud site.
   ssh_port_calculation: 30000 + x + y * 256
+  # Calculation for determining the SSH port. Schema -> 192.168.y.x
   udp_port_calculation: 30000 + x + y * 256
-
-
-  # Gateway IP
+  # Calculation for determining the UDP port. Schema -> 192.168.y.x
   gateway_ip: 129.70.51.75
-  # If set to True the client will use a Gateway instead of providing floating IPs for each instance.
-  use_gateway: True
-
-  set_password: False
-  # network where the project is located
+  # IP address of the OpenStack gateway.
   network: portalexternalnetwork
+  # Name or identifier of the openstack network
 
-  # subnetwork for starting Clusters
-  sub_network: portalexternalsubnetwork
-
-  production: False
-
-
-  floating_ip_network: external
-
-  # If you use docker-compose this path needs to be the path you mount the server.pem into
-  certfile: /code/VirtualMachineService/keys/server.pem
-  use_ssl: True
-
+# Bibigrid configuration
 bibigrid:
-  # Url for Bibigrid API
-    port: 8080
-    host: simplevm_bibigrid
-    https: False
-    sub_network: portalexternalsubnetwork
-    modes:
-      -   slurm
+  activated: False
+  # If Bibigrid ist activated  -- defaults to True
+  port: 8080
+  # Port number for Bibigrid API.
+  host: simplevm_bibigrid
+  # Hostname or IP address of the Bibigrid server.
+  https: False
+  # Set to True if Bibigrid should use HTTPS, otherwise False.
+  localDnsLookup: False
+  # Set to True if Bibigrid should perform local DNS lookup, otherwise False.
+  sub_network: portalexternalsubnetwork
+  # Name or identifier of the openstack subnetwork.
+  modes:
+    - slurm
 
+
+# FORC
 forc:
+  activated: True
+  # If Forc ist activated  -- defaults to True
   forc_url: https://proxy-dev.bi.denbi.de:5000/
+  # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
+  # Access URL for FORC - optional - default is forc_url without port.
   github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
-  forc_security_group_id: forc_security_group_id
+  # GitHub repository URL for FORC playbooks.
