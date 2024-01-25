@@ -46,13 +46,14 @@ class TestBibigridConnector(unittest.TestCase):
            modes: {MODES}
            use_master_with_public_ip: {MASTER_WITH_PUBLIC_IP}
            localDnsLookup: {LOCAL_DNS_LOOKUP}
+           sub_network: {SUB_NETWORK}
+
            ansibleGalaxyRoles:
              - role1
              - role2
 
          openstack:
            network: {NETWORK}
-           sub_network: {SUB_NETWORK}
 
          production: {PRODUCTION}
          """

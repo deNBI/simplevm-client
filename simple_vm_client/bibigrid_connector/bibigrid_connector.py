@@ -125,7 +125,7 @@ class BibigridConnector:
         return infos
 
     def is_bibigrid_available(self) -> bool:
-        logger.info(f"Checking if Bibigrid is available via:  {self._BIBIGRID_EP}")
+        logger.info(f"Checking if Bibigrid is available")
 
         if not self._BIBIGRID_EP:
             logger.info("Bibigrid Url is not set")
