@@ -1,0 +1,48 @@
+version: '3.5'
+services:
+  simplevm-client:
+    container_name: simplevm-client
+    image: quay.io/denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
+    expose:
+      - "9090"  # Expose the service port
+    env_file:
+      - .env
+    volumes:
+      - ${client_PERSISTENT_PATH}/config.yml:/code/simple_vm_client/config.yml
+      - ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/server.pem
+      - ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/CA.pem
+      - ./logs/client:/code/simple_vm_client/log:rw
+    command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
+    network_mode: host  # Use the host network namespace
+
+  simplevm_client_redis:
+    container_name: simplevm_client_redis
+    network_mode: host  # Use the host network namespace
+    image: redis:7.2.4
+    expose:
+      - "6379"
+
+
+  simplevm_client_filebeat:
+    container_name: simplevm_client_filebeat
+    image: docker.elastic.co/beats/filebeat:8.11.4
+    env_file:
+      - .env
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs:/usr/share/filebeat/log:ro
+      - ./filebeat/data:/usr/share/filebeat/data:rw
+    command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
+    networks:
+      - portal-production
+
+networks:
+  portal-production:
+    name: portal-production
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440

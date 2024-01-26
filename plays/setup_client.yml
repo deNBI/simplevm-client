@@ -141,7 +141,13 @@
       shell: docker compose -f {{ client.REPO_PATH }}/docker-compose.yml up -d
 
       become: yes
-      when: "'bibigrid' not in ansible_run_tags"
+      when: "'bibigrid' not in ansible_run_tags and 'host_network' not in ansible_run_tags"
+
+    - name: Start client docker container in host network without bibigrid
+      shell: docker compose -f {{ client.REPO_PATH }}/docker-compose.host.yml up -d
+      become: yes
+      tags: [ 'never', 'host_network' ]
+
 
     - name: Start docker container with bibigrid
       shell: docker compose -f {{ client.REPO_PATH }}/docker-compose.bibigrid.yml up -d
