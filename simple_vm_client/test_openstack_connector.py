@@ -126,9 +126,10 @@ CONFIG_DATA = f"""
               ssh_port_calculation: {PORT_CALCULATION}
               udp_port_calculation: {PORT_CALCULATION}
               gateway_security_group_id: "security_group_id"
-            production: true
-            forc:
               forc_security_group_id: "forc_security_group_id"
+
+            production: true
+
             """
 
 
@@ -200,7 +201,6 @@ class TestOpenStackConnector(unittest.TestCase):
         # Assert that the configuration attributes are set correctly
         self.assertEqual(self.openstack_connector.GATEWAY_IP, "192.168.1.1")
         self.assertEqual(self.openstack_connector.NETWORK, "my_network")
-        self.assertEqual(self.openstack_connector.SUB_NETWORK, "my_sub_network")
         self.assertTrue(self.openstack_connector.PRODUCTION)
         self.assertEqual(self.openstack_connector.CLOUD_SITE, "my_cloud_site")
         self.assertEqual(

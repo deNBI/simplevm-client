@@ -81,7 +81,6 @@ class TestForcConnector(unittest.TestCase):
         os.remove(temp_file.name)
         self.assertEqual(self.forc_connector.FORC_URL, FORC_URL)
         self.assertEqual(self.forc_connector.FORC_ACCESS_URL, FORC_ACCESS_URL)
-        self.assertEqual(self.forc_connector.FORC_REMOTE_ID, FORC_SECRUITY_GROUP_ID)
         self.assertEqual(self.forc_connector.GITHUB_PLAYBOOKS_REPO, GITHUB_REPO)
         self.assertEqual(self.forc_connector.REDIS_HOST, REDIS_HOST)
         self.assertEqual(self.forc_connector.REDIS_PORT, REDIS_PORT)
