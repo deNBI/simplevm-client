@@ -3,8 +3,8 @@ This Module implements an VirtualMachineHandler.
 
 Which can be used for the PortalClient.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
 from simple_vm_client.forc_connector.forc_connector import ForcConnector
@@ -406,19 +406,21 @@ class VirtualMachineHandler(Iface):
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
         )
         gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
-        cloud_site = self.openstack_connector.CLOUD_SITE
-        return self.forc_connector.create_and_deploy_playbook(
-            public_key=public_key,
-            research_environment_template=research_environment_template,
-            create_only_backend=create_only_backend,
-            conda_packages=conda_packages,
-            apt_packages=apt_packages,
-            openstack_id=openstack_id,
-            port=port,
-            ip=gateway_ip,
-            cloud_site=cloud_site,
-            base_url=base_url,
-        )
+        if self.openstack_connector.netcat(host=gateway_ip, port=port):
+
+            cloud_site = self.openstack_connector.CLOUD_SITE
+            return self.forc_connector.create_and_deploy_playbook(
+                public_key=public_key,
+                research_environment_template=research_environment_template,
+                create_only_backend=create_only_backend,
+                conda_packages=conda_packages,
+                apt_packages=apt_packages,
+                openstack_id=openstack_id,
+                port=port,
+                ip=gateway_ip,
+                cloud_site=cloud_site,
+                base_url=base_url,
+            )
 
     def is_bibigrid_available(self) -> bool:
         return self.bibigrid_connector.is_bibigrid_available()
