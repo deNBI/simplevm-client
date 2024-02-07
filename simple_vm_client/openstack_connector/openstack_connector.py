@@ -459,17 +459,23 @@ class OpenStackConnector:
             logger.info(f"Checking SSH Connection {host}:{port} Result = {r}")
         return r == 0
 
-    def get_flavor(self, name_or_id: str) -> Flavor:
+    def get_flavor(self, name_or_id: str, ignore_error: bool = False) -> Flavor:
         logger.info(f"Get flavor {name_or_id}")
 
         flavor: Flavor = self.openstack_connection.get_flavor(
             name_or_id=name_or_id, get_extra=True
         )
+
         if flavor is None:
-            logger.exception(f"Flavor {name_or_id} not found!")
-            raise FlavorNotFoundException(
-                message=f"Flavor {name_or_id} not found!", name_or_id=name_or_id
-            )
+            logger.error(f"Flavor {name_or_id} not found!")
+
+            if not ignore_error:
+                raise FlavorNotFoundException(
+                    message=f"Flavor {name_or_id} not found!", name_or_id=name_or_id
+                )
+            else:
+                return Flavor()
+
         return flavor
 
     def get_flavors(self) -> list[Flavor]:
@@ -1014,7 +1020,9 @@ class OpenStackConnector:
                 ignore_not_found=True,
             )
 
-            server.flavor = self.get_flavor(name_or_id=server.flavor["id"])
+            server.flavor = self.get_flavor(
+                name_or_id=server.flavor["id"], ignore_error=True
+            )
 
             return server
         except OpenStackCloudException as e:
