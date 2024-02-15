@@ -966,9 +966,12 @@ class OpenStackConnector:
 
     def get_limits(self) -> dict[str, str]:
         logger.info("Get Limits")
-        limits = self.openstack_connection.get_compute_limits()
-        limits.update(self.openstack_connection.get_volume_limits()["absolute"])
+        # Retrieve compute and volume limits
+        compute_limits = self.openstack_connection.get_compute_limits()
+        volume_limits = self.openstack_connection.get_volume_limits()["absolute"]
 
+        # Merge compute and volume limits into a single dictionary
+        limits = {**compute_limits, **volume_limits}
         return {
             "cores_limit": str(limits["max_total_cores"]),
             "vms_limit": str(limits["max_total_instances"]),

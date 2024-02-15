@@ -54,7 +54,7 @@ openstack:
 
 # Bibigrid configuration
 bibigrid:
-  activated: False
+  activated: True
   # If Bibigrid ist activated  -- defaults to True
   port: 8080
   # Port number for Bibigrid API.
