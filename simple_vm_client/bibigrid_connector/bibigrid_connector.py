@@ -17,6 +17,7 @@ class BibigridConnector:
         self._BIBIGRID_PORT: str = ""
         self._BIBIGRID_ANSIBLE_ROLES = []
         self._BIBIGRID_LOCAL_DNS_LOOKUP = False
+        self._BIBIGRID_EP = ""
         self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP: bool = False
         self._PRODUCTION_bool = True
         self.load_config_yml(config_file=config_file)
