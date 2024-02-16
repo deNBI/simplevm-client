@@ -887,6 +887,16 @@ class OpenStackConnector:
         # If none of the above are true, the security group is no longer in use
         return False
 
+    def get_research_environment_security_group(self, security_group_name: str):
+        security_group = self.openstack_connection.get_security_group(
+            name_or_id=security_group_name
+        )
+        if not security_group:
+            raise DefaultException(
+                message=f"Security Group {security_group_name} not found"
+            )
+        return security_group
+
     def get_or_create_research_environment_security_group(
         self, resenv_metadata: ResearchEnvironmentMetadata
     ):
@@ -1369,6 +1379,23 @@ class OpenStackConnector:
                 deactivate_update_script.encode("utf-8")
             )
         return deactivate_update_script
+
+    def add_research_environment_security_group(
+        self, server_id: str, security_group_name: str
+    ):
+        logger.info(f"Setting up {security_group_name} security group for {server_id}")
+        server = self.get_server(openstack_id=server_id)
+        security_group = self.get_research_environment_security_group(
+            security_group_name=security_group_name
+        )
+        self.openstack_connection.compute.add_security_group_to_server(
+            server=server, security_group=security_group
+        )
+
+    def add_metadata_to_server(self, server_id, metadata):
+        server = self.get_server(openstack_id=server_id)
+
+        self.openstack_connection.compute.set_server_metadata(server, **metadata)
 
     def add_udp_security_group(self, server_id):
         logger.info(f"Setting up UDP security group for {server_id}")
