@@ -148,16 +148,16 @@ class Template(object):
             self._update_forc_allowed(template_metadata)
 
             if template_metadata.template_name not in self._loaded_resenv_metadata:
-                self._loaded_resenv_metadata[
-                    template_metadata.template_name
-                ] = template_metadata
+                self._loaded_resenv_metadata[template_metadata.template_name] = (
+                    template_metadata
+                )
             elif (
                 self._loaded_resenv_metadata[template_metadata.template_name]
                 != template_metadata
             ):
-                self._loaded_resenv_metadata[
-                    template_metadata.template_name
-                ] = template_metadata
+                self._loaded_resenv_metadata[template_metadata.template_name] = (
+                    template_metadata
+                )
 
     def update_playbooks(self) -> None:
         if not self.GITHUB_PLAYBOOKS_REPO:
@@ -233,6 +233,7 @@ class Template(object):
                 info_url=metadata.info_url,
                 port=int(metadata.port),
                 incompatible_versions=metadata.incompatible_versions,
+                securitygroup_name=metadata.securitygroup_name,
                 is_maintained=metadata.is_maintained,
                 information_for_display=metadata.information_for_display,
                 min_ram=metadata.min_ram,

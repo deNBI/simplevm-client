@@ -27,6 +27,7 @@ struct ResearchEnvironmentTemplate{
 9: optional map<string,string> information_for_display
 10: optional int min_ram = 0
 11: optional int min_cores = 0
+12: optional string securitygroup_name
 
 }
 struct CondaPackage{
@@ -340,7 +341,16 @@ service VirtualMachineService {
 
     )
 
+     /**
+    * Adds template security group to a server
+    */
+    void add_research_environment_security_group(
+    /** OpenStack id of the server*/
+    1:string server_id,2:string security_group_name)
 
+    throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
     /**
 	 * Add metadata to a server.
 	 * Returns: List of flavor instances.
