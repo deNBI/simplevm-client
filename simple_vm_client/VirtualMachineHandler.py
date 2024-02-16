@@ -321,8 +321,20 @@ class VirtualMachineHandler(Iface):
             protocol=protocol,
         )
 
+    def add_research_environment_security_group(
+        self, server_id: str, security_group_name: str
+    ) -> None:
+        return self.openstack_connector.add_research_environment_security_group(
+            server_id=server_id, security_group_name=security_group_name
+        )
+
     def add_udp_security_group(self, server_id: str) -> None:
         return self.openstack_connector.add_udp_security_group(server_id=server_id)
+
+    def add_metadata_to_server(self, openstack_id: str, metadata):
+        self.openstack_connector.add_metadata_to_server(
+            server_id=openstack_id, metadata=metadata
+        )
 
     def start_server(
         self,
