@@ -38,7 +38,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print(
         "  void add_research_environment_security_group(string server_id, string security_group_name)"
     )
-    print("   add_metadata_to_server(string openstack_id,  metadata)")
+    print("  void add_metadata_to_server(string openstack_id,  metadata)")
     print("   get_flavors()")
     print("   get_images()")
     print("   get_public_images()")
