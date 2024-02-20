@@ -1384,10 +1384,14 @@ class OpenStackConnector:
         self, server_id: str, security_group_name: str
     ):
         logger.info(f"Setting up {security_group_name} security group for {server_id}")
-        server = self.get_server(openstack_id=server_id)
-        security_group = self.get_research_environment_security_group(
+        server: Server = self.get_server(openstack_id=server_id)
+        security_group: SecurityGroup = self.get_research_environment_security_group(
             security_group_name=security_group_name
         )
+        if self._is_security_group_already_added_to_server(
+            server=server, security_group_name=security_group.name
+        ):
+            return
         self.openstack_connection.compute.add_security_group_to_server(
             server=server, security_group=security_group
         )
@@ -1397,6 +1401,21 @@ class OpenStackConnector:
 
         self.openstack_connection.compute.set_server_metadata(server, **metadata)
 
+    def _is_security_group_already_added_to_server(
+        self, server: Server, security_group_name: str
+    ):
+        server_security_groups = self.openstack_connection.list_server_security_groups(
+            server
+        )
+
+        for sg in server_security_groups:
+            if sg["name"] == security_group_name:
+                logger.info(
+                    f" Security group with name {security_group_name} already added to server."
+                )
+                return True
+        return False
+
     def add_udp_security_group(self, server_id):
         logger.info(f"Setting up UDP security group for {server_id}")
         server = self.get_server(openstack_id=server_id)
@@ -1404,16 +1423,10 @@ class OpenStackConnector:
         existing_sec = self.openstack_connection.get_security_group(name_or_id=sec_name)
         if existing_sec:
             logger.info(f"UDP Security group with name {sec_name} already exists.")
-            server_security_groups = (
-                self.openstack_connection.list_server_security_groups(server)
-            )
-
-            for sg in server_security_groups:
-                if sg["name"] == sec_name:
-                    logger.info(
-                        f"UDP Security group with name {sec_name} already added to server."
-                    )
-                    return
+            if self._is_security_group_already_added_to_server(
+                server=server, security_group_name=sec_name
+            ):
+                return
 
             self.openstack_connection.compute.add_security_group_to_server(
                 server=server_id, security_group=existing_sec
