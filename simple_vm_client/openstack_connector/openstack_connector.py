@@ -1426,6 +1426,10 @@ class OpenStackConnector:
             if self._is_security_group_already_added_to_server(
                 server=server, security_group_name=sec_name
             ):
+                logger.info(
+                    f"UDP Security group with name {sec_name} already added to server."
+                )
+
                 return
 
             self.openstack_connection.compute.add_security_group_to_server(
