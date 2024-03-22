@@ -26,11 +26,7 @@ services:
 
 networks:
   portal:
-    name: portal_default
-    driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1440
-  default:
+    name: portal
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440

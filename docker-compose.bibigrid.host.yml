@@ -48,7 +48,7 @@ services:
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
     networks:
-      - portal-production
+      - portal
 
 networks:
   portal:

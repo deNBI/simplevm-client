@@ -14,7 +14,7 @@ services:
       - ./logs/client:/code/simple_vm_client/log:rw
     command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
     networks:
-     - portal-production
+     - portal
 
   simplevm_client_redis:
     container_name: simplevm_client_redis
@@ -22,7 +22,7 @@ services:
     expose:
       - "6379"
     networks:
-      - portal-production
+      - portal
 
   # filebeat
   simplevm_client_filebeat:
@@ -36,7 +36,7 @@ services:
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
     networks:
-      - portal-production
+      - portal
 
 networks:
   portal:

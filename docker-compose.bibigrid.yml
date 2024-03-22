@@ -14,7 +14,7 @@ services:
       - ./logs/client:/code/simple_vm_client/log:rw
     command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
     networks:
-      - portal-production
+      - portal
 
   simplevm_client_redis:
     container_name: simplevm_client_redis
@@ -22,7 +22,7 @@ services:
     expose:
       - "6379"
     networks:
-      - portal-production
+      - portal
 
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
@@ -37,7 +37,7 @@ services:
     expose:
       - "8080"
     networks:
-      - portal-production
+      - portal
 
   # filebeat
   simplevm_filebeat:
@@ -50,7 +50,7 @@ services:
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
     networks:
-      - portal-production
+      - portal
 
 networks:
   portal:
@@ -58,4 +58,3 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440
-
