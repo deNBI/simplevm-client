@@ -39,12 +39,8 @@ services:
       - portal-production
 
 networks:
-  portal-production:
-    name:  portal-production
-    driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1440
-  default:
+  portal:
+    name:  portal
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440
