@@ -15,13 +15,15 @@ services:
     command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
     network_mode: host  # Use the host network namespace
 
+
   simplevm_client_redis:
     container_name: simplevm_client_redis
     network_mode: host  # Use the host network namespace
     image: redis:7.2.4
     expose:
       - "6379"
-
+    networks:
+      - portal
 
   simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
@@ -33,16 +35,11 @@ services:
       - ./logs:/usr/share/filebeat/log:ro
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: [sh, -c, "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat run -e"]
-    networks:
-      - portal-production
+
 
 networks:
-  portal-production:
-    name: portal-production
-    driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1440
-  default:
+  portal:
+    name: portal
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440

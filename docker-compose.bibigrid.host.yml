@@ -3,30 +3,30 @@ services:
   simplevm-client:
     container_name: simplevm-client
     image: quay.io/denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
-    ports:
-      - ${CLIENT_PORT}:9090
+    expose:
+      - "9090"  # Expose the service port
     env_file:
       - .env
     volumes:
-      -  ${client_PERSISTENT_PATH}/config.yml:/code/simple_vm_client/config.yml
-      -  ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/server.pem
-      -  ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/CA.pem
+      - ${client_PERSISTENT_PATH}/config.yml:/code/simple_vm_client/config.yml
+      - ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/server.pem
+      - ${client_PERSISTENT_PATH}/server.pem:/code/simple_vm_client/keys/CA.pem
       - ./logs/client:/code/simple_vm_client/log:rw
     command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
-    networks:
-      - portal
+    network_mode: host  # Use the host network namespace
 
   simplevm_client_redis:
     container_name: simplevm_client_redis
+    network_mode: host  # Use the host network namespace
     image: redis:7.2.4
     expose:
       - "6379"
-    networks:
-      - portal
 
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
     image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
+    network_mode: host  # Use the host network namespace
+
     volumes:
       - ./scripts/bibigrid/clear_keys_cron:/etc/crontabs/root
     env_file:
@@ -36,11 +36,9 @@ services:
       - server.enableHttp=true
     expose:
       - "8080"
-    networks:
-      - portal
 
-  # filebeat
-  simplevm_filebeat:
+  simplevm_client_filebeat:
+    container_name: simplevm_client_filebeat
     image: docker.elastic.co/beats/filebeat:8.12.2
     env_file:
       - .env
@@ -54,7 +52,7 @@ services:
 
 networks:
   portal:
-    name:   portal
+    name: portal
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1440

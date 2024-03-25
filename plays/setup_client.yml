@@ -148,6 +148,11 @@
       become: yes
       tags: [ 'never', 'host_network' ]
 
+    - name: Start client docker container in host network with bibigrid
+      shell: docker compose -f {{ client.REPO_PATH }}/docker-compose.bibigrid.host.yml up -d
+      become: yes
+      tags: [ 'never', 'host_network_bibigrid', ]
+
 
     - name: Start docker container with bibigrid
       shell: docker compose -f {{ client.REPO_PATH }}/docker-compose.bibigrid.yml up -d
