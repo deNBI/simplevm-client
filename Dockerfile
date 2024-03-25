@@ -1,5 +1,5 @@
-FROM python:3.11.4-buster
-
+FROM python:3.12.0
+RUN echo "deb https://deb.debian.org/debian/ stable main" > /etc/apt/sources.list
 RUN apt-get update -y \
     && apt-get install -y build-essential \
     && apt-get clean \
