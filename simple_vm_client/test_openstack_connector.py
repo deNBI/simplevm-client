@@ -1098,7 +1098,12 @@ class TestOpenStackConnector(unittest.TestCase):
         result_script = self.openstack_connector.create_add_keys_script(keys)
 
         # Assertions
-        expected_script_content = '#!/bin/bash\ndeclare -a keys_to_add=("key1" "key2" "key3" )\necho "Found keys: ${#keys_to_add[*]}"\nfor ix in ${!keys_to_add[*]}\ndo\n    printf "\\n%s" "${keys_to_add[$ix]}" >> /home/ubuntu/.ssh/authorized_keys\n\ndone\n'
+        expected_script_content = (
+            '#!/bin/bash\ndeclare -a keys_to_add=("key1" "key2" "key3" )'
+            '\necho "Found keys: ${#keys_to_add[*]}"\nfor ix in ${!keys_to_add[*]}'
+            '\ndo\n    printf "\\n%s" "${keys_to_add[$ix]}" >> /home/ubuntu/.ssh/authorized_keys'
+            "\n\ndone\n"
+        )
         expected_script_content = encodeutils.safe_encode(
             expected_script_content.encode("utf-8")
         )
@@ -2167,21 +2172,6 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_reboot_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
-    ):
-        self.openstack_connector.openstack_connection.compute.reboot_server.side_effect = ConflictException(
-            "Unit Test"
-        )
-        # Act
-        with self.assertRaises(OpenStackConflictException):
-            self.openstack_connector.reboot_server("some_openstack_id", "SOFT")
-        mock_logger_exception.assert_called_once_with(
-            "Reboot Server some_openstack_id failed!"
-        )
-
-    @patch.object(OpenStackConnector, "get_server")
     def test_reboot_soft_server(self, mock_get_server):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
@@ -2271,7 +2261,9 @@ class TestOpenStackConnector(unittest.TestCase):
             ignore_not_active=True,
             ignore_not_found=True,
         )
-        mock_get_flavor.assert_called_once_with(name_or_id=flavor_mock.id)
+        mock_get_flavor.assert_called_once_with(
+            name_or_id=flavor_mock.id, ignore_error=True
+        )
         mock_netcat.return_value = False  # Assuming SSH connection is successful
         # Act
         result_server = self.openstack_connector.get_server(openstack_id)
@@ -2335,7 +2327,7 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.reboot_server("some_openstack_id", "SOFT")
         mock_logger_exception.assert_called_once_with(
-            f"Reboot Server some_openstack_id failed!"
+            "Reboot Server some_openstack_id failed!"
         )
 
     def test_exist_server_true(self):
@@ -2514,7 +2506,6 @@ class TestOpenStackConnector(unittest.TestCase):
 
     def test_is_security_group_in_use_load_balancers(self):
         # Mock the network.load_balancers method to simulate load balancers associated with the security group
-        load_balancers = [{"id": "lb_id", "name": "lb_name"}]
         self.openstack_connector.openstack_connection.compute.servers.return_value = []
         self.openstack_connector.openstack_connection.network.ports.return_value = []
 
@@ -2668,7 +2659,7 @@ class TestOpenStackConnector(unittest.TestCase):
                 range_start=1000, range_stop=1000, openstack_id="test"
             )
         mock_logger_exception.assert_called_once_with(
-            f"Could not create security group rule for instance test"
+            "Could not create security group rule for instance test"
         )
 
     @patch.object(OpenStackConnector, "get_or_create_project_security_group")
@@ -2707,7 +2698,7 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         # Call the method
-        result = self.openstack_connector.open_port_range_for_vm_in_project(
+        self.openstack_connector.open_port_range_for_vm_in_project(
             range_start=1000,
             range_stop=2000,
             openstack_id=fake_server.id,

@@ -90,7 +90,6 @@ class Iface(object):
     def add_metadata_to_server(self, openstack_id, metadata):
         """
         Add metadata to a server.
-        Returns: List of flavor instances.
 
         Parameters:
          - openstack_id
@@ -978,7 +977,6 @@ class Client(Iface):
     def add_metadata_to_server(self, openstack_id, metadata):
         """
         Add metadata to a server.
-        Returns: List of flavor instances.
 
         Parameters:
          - openstack_id

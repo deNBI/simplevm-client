@@ -299,7 +299,6 @@ class Playbook(object):
         )
 
     def run_it(self) -> None:
-        logger.info("RUN ITTT")
         command_string = f"/usr/local/bin/ansible-playbook -v -i {self.inventory.name} {self.directory.name}/{self.playbook_exec_name}"
         command_string = shlex.split(command_string)  # type: ignore
         logger.info(f"Run Playbook for {self.playbook_exec_name} - [{command_string}]")
