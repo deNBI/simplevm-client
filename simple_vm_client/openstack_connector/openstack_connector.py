@@ -428,6 +428,14 @@ class OpenStackConnector:
         else:
             return keypair
 
+    def get_keypair_public_key_by_name(self, key_name: str):
+        logger.info(f"Get keypair: {key_name}")
+
+        key_pair: Keypair = self.openstack_connection.compute.find_keypair(key_name)
+        if key_pair:
+            return key_pair.public_key
+        return ""
+
     def delete_keypair(self, key_name: str) -> None:
         logger.info(f"Delete keypair: {key_name}")
 
