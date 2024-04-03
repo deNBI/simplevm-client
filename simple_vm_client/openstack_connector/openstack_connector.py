@@ -527,6 +527,7 @@ class OpenStackConnector:
         replace_inactive: bool = False,
         ignore_not_active: bool = False,
         ignore_not_found: bool = False,
+        replace_not_found: bool = False,
     ) -> Image:
         logger.info(f"Get Image {name_or_id}")
 
@@ -535,6 +536,14 @@ class OpenStackConnector:
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} not found!", name_or_id=name_or_id
             )
+        elif not image and replace_not_found:
+            for version in ["18.04", "20.04", "22.04", "1804", "2004", "2204"]:
+                if version in name_or_id:
+                    image = self.get_active_image_by_os_version(
+                        os_version=version, os_distro="ubuntu"
+                    )
+                    break
+
         elif image and image.status != "active" and replace_inactive:
             metadata = image.get("metadata", None)
             image_os_version = metadata.get("os_version", None)
@@ -1214,7 +1223,10 @@ class OpenStackConnector:
         key_name: str = None  # type: ignore
         try:
             image: Image = self.get_image(
-                name_or_id=image_name, replace_inactive=True, ignore_not_found=True
+                name_or_id=image_name,
+                replace_not_found=True,
+                replace_inactive=True,
+                ignore_not_found=True,
             )
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
