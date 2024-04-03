@@ -53,7 +53,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("  void delete_security_group_rule(string openstack_id)")
     print("  void delete_server(string openstack_id)")
     print(
-        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_keys, string research_environment,  additional_security_group_ids)"
+        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_keys, string research_environment,  additional_security_group_ids, string slurm_version)"
     )
     print("  bool is_bibigrid_available()")
     print("  void detach_ip_from_server(string server_id, string floating_ip)")
@@ -389,8 +389,8 @@ elif cmd == "delete_server":
     )
 
 elif cmd == "start_server":
-    if len(args) != 10:
-        print("start_server requires 10 args")
+    if len(args) != 11:
+        print("start_server requires 11 args")
         sys.exit(1)
     pp.pprint(
         client.start_server(
@@ -404,6 +404,7 @@ elif cmd == "start_server":
             eval(args[7]),
             args[8],
             eval(args[9]),
+            args[10],
         )
     )
 

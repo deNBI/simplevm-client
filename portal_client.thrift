@@ -443,6 +443,7 @@ service VirtualMachineService {
      9:list <string> additional_keys,
      10:optional string research_environment
      11:optional list<string> additional_security_group_ids,
+     12:optional string slurm_version,
 
     )
 

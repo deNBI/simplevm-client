@@ -202,6 +202,7 @@ class Iface(object):
         additional_keys,
         research_environment,
         additional_security_group_ids,
+        slurm_version,
     ):
         """
         Parameters:
@@ -215,6 +216,7 @@ class Iface(object):
          - additional_keys
          - research_environment
          - additional_security_group_ids
+         - slurm_version
 
         """
 
@@ -1458,6 +1460,7 @@ class Client(Iface):
         additional_keys,
         research_environment,
         additional_security_group_ids,
+        slurm_version,
     ):
         """
         Parameters:
@@ -1471,6 +1474,7 @@ class Client(Iface):
          - additional_keys
          - research_environment
          - additional_security_group_ids
+         - slurm_version
 
         """
         self.send_start_server(
@@ -1484,6 +1488,7 @@ class Client(Iface):
             additional_keys,
             research_environment,
             additional_security_group_ids,
+            slurm_version,
         )
         return self.recv_start_server()
 
@@ -1499,6 +1504,7 @@ class Client(Iface):
         additional_keys,
         research_environment,
         additional_security_group_ids,
+        slurm_version,
     ):
         self._oprot.writeMessageBegin("start_server", TMessageType.CALL, self._seqid)
         args = start_server_args()
@@ -1512,6 +1518,7 @@ class Client(Iface):
         args.additional_keys = additional_keys
         args.research_environment = research_environment
         args.additional_security_group_ids = additional_security_group_ids
+        args.slurm_version = slurm_version
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -4216,6 +4223,7 @@ class Processor(Iface, TProcessor):
                 args.additional_keys,
                 args.research_environment,
                 args.additional_security_group_ids,
+                args.slurm_version,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -9168,6 +9176,7 @@ class start_server_args(object):
      - additional_keys
      - research_environment
      - additional_security_group_ids
+     - slurm_version
 
     """
 
@@ -9183,6 +9192,7 @@ class start_server_args(object):
         additional_keys=None,
         research_environment=None,
         additional_security_group_ids=None,
+        slurm_version=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -9194,6 +9204,7 @@ class start_server_args(object):
         self.additional_keys = additional_keys
         self.research_environment = research_environment
         self.additional_security_group_ids = additional_security_group_ids
+        self.slurm_version = slurm_version
 
     def read(self, iprot):
         if (
@@ -9348,6 +9359,15 @@ class start_server_args(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.slurm_version = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -9468,6 +9488,14 @@ class start_server_args(object):
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
+        if self.slurm_version is not None:
+            oprot.writeFieldBegin("slurm_version", TType.STRING, 12)
+            oprot.writeString(
+                self.slurm_version.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.slurm_version
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -9559,6 +9587,13 @@ start_server_args.thrift_spec = (
         (TType.STRING, "UTF8", False),
         None,
     ),  # 11
+    (
+        12,
+        TType.STRING,
+        "slurm_version",
+        "UTF8",
+        None,
+    ),  # 12
 )
 
 
