@@ -90,6 +90,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     )
     print("  ClusterInfo get_cluster_info(string cluster_id)")
     print("   get_cluster_status(string cluster_id)")
+    print("  string get_keypair_public_key_by_name(string key_name)")
+    print("  void delete_keypair(string key_name)")
     print("  VM get_server(string openstack_id)")
     print("  void stop_server(string openstack_id)")
     print(
@@ -660,6 +662,26 @@ elif cmd == "get_cluster_status":
         sys.exit(1)
     pp.pprint(
         client.get_cluster_status(
+            args[0],
+        )
+    )
+
+elif cmd == "get_keypair_public_key_by_name":
+    if len(args) != 1:
+        print("get_keypair_public_key_by_name requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.get_keypair_public_key_by_name(
+            args[0],
+        )
+    )
+
+elif cmd == "delete_keypair":
+    if len(args) != 1:
+        print("delete_keypair requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.delete_keypair(
             args[0],
         )
     )

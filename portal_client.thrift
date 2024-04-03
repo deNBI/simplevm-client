@@ -587,7 +587,9 @@ service VirtualMachineService {
 
 	map<string,string>get_cluster_status(1:string cluster_id) throws(1:ClusterNotFoundException c)
 
+	string get_keypair_public_key_by_name(1:string key_name)
 
+	void delete_keypair(1:string key_name)
 
 
 	/**
