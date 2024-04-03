@@ -356,6 +356,7 @@ class VirtualMachineHandler(Iface):
         additional_keys: list[str],
         research_environment: str,
         additional_security_group_ids: list[str],
+        slurm_version: str = None,
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -376,6 +377,7 @@ class VirtualMachineHandler(Iface):
             additional_keys=additional_keys,
             research_environment_metadata=research_environment_metadata,
             additional_security_group_ids=additional_security_group_ids,
+            slurm_version=slurm_version,
         )
 
     def start_server_with_custom_key(
