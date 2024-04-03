@@ -501,12 +501,10 @@ class OpenStackConnector:
     def get_active_image_by_os_version(self, os_version: str, os_distro: str) -> Image:
         logger.info(f"Get active Image by os-version: {os_version}")
         images = self.openstack_connection.list_images()
-        for img in images:
-            image: Image = img
-            metadata = image["metadata"]
-            image_os_version = metadata.get("os_version", None)
-            image_os_distro = metadata.get("os_distro", None)
-            base_image_ref = metadata.get("base_image_ref", None)
+        for image in images:
+            image_os_version = image.get("os_version", None)
+            image_os_distro = image.get("os_distro", None)
+            base_image_ref = image.get("properties", {}).get("base_image_ref", None)
             if (
                 os_version == image_os_version
                 and image.status == "active"
@@ -521,13 +519,35 @@ class OpenStackConnector:
             name_or_id="",
         )
 
+    def get_active_image_by_os_version_and_slurm_version(
+        self, os_version, os_distro, slurm_version
+    ) -> Image:
+        logger.info(
+            f"Get active Image by os-version: {os_version} and slurm_version {slurm_version}"
+        )
+        images = self.openstack_connection.list_images()
+        backup_image = None
+        for image in images:
+            if image and image.status == "active":
+                image_os_version = image.get("os_version", None)
+                image_os_distro = image.get("os_distro", None)
+                properties = image.get("properties", None)
+                if os_version == image_os_version and "worker" in image.get("tags", []):
+                    if os_distro and os_distro == image_os_distro:
+                        backup_image = image
+                        if properties.get("slurm_version" == slurm_version):
+                            return image
+
+        return backup_image
+
     def get_image(
         self,
         name_or_id: str,
         replace_inactive: bool = False,
         ignore_not_active: bool = False,
-        ignore_not_found: bool = False,
         replace_not_found: bool = False,
+        ignore_not_found: bool = False,
+        slurm_version: str = None,
     ) -> Image:
         logger.info(f"Get Image {name_or_id}")
 
@@ -536,21 +556,33 @@ class OpenStackConnector:
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} not found!", name_or_id=name_or_id
             )
-        elif not image and replace_not_found:
-            for version in ["18.04", "20.04", "22.04", "1804", "2004", "2204"]:
+        elif image is None and replace_not_found:
+            for version in ["20.04", "22.04", "2004", "2204"]:
                 if version in name_or_id:
-                    image = self.get_active_image_by_os_version(
-                        os_version=version, os_distro="ubuntu"
-                    )
-                    break
+                    if slurm_version:
+                        image = self.get_active_image_by_os_version_and_slurm_version(
+                            os_version=version,
+                            os_distro="ubuntu",
+                            slurm_version=slurm_version,
+                        )
+                    else:
+                        image = self.get_active_image_by_os_version(
+                            os_version=version, os_distro="ubuntu"
+                        )
 
         elif image and image.status != "active" and replace_inactive:
-            metadata = image.get("metadata", None)
-            image_os_version = metadata.get("os_version", None)
-            image_os_distro = metadata.get("os_distro", None)
-            image = self.get_active_image_by_os_version(
-                os_version=image_os_version, os_distro=image_os_distro
-            )
+            image_os_version = image["os_version"]
+            image_os_distro = image["os_distro"]
+            if slurm_version:
+                image = self.get_active_image_by_os_version_and_slurm_version(
+                    os_version=image_os_version,
+                    os_distro=image_os_distro,
+                    slurm_version=slurm_version,
+                )
+            else:
+                image = self.get_active_image_by_os_version(
+                    os_version=image_os_version, os_distro=image_os_distro
+                )
         elif image and image.status != "active" and not ignore_not_active:
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} found but not active!",
@@ -1217,16 +1249,19 @@ class OpenStackConnector:
         volume_ids_path_attach: Union[list[dict[str, str]], None] = None,
         additional_keys: Union[list[str], None] = None,
         additional_security_group_ids: Union[list[str], None] = None,
+        slurm_version: str = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
         key_name: str = None  # type: ignore
         try:
+
             image: Image = self.get_image(
                 name_or_id=image_name,
-                replace_not_found=True,
                 replace_inactive=True,
                 ignore_not_found=True,
+                replace_not_found=True,
+                slurm_version=slurm_version,
             )
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
