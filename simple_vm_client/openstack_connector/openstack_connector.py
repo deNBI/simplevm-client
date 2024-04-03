@@ -1213,7 +1213,9 @@ class OpenStackConnector:
 
         key_name: str = None  # type: ignore
         try:
-            image: Image = self.get_image(name_or_id=image_name)
+            image: Image = self.get_image(
+                name_or_id=image_name, replace_inactive=True, ignore_not_found=True
+            )
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
             key_name = f"{servername}_{metadata['project_name']}"
