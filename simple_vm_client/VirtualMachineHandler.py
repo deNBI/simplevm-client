@@ -99,6 +99,14 @@ class VirtualMachineHandler(Iface):
     def get_gateway_ip(self) -> dict[str, str]:
         return self.openstack_connector.get_gateway_ip()
 
+    def get_keypair_public_key_by_name(self, key_name: str):
+        return self.openstack_connector.get_keypair_public_key_by_name(
+            key_name=key_name
+        )
+
+    def delete_keypair(self, key_name: str):
+        return self.openstack_connector.delete_keypair(key_name=key_name)
+
     def get_calculation_values(self) -> dict[str, str]:
         val = self.openstack_connector.get_calculation_values()
         return val
@@ -419,7 +427,6 @@ class VirtualMachineHandler(Iface):
         )
         gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
         if self.openstack_connector.netcat(host=gateway_ip, port=port):
-
             cloud_site = self.openstack_connector.CLOUD_SITE
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,

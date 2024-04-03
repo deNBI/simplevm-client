@@ -1,7 +1,11 @@
 import requests
 import yaml
 
-from simple_vm_client.ttypes import ClusterInfo, ClusterInstance
+from simple_vm_client.ttypes import (
+    ClusterInfo,
+    ClusterInstance,
+    ClusterNotFoundException,
+)
 from simple_vm_client.util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
@@ -94,8 +98,10 @@ class BibigridConnector:
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         infos: list[dict[str, str]] = self.get_clusters_info()
+        if infos == "No BiBiGrid cluster found!":
+            raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
         for info in infos:
-            if info["cluster-id"] == cluster_id:
+            if info.get("cluster-id", "") == cluster_id:
                 cluster_info = ClusterInfo(
                     group_id=info["group-id"],
                     network_id=info["network-id"],
@@ -109,7 +115,7 @@ class BibigridConnector:
                 logger.info(f"Cluster {cluster_id} info: {cluster_info} ")
 
                 return cluster_info
-        return None
+        raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
 
     def get_clusters_info(self) -> list[dict[str, str]]:
         logger.info("Get clusters info")
@@ -126,7 +132,7 @@ class BibigridConnector:
         return infos
 
     def is_bibigrid_available(self) -> bool:
-        logger.info(f"Checking if Bibigrid is available")
+        logger.info("Checking if Bibigrid is available")
 
         if not self._BIBIGRID_EP:
             logger.info("Bibigrid Url is not set")

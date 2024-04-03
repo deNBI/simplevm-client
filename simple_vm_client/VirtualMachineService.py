@@ -474,6 +474,20 @@ class Iface(object):
 
         """
 
+    def get_keypair_public_key_by_name(self, key_name):
+        """
+        Parameters:
+         - key_name
+
+        """
+
+    def delete_keypair(self, key_name):
+        """
+        Parameters:
+         - key_name
+
+        """
+
     def get_server(self, openstack_id):
         """
         Get a Server.
@@ -2633,6 +2647,73 @@ class Client(Iface):
             "get_cluster_status failed: unknown result",
         )
 
+    def get_keypair_public_key_by_name(self, key_name):
+        """
+        Parameters:
+         - key_name
+
+        """
+        self.send_get_keypair_public_key_by_name(key_name)
+        return self.recv_get_keypair_public_key_by_name()
+
+    def send_get_keypair_public_key_by_name(self, key_name):
+        self._oprot.writeMessageBegin(
+            "get_keypair_public_key_by_name", TMessageType.CALL, self._seqid
+        )
+        args = get_keypair_public_key_by_name_args()
+        args.key_name = key_name
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_keypair_public_key_by_name(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_keypair_public_key_by_name_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "get_keypair_public_key_by_name failed: unknown result",
+        )
+
+    def delete_keypair(self, key_name):
+        """
+        Parameters:
+         - key_name
+
+        """
+        self.send_delete_keypair(key_name)
+        self.recv_delete_keypair()
+
+    def send_delete_keypair(self, key_name):
+        self._oprot.writeMessageBegin("delete_keypair", TMessageType.CALL, self._seqid)
+        args = delete_keypair_args()
+        args.key_name = key_name
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_delete_keypair(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = delete_keypair_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        return
+
     def get_server(self, openstack_id):
         """
         Get a Server.
@@ -3498,6 +3579,10 @@ class Processor(Iface, TProcessor):
         self._processMap["add_cluster_machine"] = Processor.process_add_cluster_machine
         self._processMap["get_cluster_info"] = Processor.process_get_cluster_info
         self._processMap["get_cluster_status"] = Processor.process_get_cluster_status
+        self._processMap["get_keypair_public_key_by_name"] = (
+            Processor.process_get_keypair_public_key_by_name
+        )
+        self._processMap["delete_keypair"] = Processor.process_delete_keypair
         self._processMap["get_server"] = Processor.process_get_server
         self._processMap["stop_server"] = Processor.process_stop_server
         self._processMap["create_snapshot"] = Processor.process_create_snapshot
@@ -4890,6 +4975,56 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("get_cluster_status", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_get_keypair_public_key_by_name(self, seqid, iprot, oprot):
+        args = get_keypair_public_key_by_name_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_keypair_public_key_by_name_result()
+        try:
+            result.success = self._handler.get_keypair_public_key_by_name(args.key_name)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("get_keypair_public_key_by_name", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_delete_keypair(self, seqid, iprot, oprot):
+        args = delete_keypair_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = delete_keypair_result()
+        try:
+            self._handler.delete_keypair(args.key_name)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("delete_keypair", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -14860,6 +14995,308 @@ get_cluster_status_result.thrift_spec = (
         None,
     ),  # 1
 )
+
+
+class get_keypair_public_key_by_name_args(object):
+    """
+    Attributes:
+     - key_name
+
+    """
+
+    def __init__(
+        self,
+        key_name=None,
+    ):
+        self.key_name = key_name
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.key_name = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_keypair_public_key_by_name_args")
+        if self.key_name is not None:
+            oprot.writeFieldBegin("key_name", TType.STRING, 1)
+            oprot.writeString(
+                self.key_name.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.key_name
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_keypair_public_key_by_name_args)
+get_keypair_public_key_by_name_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "key_name",
+        "UTF8",
+        None,
+    ),  # 1
+)
+
+
+class get_keypair_public_key_by_name_result(object):
+    """
+    Attributes:
+     - success
+
+    """
+
+    def __init__(
+        self,
+        success=None,
+    ):
+        self.success = success
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_keypair_public_key_by_name_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRING, 0)
+            oprot.writeString(
+                self.success.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.success
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_keypair_public_key_by_name_result)
+get_keypair_public_key_by_name_result.thrift_spec = (
+    (
+        0,
+        TType.STRING,
+        "success",
+        "UTF8",
+        None,
+    ),  # 0
+)
+
+
+class delete_keypair_args(object):
+    """
+    Attributes:
+     - key_name
+
+    """
+
+    def __init__(
+        self,
+        key_name=None,
+    ):
+        self.key_name = key_name
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.key_name = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("delete_keypair_args")
+        if self.key_name is not None:
+            oprot.writeFieldBegin("key_name", TType.STRING, 1)
+            oprot.writeString(
+                self.key_name.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.key_name
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(delete_keypair_args)
+delete_keypair_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "key_name",
+        "UTF8",
+        None,
+    ),  # 1
+)
+
+
+class delete_keypair_result(object):
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("delete_keypair_result")
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(delete_keypair_result)
+delete_keypair_result.thrift_spec = ()
 
 
 class get_server_args(object):
