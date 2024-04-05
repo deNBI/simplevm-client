@@ -11,6 +11,9 @@ from typing import Union
 
 import sympy
 import yaml
+from keystoneauth1 import session
+from keystoneauth1.identity import v3
+from keystoneauth1.identity.v3 import application_credential
 from openstack import connection
 from openstack.block_storage.v2.snapshot import Snapshot
 from openstack.block_storage.v3.volume import Volume
@@ -83,24 +86,42 @@ class OpenStackConnector:
         self.load_config_yml(config_file)
 
         try:
+            # Create an authentication session
+
             if self.USE_APPLICATION_CREDENTIALS:
+
                 logger.info("Using Application Credentials for OpenStack Connection")
-                self.openstack_connection = connection.Connection(
+                # Create an authentication session
+                auth = application_credential.ApplicationCredential(
                     auth_url=self.AUTH_URL,
                     application_credential_id=self.APPLICATION_CREDENTIAL_ID,
                     application_credential_secret=self.APPLICATION_CREDENTIAL_SECRET,
-                    auth_type="v3applicationcredential",
                 )
+
+                sess = session.Session(auth=auth)
+
+                # Configure session settings as needed
+                sess.session.connections_pool = True
+                sess.session.connection_pool_size = 32
+
+                # Create the Connection object with the session
+                self.openstack_connection = connection.Connection(session=sess)
+
             else:
                 logger.info("Using User Credentials for OpenStack Connection")
-
-                self.openstack_connection = connection.Connection(
+                auth = v3.Password(
+                    auth_url=self.AUTH_URL,
                     username=self.USERNAME,
                     password=self.PASSWORD,
-                    auth_url=self.AUTH_URL,
                     project_name=self.PROJECT_NAME,
                     user_domain_name=self.USER_DOMAIN_NAME,
                     project_domain_id=self.PROJECT_DOMAIN_ID,
+                )
+                sess = session.Session(auth=auth)
+                sess.session.connections_pool = True
+                sess.session.connection_pool_size = 32  # Number of connections to pool
+                self.openstack_connection = connection.Connection(
+                    session=sess,
                     compute_api_version=self.NOVA_MICROVERSION,
                 )
             self.openstack_connection.authorize()
