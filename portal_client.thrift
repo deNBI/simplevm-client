@@ -604,6 +604,12 @@ service VirtualMachineService {
 
 	 throws (1:ServerNotFoundException e),
 
+	VM get_server_by_unique_name(
+
+	/** Id of the server.*/
+	1:string unique_name)
+
+	 throws (1:ServerNotFoundException e),
 
 	/**
 	 * Stop a Server.
