@@ -9,6 +9,9 @@ services:
       - ${CLIENT_PORT}:9090
     env_file:
       - .env.dev.giessen
+    environment:
+      - TERM=xterm-256color
+    tty: true
     volumes:
       - ./simple_vm_client/config/config_giessen.yml:/code/simple_vm_client/config.yml
       - ./simple_vm_client/keys/localhost/server.pem:/code/simple_vm_client/keys/server.pem

@@ -1081,6 +1081,40 @@ class OpenStackConnector:
                 message=f"Error when setting server {openstack_id} metadata --> {metadata}! - {e}"
             )
 
+    def get_server_by_unique_name(self, unique_name: str) -> Server:
+        try:
+            logger.info(f"Get Server by unique_name: {unique_name}")
+            server: Server = self.openstack_connection.get_server(
+                name_or_id=unique_name
+            )
+            if server is None:
+                logger.exception(f"Instance {unique_name} not found")
+                raise ServerNotFoundException(
+                    message=f"Instance {unique_name} not found",
+                    name_or_id=unique_name,
+                )
+            if server.vm_state == VmStates.ACTIVE.value:
+                ssh_port, udp_port = self._calculate_vm_ports(server=server)
+
+                if not self.netcat(host=self.GATEWAY_IP, port=ssh_port):
+                    server.task_state = VmTaskStates.CHECKING_SSH_CONNECTION.value
+
+            server.image = self.get_image(
+                name_or_id=server.image["id"],
+                ignore_not_active=True,
+                ignore_not_found=True,
+            )
+
+            server.flavor = self.get_flavor(
+                name_or_id=server.flavor["id"], ignore_error=True
+            )
+
+            return server
+        except OpenStackCloudException as e:
+            raise DefaultException(
+                message=f"Error when getting server {unique_name}! - {e}"
+            )
+
     def get_server(self, openstack_id: str) -> Server:
         try:
             logger.info(f"Get Server by id: {openstack_id}")
@@ -1323,6 +1357,7 @@ class OpenStackConnector:
             )
 
             openstack_id: str = server["id"]
+            logger.info(f"Started Server {servername} with id - {openstack_id}")
             self.delete_keypair(key_name=key_name)
 
             return openstack_id
