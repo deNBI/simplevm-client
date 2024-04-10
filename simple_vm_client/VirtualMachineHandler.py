@@ -142,6 +142,14 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id, metadata=metadata
         )
 
+    def get_server_by_unique_name(self, unique_name: str) -> VM:
+        server = self.openstack_connector.get_server_by_unique_name(
+            unique_name=unique_name
+        )
+        server = self.forc_connector.get_playbook_status(server=server)
+        server = thrift_converter.os_to_thrift_server(openstack_server=server)
+        return server
+
     def get_server(self, openstack_id: str) -> VM:
         server = self.openstack_connector.get_server(openstack_id=openstack_id)
         server = self.forc_connector.get_playbook_status(server=server)

@@ -15,4 +15,5 @@ pyyaml==6.0.1
 pre-commit==3.7.0
 types-PyYAML==6.0.12.20240311
 sympy==1.12
-types-redis==4.6.0.20240311
+colorama==0.4.6
+types-redis==4.6.0.20240409
