@@ -591,7 +591,7 @@ service VirtualMachineService {
 	string get_keypair_public_key_by_name(1:string key_name)
 
 	void delete_keypair(1:string key_name)
-
+    void add_default_security_groups_to_server(1:string openstack_id) throws  (1:ServerNotFoundException e)
 
 	/**
 	 * Get a Server.
@@ -654,7 +654,7 @@ service VirtualMachineService {
      */
     map<string,string> get_limits()
 
-     map<string,string> start_cluster(1:string public_key,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:string user)
+     map<string,string> start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:string user)
 
      map<string,string> terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c)
 

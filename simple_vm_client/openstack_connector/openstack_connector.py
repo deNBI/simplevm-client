@@ -8,6 +8,7 @@ import urllib
 import urllib.parse
 from contextlib import closing
 from typing import Union
+from uuid import uuid4
 
 import sympy
 import yaml
@@ -787,6 +788,14 @@ class OpenStackConnector:
             )
         return sec
 
+    def add_default_security_groups_to_server(self, openstack_id):
+        logger.info(f"Add default Security Group Rule to vm -- {openstack_id}")
+        server = self.get_server(openstack_id=openstack_id)
+        sec_group = self._get_default_security_groups()
+        self.openstack_connection.add_server_security_groups(
+            server=server, security_groups=sec_group
+        )
+
     def delete_security_group_rule(self, openstack_id):
         logger.info(f"Delete Security Group Rule -- {openstack_id}")
         deleted = self.openstack_connection.delete_security_group_rule(
@@ -1308,7 +1317,13 @@ class OpenStackConnector:
     ) -> str:
         logger.info(f"Start Server {servername}")
 
-        key_name: str = None  # type: ignore
+        key_name: str = (
+            str(uuid4())[0:3]
+            + "_"
+            + servername[:10]
+            + "_"
+            + metadata.get("project_name", "")
+        )
         try:
 
             image: Image = self.get_image(
@@ -1320,7 +1335,6 @@ class OpenStackConnector:
             )
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
-            key_name = f"{servername}_{metadata['project_name']}"
             logger.info(f"Key name {key_name}")
             project_name = metadata.get("project_name")
             project_id = metadata.get("project_id")

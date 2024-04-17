@@ -168,7 +168,7 @@ class BibigridConnector:
 
     def start_cluster(
         self,
-        public_key: str,
+        public_keys: list[str],
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         user: str,
@@ -186,7 +186,7 @@ class BibigridConnector:
         body = {
             "mode": "openstack",
             "subnet": self._SUB_NETWORK,
-            "sshPublicKeys": [public_key],
+            "sshPublicKeys": public_keys,
             "user": user,
             "sshUser": "ubuntu",
             "masterInstance": master_instance,
