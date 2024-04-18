@@ -321,6 +321,11 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id
         )
 
+    def add_default_security_groups_to_server(self, openstack_id):
+        return self.openstack_connector.add_default_security_groups_to_server(
+            openstack_id=openstack_id
+        )
+
     def open_port_range_for_vm_in_project(
         self,
         range_start,
@@ -462,13 +467,13 @@ class VirtualMachineHandler(Iface):
 
     def start_cluster(
         self,
-        public_key: str,
+        public_keys: list[str],
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         user: str,
     ) -> dict[str, str]:
         return self.bibigrid_connector.start_cluster(
-            public_key=public_key,
+            public_keys=public_keys,
             master_instance=master_instance,
             worker_instances=worker_instances,
             user=user,
