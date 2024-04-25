@@ -1,6 +1,6 @@
 ---
 - name: Install Docker on Ubuntu
-  hosts: gateway
+  hosts: all
   become: true
   vars:
     arch_mapping:  # Map ansible architecture {{ ansible_architecture }} names to Docker's architecture names
