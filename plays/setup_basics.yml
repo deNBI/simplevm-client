@@ -5,11 +5,6 @@
     - general_variables.yml
 
 
-  roles:
-    - role: geerlingguy.docker
-      tags: always
-
-
   pre_tasks:
     - name: Verify Ansible version
       assert:
@@ -37,18 +32,6 @@
       become: no
       tags: always
 
-    - name: Import deadsnake PPA for python3.8
-      ansible.builtin.apt_repository:
-        repo: ppa:deadsnakes/ppa
-        update_cache: yes
-      tags: always
-
-    - name: Install python3.8
-      apt:
-        state: latest
-        name: python3.8
-      tags: always
-
     - name: Install python3-pip
       apt:
         state: latest
@@ -57,7 +40,7 @@
 
     - name: Install list of packages
       apt:
-        name:  ['libffi-dev', 'libssl-dev', 'jq', 'python3-setuptools']
+        name: [ 'libffi-dev', 'libssl-dev', 'jq', 'python3-setuptools' ]
         state: present
         update_cache: yes
       tags: always
