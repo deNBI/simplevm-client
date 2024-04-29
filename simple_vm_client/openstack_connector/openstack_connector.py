@@ -1091,17 +1091,15 @@ class OpenStackConnector:
             )
 
     def get_server_by_unique_name(self, unique_name: str) -> Server:
-        try:
-            logger.info(f"Get Server by unique_name: {unique_name}")
-            server: Server = self.openstack_connection.get_server(
-                name_or_id=unique_name
-            )
-            if server is None:
-                logger.exception(f"Instance {unique_name} not found")
-                raise ServerNotFoundException(
-                    message=f"Instance {unique_name} not found",
-                    name_or_id=unique_name,
-                )
+        logger.info(f"Get Server by unique_name: {unique_name}")
+
+        filters = {"name": unique_name}
+
+        servers = list(self.openstack_connection.list_servers(filters=filters))
+        logger.info(f"Found {len(servers)} with name {unique_name}")
+        if len(servers) == 1:
+            server = list(servers)[0]
+            logger.info(server)
             if server.vm_state == VmStates.ACTIVE.value:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
@@ -1117,11 +1115,16 @@ class OpenStackConnector:
             server.flavor = self.get_flavor(
                 name_or_id=server.flavor["id"], ignore_error=True
             )
-
             return server
-        except OpenStackCloudException as e:
+        elif len(servers) == 0:
+            logger.exception(f"Instance {unique_name} not found")
+            raise ServerNotFoundException(
+                message=f"Instance {unique_name} not found",
+                name_or_id=unique_name,
+            )
+        else:
             raise DefaultException(
-                message=f"Error when getting server {unique_name}! - {e}"
+                message=f"Error when getting server {unique_name}! - multiple entries"
             )
 
     def get_server(self, openstack_id: str) -> Server:
