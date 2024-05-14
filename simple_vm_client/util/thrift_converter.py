@@ -27,6 +27,8 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
         created_at=openstack_image.created_at,
         updated_at=openstack_image.updated_at,
         os_version=openstack_image.get("os_version", ""),
+        os_distro=openstack_image.get("os_distro", ""),
+        title=properties.get("title", ""),
         openstack_id=openstack_image.id,
         description=properties.get("description", ""),
         tags=openstack_image.get("tags", []),
