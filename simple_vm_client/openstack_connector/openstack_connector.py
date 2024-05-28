@@ -1214,8 +1214,12 @@ class OpenStackConnector:
                     and not self.is_security_group_in_use(security_group_id=sec.id)
                 ):
                     logger.info(f"Delete security group {sec}")
-
-                    self.openstack_connection.delete_security_group(sec)
+                    try:
+                        self.openstack_connection.delete_security_group(sec)
+                    except ResourceNotFound:
+                        logger.info(
+                            f"Could not remoeve security group {sec.id} from server"
+                        )
 
     def _validate_server_for_deletion(self, server: Server) -> None:
         task_state = server.task_state
