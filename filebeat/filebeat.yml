@@ -9,8 +9,9 @@ output.elasticsearch:
     username: '${ELASTIC_USER}'
     password: '${ELASTIC_PASSWORD}'
     ssl:
-      verification_mode: none
-    timeout: 15
+      verification_mode: full
+    timeout: 60
+    bulk_max_size: 50
     headers:
       HOST: '${HOST}'
 
