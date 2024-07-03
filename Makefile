@@ -70,5 +70,11 @@ check_local_config: ## Check if your config_local.yml contains every key set in 
 check_manual_config: ## Check if your specified config_*.yml contains every key set in config.yml
 	python3 check_env.py VirtualMachineService/config/config.yml VirtualMachineService/config/$(config-file) config
 
+NUM_REQUESTS ?= 600
+MAX_CONCURRENT_REQUESTS ?= 32
+VOLUME_ID ?=
+
+run_benchmark:
+	docker exec -i simplevm-client python3 benchmark/test_service.py --volume-id $(VOLUME_ID) --num-requests $(NUM_REQUESTS) --max-concurrent-requests $(MAX_CONCURRENT_REQUESTS)
 
 .PHONY: help lint  docs thrift_py

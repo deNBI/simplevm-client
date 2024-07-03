@@ -17,3 +17,4 @@ types-PyYAML==6.0.12.20240311
 sympy==1.12.1
 colorama==0.4.6
 types-redis==4.6.0.20240425
+gevent
