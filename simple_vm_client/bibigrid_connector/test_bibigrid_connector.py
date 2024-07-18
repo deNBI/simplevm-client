@@ -6,7 +6,11 @@ from unittest.mock import MagicMock, Mock, patch
 import requests
 
 from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
-from simple_vm_client.ttypes import ClusterInfo, ClusterInstance
+from simple_vm_client.ttypes import (
+    ClusterInfo,
+    ClusterInstance,
+    ClusterNotFoundException,
+)
 
 HOST = "example.com"
 PORT = 8080
@@ -200,7 +204,7 @@ class TestBibigridConnector(unittest.TestCase):
 
         # Call the method to test
         result = self.connector.start_cluster(
-            public_key=public_key,
+            public_keys=[public_key],
             master_instance=DEFAULT_MASTER_INSTANCE,
             worker_instances=DEFAULT_WORKER_INSTANCES,
             user=user,
@@ -271,13 +275,16 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertEqual(result, [{"cluster-id": "fake_cluster_id"}])
         mock_logger_info.assert_called_once_with("Get clusters info")
 
-    @patch.object(BibigridConnector, "get_clusters_info")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.get_clusters_info"
+    )
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     def test_get_cluster_info_none(self, mock_logger_info, mock_get_clusters_info):
         mock_get_clusters_info.return_value = []
-        result = self.connector.get_cluster_info("fake_cluster_id")
+        with self.assertRaises(ClusterNotFoundException):
+            self.connector.get_cluster_info("fake_cluster_id")
+
         mock_logger_info.assert_any_call("Get Cluster info from fake_cluster_id")
-        self.assertIsNone(result)
 
     @patch.object(BibigridConnector, "get_clusters_info")
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")

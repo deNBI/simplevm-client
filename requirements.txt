@@ -18,3 +18,4 @@ sympy==1.13.0
 colorama==0.4.6
 types-redis==4.6.0.20240425
 gevent
+pytest

@@ -520,18 +520,27 @@ class OpenStackConnector:
         servers: list[Server] = self.openstack_connection.list_servers(filters=filters)
         return servers
 
-    def get_active_image_by_os_version(self, os_version: str, os_distro: str) -> Image:
+    def get_active_image_by_os_version(
+        self, os_version: str, os_distro: Union[str, None]
+    ) -> Image:
         logger.info(f"Get active Image by os-version: {os_version}")
         images = self.openstack_connection.list_images()
         for image in images:
+
             image_os_version = image.get("os_version", None)
             image_os_distro = image.get("os_distro", None)
-            base_image_ref = image.get("properties", {}).get("base_image_ref", None)
+            image_properties = image.get("properties", None)
+            if image_properties:
+
+                base_image_ref = image_properties.get("base_image_ref", None)
+            else:
+                base_image_ref = None
             if (
                 os_version == image_os_version
                 and image.status == "active"
                 and base_image_ref is None
             ):
+
                 if os_distro and os_distro == image_os_distro:
                     return image
                 elif os_distro is None:
