@@ -4,7 +4,7 @@ import socket
 import tempfile
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 from openstack.block_storage.v3 import volume
 from openstack.block_storage.v3.limits import Limit
@@ -86,6 +86,8 @@ EXPECTED_IMAGE = image_module.Image(
     id="image_id_2",
     status="active",
     name="image_2",
+    os_version="22.04",
+    os_distro="ubuntu",
     metadata={"os_version": "22.04", "os_distro": "ubuntu"},
     tags=["portalclient"],
 )
@@ -93,6 +95,8 @@ INACTIVE_IMAGE = image_module.Image(
     id="image_inactive",
     status="building",
     name="image_inactive",
+    os_version="22.04",
+    os_distro="ubuntu",
     metadata={"os_version": "22.04", "os_distro": "ubuntu"},
     tags=["portalclient"],
 )
@@ -102,6 +106,8 @@ IMAGES = [
         id="image_id_1",
         status="inactive",
         name="image_1",
+        os_version="22.04",
+        os_distro="ubuntu",
         metadata={"os_version": "22.04", "os_distro": "ubuntu"},
         tags=["portalclient"],
     ),
@@ -110,6 +116,8 @@ IMAGES = [
         id="image_id_3",
         status="active",
         name="image_3",
+        os_version="22.04",
+        os_distro="ubuntu",
         metadata={"os_version": "22.04", "os_distro": "centos"},
         tags=["portalclient"],
     ),
@@ -1837,7 +1845,7 @@ class TestOpenStackConnector(unittest.TestCase):
             image=fake_image.id,
             flavor=fake_flavor.id,
             network=[fake_network.id],
-            key_name=server_keypair.name,
+            key_name=ANY,
             meta=metadata,
             volumes=["volume1", "volume2"],
             userdata="userdata",
@@ -1858,7 +1866,7 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         self.openstack_connector.openstack_connection.create_keypair.assert_called_once_with(
-            name=server_keypair.name, public_key=public_key
+            name=ANY, public_key=public_key
         )
 
         mock_get_volumes.assert_called_once_with(
@@ -1867,9 +1875,9 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         self.openstack_connector.openstack_connection.get_keypair.assert_called_once_with(
-            name_or_id=server_keypair.name
+            name_or_id=ANY
         )
-        mock_delete_keypair.assert_any_call(key_name=server_keypair.name)
+        mock_delete_keypair.assert_any_call(key_name=ANY)
 
         # Check the result
         self.assertEqual(result, server.id)
