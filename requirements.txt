@@ -16,6 +16,6 @@ pre-commit==3.7.1
 types-PyYAML==6.0.12.20240724
 sympy==1.13.1
 colorama==0.4.6
-types-redis==4.6.0.20240425
+types-redis==4.6.0.20240726
 gevent
 pytest
