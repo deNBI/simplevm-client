@@ -481,6 +481,20 @@ class OpenStackConnector:
         key_script = text
         return key_script
 
+    def create_save_metadata_auth_token_script(self, token: str) -> str:
+        logger.info("create save metadata auth token script")
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        metadata_token_script = os.path.join(
+            file_dir, "scripts/bash/save_metadata_auth_token.sh"
+        )
+
+        with open(metadata_token_script, "r") as file:
+            text = file.read()
+            text = text.replace("METADATA_AUTH_TOKEN", token)
+            text = encodeutils.safe_encode(text.encode("utf-8"))
+        metadata_token_script = text
+        return metadata_token_script
+
     def netcat(self, host: str, port: int) -> bool:
         logger.info(f"Checking SSH Connection {host}:{port}")
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
@@ -1290,13 +1304,22 @@ class OpenStackConnector:
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
+        auth_token=None,
     ) -> str:
         unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
             unlock_ubuntu_user_script.encode("utf-8")
         )
         init_script = unlock_ubuntu_user_script_encoded
-
+        if auth_token:
+            save_metadata_token_script = self.create_save_metadata_auth_token_script(
+                token=auth_token
+            )
+            init_script = (
+                init_script
+                + encodeutils.safe_encode("\n".encode("utf-8"))
+                + save_metadata_token_script
+            )
         if additional_keys:
             add_key_script = self.create_add_keys_script(keys=additional_keys)
             init_script = (
@@ -1330,6 +1353,7 @@ class OpenStackConnector:
         additional_keys: Union[list[str], None] = None,
         additional_security_group_ids: Union[list[str], None] = None,
         slurm_version: str = None,
+        auth_token: str = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1372,6 +1396,7 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
+                auth_token=auth_token,
             )
             logger.info(f"Starting Server {servername}...")
             server = self.openstack_connection.create_server(
@@ -1455,6 +1480,7 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
         additional_keys: list[str] = None,  # type: ignore
         additional_security_group_ids=None,  # type: ignore
+        auth_token: str = None,
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1488,6 +1514,7 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
+                auth_token=auth_token,
             )
             server = self.openstack_connection.create_server(
                 name=servername,

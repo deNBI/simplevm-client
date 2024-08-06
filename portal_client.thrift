@@ -210,6 +210,10 @@ struct PlaybookResult {
     3: required string stderr
 }
 
+exception MetadataServerNotAvailableException {
+    1: string message
+}
+
 exception ResourceNotFoundException {
     /** Name already used. */
     1: string message
@@ -452,6 +456,7 @@ service VirtualMachineService {
      10:optional string research_environment
      11:optional list<string> additional_security_group_ids,
      12:optional string slurm_version,
+     13:optional string auth_token,
 
     )
 
@@ -485,6 +490,8 @@ service VirtualMachineService {
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
         9:optional list<string> additional_security_group_ids,
+             10:optional string auth_token,
+
 )  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
 
     /** Check if there is an instance with name */
@@ -824,5 +831,10 @@ service VirtualMachineService {
 )
 
     throws (1:ServerNotFoundException e, 2: OpenStackConflictException c)
+
+
+    void set_metadata_server_data(1:string ip,2:map<string,string> metadata) throws (1:MetadataServerNotAvailableException),
+        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException),
+        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException),
 
 }
