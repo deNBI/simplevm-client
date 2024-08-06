@@ -549,6 +549,9 @@ service VirtualMachineService {
     ) throws (1:BackendNotFoundException b,2:DefaultException d)
 
 
+    void set_metadata_server_data(1:string ip,2:map<string,string> metadata) throws (1:MetadataServerNotAvailableException m)
+        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m)
+        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m)
 
     /** Delete a backend*/
     void delete_backend(
@@ -833,8 +836,6 @@ service VirtualMachineService {
     throws (1:ServerNotFoundException e, 2: OpenStackConflictException c)
 
 
-    void set_metadata_server_data(1:string ip,2:map<string,string> metadata) throws (1:MetadataServerNotAvailableException),
-        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException),
-        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException),
+
 
 }

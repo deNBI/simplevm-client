@@ -12,6 +12,7 @@ from simple_vm_client.openstack_connector.openstack_connector import OpenStackCo
 from simple_vm_client.util import thrift_converter
 from simple_vm_client.util.logger import setup_custom_logger
 
+from .metadata_connector.metadata_connector import MetadataConnector
 from .ttypes import (
     VM,
     Backend,
@@ -37,6 +38,7 @@ class VirtualMachineHandler(Iface):
         self.openstack_connector = OpenStackConnector(config_file=config_file)
         self.bibigrid_connector = BibigridConnector(config_file=config_file)
         self.forc_connector = ForcConnector(config_file=config_file)
+        self.metadata_connetor = MetadataConnector(config_file=config_file)
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
         for k, v in self.forc_connector._active_playbooks.items():
@@ -49,6 +51,15 @@ class VirtualMachineHandler(Iface):
             v.stop(k)
             self.openstack_connector.delete_server(openstack_id=k)
         raise SystemExit(0)
+
+    def is_metadata_server_available(self):
+        return self.metadata_connetor.is_metadata_server_available()
+
+    def set_metadata_server_data(self, ip: str, metadata: dict[str, str]):
+        return self.metadata_connetor.set_metadata(ip=ip, metadata=metadata)
+
+    def remove_metadata_server_data(self, ip: str):
+        return self.metadata_connetor.remove_metadata(ip=ip)
 
     def get_images(self) -> list[Image]:
         images: list[Image] = thrift_converter.os_to_thrift_images(

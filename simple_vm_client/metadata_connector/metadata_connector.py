@@ -94,10 +94,10 @@ class MetadataConnector:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to set metadata for {ip}: {e}")
 
-    def health_check(self):
+    def is_metadata_server_available(self):
         if not self.ACTIVATED:
             logger.info("Metadata Server not activated. Skipping.")
-            return
+            return False
 
         logger.info("Metadata Server checking health...")
         health_url = urljoin(self.METADATA_BASE_URL, "health")
@@ -110,5 +110,7 @@ class MetadataConnector:
             )
             response.raise_for_status()
             logger.info(f"Metadata Health Check --- {response.json()}")
+            return True
         except requests.exceptions.RequestException as e:
             logger.error(f"Health check failed: {e}")
+            return False
