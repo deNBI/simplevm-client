@@ -203,7 +203,7 @@ class Iface(object):
         research_environment,
         additional_security_group_ids,
         slurm_version,
-        auth_token,
+        metadata_token,
     ):
         """
         Parameters:
@@ -218,7 +218,7 @@ class Iface(object):
          - research_environment
          - additional_security_group_ids
          - slurm_version
-         - auth_token
+         - metadata_token
 
         """
 
@@ -243,7 +243,7 @@ class Iface(object):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_security_group_ids,
-        auth_token,
+        metadata_token,
     ):
         """
         Start a new server with custom key for ansible.
@@ -257,7 +257,7 @@ class Iface(object):
          - volume_ids_path_new
          - volume_ids_path_attach
          - additional_security_group_ids
-         - auth_token
+         - metadata_token
 
         """
 
@@ -1497,7 +1497,7 @@ class Client(Iface):
         research_environment,
         additional_security_group_ids,
         slurm_version,
-        auth_token,
+        metadata_token,
     ):
         """
         Parameters:
@@ -1512,7 +1512,7 @@ class Client(Iface):
          - research_environment
          - additional_security_group_ids
          - slurm_version
-         - auth_token
+         - metadata_token
 
         """
         self.send_start_server(
@@ -1527,7 +1527,7 @@ class Client(Iface):
             research_environment,
             additional_security_group_ids,
             slurm_version,
-            auth_token,
+            metadata_token,
         )
         return self.recv_start_server()
 
@@ -1544,7 +1544,7 @@ class Client(Iface):
         research_environment,
         additional_security_group_ids,
         slurm_version,
-        auth_token,
+        metadata_token,
     ):
         self._oprot.writeMessageBegin("start_server", TMessageType.CALL, self._seqid)
         args = start_server_args()
@@ -1559,7 +1559,7 @@ class Client(Iface):
         args.research_environment = research_environment
         args.additional_security_group_ids = additional_security_group_ids
         args.slurm_version = slurm_version
-        args.auth_token = auth_token
+        args.metadata_token = metadata_token
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -1668,7 +1668,7 @@ class Client(Iface):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_security_group_ids,
-        auth_token,
+        metadata_token,
     ):
         """
         Start a new server with custom key for ansible.
@@ -1682,7 +1682,7 @@ class Client(Iface):
          - volume_ids_path_new
          - volume_ids_path_attach
          - additional_security_group_ids
-         - auth_token
+         - metadata_token
 
         """
         self.send_start_server_with_custom_key(
@@ -1694,7 +1694,7 @@ class Client(Iface):
             volume_ids_path_new,
             volume_ids_path_attach,
             additional_security_group_ids,
-            auth_token,
+            metadata_token,
         )
         return self.recv_start_server_with_custom_key()
 
@@ -1708,7 +1708,7 @@ class Client(Iface):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_security_group_ids,
-        auth_token,
+        metadata_token,
     ):
         self._oprot.writeMessageBegin(
             "start_server_with_custom_key", TMessageType.CALL, self._seqid
@@ -1722,7 +1722,7 @@ class Client(Iface):
         args.volume_ids_path_new = volume_ids_path_new
         args.volume_ids_path_attach = volume_ids_path_attach
         args.additional_security_group_ids = additional_security_group_ids
-        args.auth_token = auth_token
+        args.metadata_token = metadata_token
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -4462,7 +4462,7 @@ class Processor(Iface, TProcessor):
                 args.research_environment,
                 args.additional_security_group_ids,
                 args.slurm_version,
-                args.auth_token,
+                args.metadata_token,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -4565,7 +4565,7 @@ class Processor(Iface, TProcessor):
                 args.volume_ids_path_new,
                 args.volume_ids_path_attach,
                 args.additional_security_group_ids,
-                args.auth_token,
+                args.metadata_token,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -9568,7 +9568,7 @@ class start_server_args(object):
      - research_environment
      - additional_security_group_ids
      - slurm_version
-     - auth_token
+     - metadata_token
 
     """
 
@@ -9585,7 +9585,7 @@ class start_server_args(object):
         research_environment=None,
         additional_security_group_ids=None,
         slurm_version=None,
-        auth_token=None,
+        metadata_token=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -9598,7 +9598,7 @@ class start_server_args(object):
         self.research_environment = research_environment
         self.additional_security_group_ids = additional_security_group_ids
         self.slurm_version = slurm_version
-        self.auth_token = auth_token
+        self.metadata_token = metadata_token
 
     def read(self, iprot):
         if (
@@ -9764,7 +9764,7 @@ class start_server_args(object):
                     iprot.skip(ftype)
             elif fid == 13:
                 if ftype == TType.STRING:
-                    self.auth_token = (
+                    self.metadata_token = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -9899,12 +9899,12 @@ class start_server_args(object):
                 else self.slurm_version
             )
             oprot.writeFieldEnd()
-        if self.auth_token is not None:
-            oprot.writeFieldBegin("auth_token", TType.STRING, 13)
+        if self.metadata_token is not None:
+            oprot.writeFieldBegin("metadata_token", TType.STRING, 13)
             oprot.writeString(
-                self.auth_token.encode("utf-8")
+                self.metadata_token.encode("utf-8")
                 if sys.version_info[0] == 2
-                else self.auth_token
+                else self.metadata_token
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -10008,7 +10008,7 @@ start_server_args.thrift_spec = (
     (
         13,
         TType.STRING,
-        "auth_token",
+        "metadata_token",
         "UTF8",
         None,
     ),  # 13
@@ -10520,7 +10520,7 @@ class start_server_with_custom_key_args(object):
      - volume_ids_path_new
      - volume_ids_path_attach
      - additional_security_group_ids
-     - auth_token
+     - metadata_token
 
     """
 
@@ -10534,7 +10534,7 @@ class start_server_with_custom_key_args(object):
         volume_ids_path_new=None,
         volume_ids_path_attach=None,
         additional_security_group_ids=None,
-        auth_token=None,
+        metadata_token=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -10544,7 +10544,7 @@ class start_server_with_custom_key_args(object):
         self.volume_ids_path_new = volume_ids_path_new
         self.volume_ids_path_attach = volume_ids_path_attach
         self.additional_security_group_ids = additional_security_group_ids
-        self.auth_token = auth_token
+        self.metadata_token = metadata_token
 
     def read(self, iprot):
         if (
@@ -10678,7 +10678,7 @@ class start_server_with_custom_key_args(object):
                     iprot.skip(ftype)
             elif fid == 10:
                 if ftype == TType.STRING:
-                    self.auth_token = (
+                    self.metadata_token = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -10788,12 +10788,12 @@ class start_server_with_custom_key_args(object):
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.auth_token is not None:
-            oprot.writeFieldBegin("auth_token", TType.STRING, 10)
+        if self.metadata_token is not None:
+            oprot.writeFieldBegin("metadata_token", TType.STRING, 10)
             oprot.writeString(
-                self.auth_token.encode("utf-8")
+                self.metadata_token.encode("utf-8")
                 if sys.version_info[0] == 2
-                else self.auth_token
+                else self.metadata_token
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -10876,7 +10876,7 @@ start_server_with_custom_key_args.thrift_spec = (
     (
         10,
         TType.STRING,
-        "auth_token",
+        "metadata_token",
         "UTF8",
         None,
     ),  # 10

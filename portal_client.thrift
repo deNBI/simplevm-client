@@ -465,7 +465,7 @@ service VirtualMachineService {
      10:optional string research_environment
      11:optional list<string> additional_security_group_ids,
      12:optional string slurm_version,
-     13:optional string auth_token,
+     13:optional string metadata_token,
 
     )
 
@@ -499,7 +499,7 @@ service VirtualMachineService {
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
         9:optional list<string> additional_security_group_ids,
-             10:optional string auth_token,
+             10:optional string metadata_token,
 
 )  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
 

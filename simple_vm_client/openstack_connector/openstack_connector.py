@@ -1304,16 +1304,16 @@ class OpenStackConnector:
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
-        auth_token=None,
+        metadata_token=None,
     ) -> str:
         unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
             unlock_ubuntu_user_script.encode("utf-8")
         )
         init_script = unlock_ubuntu_user_script_encoded
-        if auth_token:
+        if metadata_token:
             save_metadata_token_script = self.create_save_metadata_auth_token_script(
-                token=auth_token
+                token=metadata_token
             )
             init_script = (
                 init_script
@@ -1353,7 +1353,7 @@ class OpenStackConnector:
         additional_keys: Union[list[str], None] = None,
         additional_security_group_ids: Union[list[str], None] = None,
         slurm_version: str = None,
-        auth_token: str = None,
+        metadata_token: str = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1396,7 +1396,7 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
-                auth_token=auth_token,
+                metadata_token=metadata_token,
             )
             logger.info(f"Starting Server {servername}...")
             server = self.openstack_connection.create_server(
@@ -1480,7 +1480,7 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
         additional_keys: list[str] = None,  # type: ignore
         additional_security_group_ids=None,  # type: ignore
-        auth_token: str = None,
+        metadata_token: str = None,
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1514,7 +1514,7 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
-                auth_token=auth_token,
+                metadata_token=metadata_token,
             )
             server = self.openstack_connection.create_server(
                 name=servername,
