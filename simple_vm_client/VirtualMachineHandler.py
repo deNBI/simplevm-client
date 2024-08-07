@@ -24,6 +24,7 @@ from .ttypes import (
     PlaybookResult,
     ResearchEnvironmentTemplate,
     Snapshot,
+    VirtualMachineServerMetadata,
     Volume,
 )
 from .VirtualMachineService import Iface
@@ -55,7 +56,7 @@ class VirtualMachineHandler(Iface):
     def is_metadata_server_available(self):
         return self.metadata_connetor.is_metadata_server_available()
 
-    def set_metadata_server_data(self, ip: str, metadata: dict[str, str]):
+    def set_metadata_server_data(self, ip: str, metadata: VirtualMachineServerMetadata):
         return self.metadata_connetor.set_metadata(ip=ip, metadata=metadata)
 
     def remove_metadata_server_data(self, ip: str):

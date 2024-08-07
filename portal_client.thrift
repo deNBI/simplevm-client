@@ -6,6 +6,12 @@ typedef i32 int
 /** The Version of the Portal-Client*/
 const string VERSION= '1.0.0'
 
+
+struct VirtualMachineServerMetadata {
+    1: list<string> public_keys
+    2: string hashed_auth_token
+    3: string ip
+}
 struct Backend {
     1: i64 id,
     2: string owner,
@@ -211,6 +217,9 @@ struct PlaybookResult {
 }
 
 exception MetadataServerNotAvailableException {
+    1: string message
+}
+exception MetadataServerNotAllowedException{
     1: string message
 }
 
@@ -549,9 +558,9 @@ service VirtualMachineService {
     ) throws (1:BackendNotFoundException b,2:DefaultException d)
 
 
-    void set_metadata_server_data(1:string ip,2:map<string,string> metadata) throws (1:MetadataServerNotAvailableException m)
-        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m)
-        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m)
+    void set_metadata_server_data(1:string ip,2:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
 
     /** Delete a backend*/
     void delete_backend(

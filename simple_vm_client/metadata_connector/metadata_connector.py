@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import requests
 import yaml
 
+from simple_vm_client.ttypes import VirtualMachineServerMetadata
 from simple_vm_client.util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
@@ -29,11 +30,17 @@ class MetadataConnector:
                 self.ACTIVATED = False
                 return
             self.ACTIVATED = True
+            self.METADATA_USE_HTTPS = cfg["metadata_server"].get("use_https", False)
             self.METADATA_SERVER_HOST = cfg["metadata_server"]["host"]
             self.METADATA_SERVER_PORT = cfg["metadata_server"]["port"]
-            self.METADATA_BASE_URL = (
-                f"{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
-            )
+            if self.METADATA_USE_HTTPS:
+                self.METADATA_BASE_URL = (
+                    f"https://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
+                )
+            else:
+                self.METADATA_BASE_URL = (
+                    f"http://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
+                )
 
         self.load_env_config()
 
@@ -71,7 +78,7 @@ class MetadataConnector:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to remove metadata for {ip}: {e}")
 
-    def set_metadata(self, ip: str, metadata: dict):
+    def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
         if not self.ACTIVATED:
             logger.info("Metadata Server not activated. Skipping.")
             return
