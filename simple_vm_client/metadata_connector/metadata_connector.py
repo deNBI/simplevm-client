@@ -14,11 +14,13 @@ class MetadataConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Metadata Connector")
         self.load_config_yml(config_file)
+        self.is_metadata_server_available()
 
     def load_config_yml(self, config_file: str) -> None:
         logger.info(f"Load config file openstack config - {config_file}")
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
+            logger.info("Config file loaded")
             if "metadata_server" not in cfg:
                 logger.info("Metadata Server configuration not found. Skipping.")
                 self.ACTIVATED = False
@@ -41,7 +43,7 @@ class MetadataConnector:
                 self.METADATA_BASE_URL = (
                     f"http://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
                 )
-
+        logger.info("Metadata Config Loaded")
         self.load_env_config()
 
     def load_env_config(self):
@@ -55,6 +57,7 @@ class MetadataConnector:
                 f"MetadataServer missing keys {missing_keys_str} not provided in env!"
             )
         self.METADATA_SERVER_TOKEN = os.environ.get("METADATA_SERVER_TOKEN")
+        logger.info("Metadata Environment loaded")
 
     def remove_metadata(self, ip: str):
         if not self.ACTIVATED:
@@ -102,11 +105,12 @@ class MetadataConnector:
             logger.error(f"Failed to set metadata for {ip}: {e}")
 
     def is_metadata_server_available(self):
+        logger.info("Metadata Server checking health...")
+
         if not self.ACTIVATED:
             logger.info("Metadata Server not activated. Skipping.")
             return False
 
-        logger.info("Metadata Server checking health...")
         health_url = urljoin(self.METADATA_BASE_URL, "health")
 
         try:
