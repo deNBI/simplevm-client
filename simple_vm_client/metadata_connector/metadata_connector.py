@@ -81,6 +81,13 @@ class MetadataConnector:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to remove metadata for {ip}: {e}")
 
+    def _serialize_metadata(self, metadata: VirtualMachineServerMetadata):
+        return {
+            "public_keys": metadata.public_keys,
+            "hashed_auth_token": metadata.hashed_auth_token,
+            "ip": metadata.ip,
+        }
+
     def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
         if not self.ACTIVATED:
             logger.info("Metadata Server not activated. Skipping.")
@@ -88,14 +95,13 @@ class MetadataConnector:
 
         logger.info(f"Setting Metadata for {ip}")
         set_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
-
         try:
             response = requests.post(
                 set_metadata_url,
-                json=metadata,
+                json=self._serialize_metadata(metadata=metadata),
                 timeout=(30, 30),
                 headers={
-                    "x_auth_token": self.METADATA_SERVER_TOKEN,
+                    "X-Auth-Token": self.METADATA_SERVER_TOKEN,
                 },
                 verify=False,
             )
