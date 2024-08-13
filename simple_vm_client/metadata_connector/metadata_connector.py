@@ -89,6 +89,8 @@ class MetadataConnector:
         }
 
     def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
+        if not ip:
+            return
         if not self.ACTIVATED:
             logger.info("Metadata Server not activated. Skipping.")
             return

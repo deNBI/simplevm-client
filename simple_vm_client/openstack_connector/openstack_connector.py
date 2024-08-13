@@ -484,16 +484,23 @@ class OpenStackConnector:
     def create_save_metadata_auth_token_script(self, token: str) -> str:
         logger.info("create save metadata auth token script")
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        metadata_token_script = os.path.join(
+        metadata_token_script_path = os.path.join(
             file_dir, "scripts/bash/save_metadata_auth_token.sh"
         )
 
-        with open(metadata_token_script, "r") as file:
+        with open(metadata_token_script_path, "r") as file:
             text = file.read()
-            text = text.replace("METADATA_AUTH_TOKEN", token)
-            text = encodeutils.safe_encode(text.encode("utf-8"))
-        metadata_token_script = text
-        return metadata_token_script
+
+            # Use a unique placeholder in the script for replacement
+            placeholder = "REPLACE_WITH_ACTUAL_TOKEN"
+
+            # Replace the placeholder with the actual token
+            text = text.replace(placeholder, token)
+
+            # Encode the text safely, if necessary, and ensure it's a string
+            text = encodeutils.safe_encode(text.encode("utf-8")).decode("utf-8")
+
+        return text
 
     def netcat(self, host: str, port: int) -> bool:
         logger.info(f"Checking SSH Connection {host}:{port}")
