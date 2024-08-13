@@ -497,8 +497,7 @@ class OpenStackConnector:
             # Replace the placeholder with the actual token
             text = text.replace(placeholder, token)
 
-            # Encode the text safely, if necessary, and ensure it's a string
-            text = encodeutils.safe_encode(text.encode("utf-8")).decode("utf-8")
+            text = encodeutils.safe_encode(text.encode("utf-8"))
 
         return text
 
@@ -1344,7 +1343,6 @@ class OpenStackConnector:
                 + encodeutils.safe_encode("\n".encode("utf-8"))
                 + mount_script
             )
-
         return init_script
 
     def start_server(
