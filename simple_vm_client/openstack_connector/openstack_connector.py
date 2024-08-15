@@ -6,6 +6,7 @@ import socket
 import sys
 import urllib
 import urllib.parse
+import threading
 from contextlib import closing
 from typing import Union
 from uuid import uuid4
@@ -53,6 +54,9 @@ logger = setup_custom_logger(__name__)
 BIOCONDA = "bioconda"
 
 ALL_TEMPLATES = [BIOCONDA]
+
+lock_dict = {}
+lock_access = threading.Lock()
 
 
 class OpenStackConnector:
@@ -1034,7 +1038,14 @@ class OpenStackConnector:
 
     def get_or_create_project_security_group(self, project_name, project_id):
         security_group_name = f"{project_name}_{project_id}"
-        logger.info(
+
+        with lock_access:
+            if security_group_name not in lock_dict:
+                lock_dict[security_group_name] = threading.Lock()
+            lock = lock_dict[security_group_name]
+        
+        with lock:
+            logger.info(
             f"Check if Security Group for project - [{project_name}-{project_id}] exists... "
         )
         sec = self.openstack_connection.get_security_group(
@@ -1061,6 +1072,7 @@ class OpenStackConnector:
             remote_group_id=new_security_group["id"],
         )
         return new_security_group["id"]
+        
 
     def get_limits(self) -> dict[str, str]:
         logger.info("Get Limits")
