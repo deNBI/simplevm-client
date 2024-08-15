@@ -72,7 +72,7 @@ class MetadataConnector:
                 remove_metadata_url,
                 timeout=(30, 30),
                 headers={
-                    "x_auth_token": self.METADATA_SERVER_TOKEN,
+                    "X-Auth-Token": self.METADATA_SERVER_TOKEN,
                 },
                 verify=False,
             )
