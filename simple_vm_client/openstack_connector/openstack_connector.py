@@ -6,6 +6,7 @@ import socket
 import sys
 import urllib
 import urllib.parse
+import threading
 from contextlib import closing
 from typing import Union
 from uuid import uuid4
@@ -53,6 +54,9 @@ logger = setup_custom_logger(__name__)
 BIOCONDA = "bioconda"
 
 ALL_TEMPLATES = [BIOCONDA]
+
+lock_dict = {}
+lock_access = threading.Lock()
 
 
 class OpenStackConnector:
@@ -1054,33 +1058,41 @@ class OpenStackConnector:
 
     def get_or_create_project_security_group(self, project_name, project_id):
         security_group_name = f"{project_name}_{project_id}"
-        logger.info(
-            f"Check if Security Group for project - [{project_name}-{project_id}] exists... "
-        )
-        sec = self.openstack_connection.get_security_group(
-            name_or_id=security_group_name
-        )
-        if sec:
-            logger.info(
-                f"Security group [{project_name}-{project_id}]  already exists."
-            )
-            return sec["id"]
 
-        logger.info(
-            f"No security Group for [{project_name}-{project_id}]  exists. Creating.. "
-        )
-        new_security_group = self.openstack_connection.create_security_group(
-            name=security_group_name, description=f"{project_name} Security Group"
-        )
-        self.openstack_connection.network.create_security_group_rule(
-            direction="ingress",
-            protocol="tcp",
-            port_range_max=22,
-            port_range_min=22,
-            security_group_id=new_security_group["id"],
-            remote_group_id=new_security_group["id"],
-        )
-        return new_security_group["id"]
+        with lock_access:
+            if security_group_name not in lock_dict:
+                lock_dict[security_group_name] = threading.Lock()
+            lock = lock_dict[security_group_name]
+        
+        with lock:
+            logger.info(
+                f"Check if Security Group for project - [{project_name}-{project_id}] exists... "
+            )
+            sec = self.openstack_connection.get_security_group(
+                name_or_id=security_group_name
+            )
+            if sec:
+                logger.info(
+                    f"Security group [{project_name}-{project_id}]  already exists."
+                )
+                return sec["id"]
+
+            logger.info(
+                f"No security Group for [{project_name}-{project_id}]  exists. Creating.. "
+            )
+            new_security_group = self.openstack_connection.create_security_group(
+                name=security_group_name, description=f"{project_name} Security Group"
+            )
+            self.openstack_connection.network.create_security_group_rule(
+                direction="ingress",
+                protocol="tcp",
+                port_range_max=22,
+                port_range_min=22,
+                security_group_id=new_security_group["id"],
+                remote_group_id=new_security_group["id"],
+            )
+            return new_security_group["id"]
+        
 
     def get_limits(self) -> dict[str, str]:
         logger.info("Get Limits")
