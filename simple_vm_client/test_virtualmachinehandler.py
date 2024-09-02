@@ -452,6 +452,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_keys=[],
             research_environment_metadata="res_metadata",
             additional_security_group_ids=[],
+            slurm_version=None,
         )
 
     def test_start_server(self):
@@ -478,6 +479,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_keys=[],
             research_environment_metadata=None,
             additional_security_group_ids=[],
+            slurm_version=None,
         )
 
     def test_start_server_with_custom_key(self):
@@ -598,13 +600,13 @@ class TestVirtualMachineHandler(unittest.TestCase):
         master = MagicMock()
         worker_instances = [MagicMock()]
         self.handler.start_cluster(
-            public_key="pub",
+            public_keys=["pub"],
             master_instance=master,
             worker_instances=worker_instances,
             user=USERNAME,
         )
         self.handler.bibigrid_connector.start_cluster.assert_called_once_with(
-            public_key="pub",
+            public_keys=["pub"],
             master_instance=master,
             worker_instances=worker_instances,
             user=USERNAME,
