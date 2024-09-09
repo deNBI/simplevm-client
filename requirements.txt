@@ -1,6 +1,5 @@
 setuptools==74.0.0
 thrift==0.20.0
-python-keystoneclient==5.4.0
 openstacksdk==4.0.0
 deprecated==1.2.14
 Click==8.1.7
@@ -17,5 +16,5 @@ types-PyYAML==6.0.12.20240808
 sympy==1.13.2
 colorama==0.4.6
 types-redis==4.6.0.20240819
-gevent
-pytest
+gevent==24.2.1
+pytest==8.3.2
