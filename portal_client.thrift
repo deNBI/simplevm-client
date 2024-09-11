@@ -466,6 +466,7 @@ service VirtualMachineService {
      11:optional list<string> additional_security_group_ids,
      12:optional string slurm_version,
      13:optional string metadata_token,
+     14:optional string metadata_endpoint
 
     )
 
@@ -500,6 +501,8 @@ service VirtualMachineService {
     8:list<map<string,string>> volume_ids_path_attach,
         9:optional list<string> additional_security_group_ids,
              10:optional string metadata_token,
+                  11:optional string metadata_endpoint
+
 
 )  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
 
@@ -558,7 +561,7 @@ service VirtualMachineService {
     ) throws (1:BackendNotFoundException b,2:DefaultException d)
 
 
-    void set_metadata_server_data(1:string ip,2:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+    void set_metadata_server_data(1:string ip,2:string endpoint,3:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
         void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
         void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
 

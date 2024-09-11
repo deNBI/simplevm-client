@@ -383,6 +383,7 @@ class VirtualMachineHandler(Iface):
         additional_security_group_ids: list[str],
         slurm_version: str = None,
         metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -405,6 +406,7 @@ class VirtualMachineHandler(Iface):
             additional_security_group_ids=additional_security_group_ids,
             slurm_version=slurm_version,
             metadata_token=metadata_token,
+            metadata_endpoint=metadata_endpoint,
         )
 
     def start_server_with_custom_key(
@@ -418,6 +420,7 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_attach: list[dict[str, str]],
         additional_security_group_ids: list[str],
         metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -437,6 +440,7 @@ class VirtualMachineHandler(Iface):
             volume_ids_path_attach=volume_ids_path_attach,
             additional_security_group_ids=additional_security_group_ids,
             metadata_token=metadata_token,
+            metadata_endpoint=metadata_endpoint,
         )
         self.forc_connector.set_vm_wait_for_playbook(
             openstack_id=openstack_id, private_key=private_key, name=servername

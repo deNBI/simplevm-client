@@ -4,9 +4,9 @@ import math
 import os
 import socket
 import sys
+import threading
 import urllib
 import urllib.parse
-import threading
 from contextlib import closing
 from typing import Union
 from uuid import uuid4
@@ -485,7 +485,9 @@ class OpenStackConnector:
         key_script = text
         return key_script
 
-    def create_save_metadata_auth_token_script(self, token: str) -> str:
+    def create_save_metadata_auth_token_script(
+        self, token: str, metadata_endpoint: str
+    ) -> str:
         logger.info("create save metadata auth token script")
         file_dir = os.path.dirname(os.path.abspath(__file__))
         metadata_token_script_path = os.path.join(
@@ -1063,7 +1065,7 @@ class OpenStackConnector:
             if security_group_name not in lock_dict:
                 lock_dict[security_group_name] = threading.Lock()
             lock = lock_dict[security_group_name]
-        
+
         with lock:
             logger.info(
                 f"Check if Security Group for project - [{project_name}-{project_id}] exists... "
@@ -1092,7 +1094,6 @@ class OpenStackConnector:
                 remote_group_id=new_security_group["id"],
             )
             return new_security_group["id"]
-        
 
     def get_limits(self) -> dict[str, str]:
         logger.info("Get Limits")
@@ -1322,16 +1323,17 @@ class OpenStackConnector:
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
-        metadata_token=None,
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
             unlock_ubuntu_user_script.encode("utf-8")
         )
         init_script = unlock_ubuntu_user_script_encoded
-        if metadata_token:
+        if metadata_token and metadata_endpoint:
             save_metadata_token_script = self.create_save_metadata_auth_token_script(
-                token=metadata_token
+                token=metadata_token, metadata_endpoint=metadata_endpoint
             )
             init_script = (
                 init_script
@@ -1371,6 +1373,7 @@ class OpenStackConnector:
         additional_security_group_ids: Union[list[str], None] = None,
         slurm_version: str = None,
         metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1414,6 +1417,7 @@ class OpenStackConnector:
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
                 metadata_token=metadata_token,
+                metadata_endpoint=metadata_endpoint,
             )
             logger.info(f"Starting Server {servername}...")
             server = self.openstack_connection.create_server(
@@ -1498,6 +1502,7 @@ class OpenStackConnector:
         additional_keys: list[str] = None,  # type: ignore
         additional_security_group_ids=None,  # type: ignore
         metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1532,6 +1537,7 @@ class OpenStackConnector:
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
                 metadata_token=metadata_token,
+                metadata_endpoint=metadata_endpoint,
             )
             server = self.openstack_connection.create_server(
                 name=servername,

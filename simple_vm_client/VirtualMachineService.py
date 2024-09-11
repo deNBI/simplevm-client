@@ -204,6 +204,7 @@ class Iface(object):
         additional_security_group_ids,
         slurm_version,
         metadata_token,
+        metadata_endpoint,
     ):
         """
         Parameters:
@@ -219,6 +220,7 @@ class Iface(object):
          - additional_security_group_ids
          - slurm_version
          - metadata_token
+         - metadata_endpoint
 
         """
 
@@ -244,6 +246,7 @@ class Iface(object):
         volume_ids_path_attach,
         additional_security_group_ids,
         metadata_token,
+        metadata_endpoint,
     ):
         """
         Start a new server with custom key for ansible.
@@ -258,6 +261,7 @@ class Iface(object):
          - volume_ids_path_attach
          - additional_security_group_ids
          - metadata_token
+         - metadata_endpoint
 
         """
 
@@ -357,10 +361,11 @@ class Iface(object):
 
         """
 
-    def set_metadata_server_data(self, ip, metadata):
+    def set_metadata_server_data(self, ip, endpoint, metadata):
         """
         Parameters:
          - ip
+         - endpoint
          - metadata
 
         """
@@ -1498,6 +1503,7 @@ class Client(Iface):
         additional_security_group_ids,
         slurm_version,
         metadata_token,
+        metadata_endpoint,
     ):
         """
         Parameters:
@@ -1513,6 +1519,7 @@ class Client(Iface):
          - additional_security_group_ids
          - slurm_version
          - metadata_token
+         - metadata_endpoint
 
         """
         self.send_start_server(
@@ -1528,6 +1535,7 @@ class Client(Iface):
             additional_security_group_ids,
             slurm_version,
             metadata_token,
+            metadata_endpoint,
         )
         return self.recv_start_server()
 
@@ -1545,6 +1553,7 @@ class Client(Iface):
         additional_security_group_ids,
         slurm_version,
         metadata_token,
+        metadata_endpoint,
     ):
         self._oprot.writeMessageBegin("start_server", TMessageType.CALL, self._seqid)
         args = start_server_args()
@@ -1560,6 +1569,7 @@ class Client(Iface):
         args.additional_security_group_ids = additional_security_group_ids
         args.slurm_version = slurm_version
         args.metadata_token = metadata_token
+        args.metadata_endpoint = metadata_endpoint
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -1669,6 +1679,7 @@ class Client(Iface):
         volume_ids_path_attach,
         additional_security_group_ids,
         metadata_token,
+        metadata_endpoint,
     ):
         """
         Start a new server with custom key for ansible.
@@ -1683,6 +1694,7 @@ class Client(Iface):
          - volume_ids_path_attach
          - additional_security_group_ids
          - metadata_token
+         - metadata_endpoint
 
         """
         self.send_start_server_with_custom_key(
@@ -1695,6 +1707,7 @@ class Client(Iface):
             volume_ids_path_attach,
             additional_security_group_ids,
             metadata_token,
+            metadata_endpoint,
         )
         return self.recv_start_server_with_custom_key()
 
@@ -1709,6 +1722,7 @@ class Client(Iface):
         volume_ids_path_attach,
         additional_security_group_ids,
         metadata_token,
+        metadata_endpoint,
     ):
         self._oprot.writeMessageBegin(
             "start_server_with_custom_key", TMessageType.CALL, self._seqid
@@ -1723,6 +1737,7 @@ class Client(Iface):
         args.volume_ids_path_attach = volume_ids_path_attach
         args.additional_security_group_ids = additional_security_group_ids
         args.metadata_token = metadata_token
+        args.metadata_endpoint = metadata_endpoint
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -2177,22 +2192,24 @@ class Client(Iface):
             "get_backend_by_id failed: unknown result",
         )
 
-    def set_metadata_server_data(self, ip, metadata):
+    def set_metadata_server_data(self, ip, endpoint, metadata):
         """
         Parameters:
          - ip
+         - endpoint
          - metadata
 
         """
-        self.send_set_metadata_server_data(ip, metadata)
+        self.send_set_metadata_server_data(ip, endpoint, metadata)
         self.recv_set_metadata_server_data()
 
-    def send_set_metadata_server_data(self, ip, metadata):
+    def send_set_metadata_server_data(self, ip, endpoint, metadata):
         self._oprot.writeMessageBegin(
             "set_metadata_server_data", TMessageType.CALL, self._seqid
         )
         args = set_metadata_server_data_args()
         args.ip = ip
+        args.endpoint = endpoint
         args.metadata = metadata
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -4463,6 +4480,7 @@ class Processor(Iface, TProcessor):
                 args.additional_security_group_ids,
                 args.slurm_version,
                 args.metadata_token,
+                args.metadata_endpoint,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -4566,6 +4584,7 @@ class Processor(Iface, TProcessor):
                 args.volume_ids_path_attach,
                 args.additional_security_group_ids,
                 args.metadata_token,
+                args.metadata_endpoint,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -4893,7 +4912,9 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = set_metadata_server_data_result()
         try:
-            self._handler.set_metadata_server_data(args.ip, args.metadata)
+            self._handler.set_metadata_server_data(
+                args.ip, args.endpoint, args.metadata
+            )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -9569,6 +9590,7 @@ class start_server_args(object):
      - additional_security_group_ids
      - slurm_version
      - metadata_token
+     - metadata_endpoint
 
     """
 
@@ -9586,6 +9608,7 @@ class start_server_args(object):
         additional_security_group_ids=None,
         slurm_version=None,
         metadata_token=None,
+        metadata_endpoint=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -9599,6 +9622,7 @@ class start_server_args(object):
         self.additional_security_group_ids = additional_security_group_ids
         self.slurm_version = slurm_version
         self.metadata_token = metadata_token
+        self.metadata_endpoint = metadata_endpoint
 
     def read(self, iprot):
         if (
@@ -9771,6 +9795,15 @@ class start_server_args(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.metadata_endpoint = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -9907,6 +9940,14 @@ class start_server_args(object):
                 else self.metadata_token
             )
             oprot.writeFieldEnd()
+        if self.metadata_endpoint is not None:
+            oprot.writeFieldBegin("metadata_endpoint", TType.STRING, 14)
+            oprot.writeString(
+                self.metadata_endpoint.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.metadata_endpoint
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -10012,6 +10053,13 @@ start_server_args.thrift_spec = (
         "UTF8",
         None,
     ),  # 13
+    (
+        14,
+        TType.STRING,
+        "metadata_endpoint",
+        "UTF8",
+        None,
+    ),  # 14
 )
 
 
@@ -10521,6 +10569,7 @@ class start_server_with_custom_key_args(object):
      - volume_ids_path_attach
      - additional_security_group_ids
      - metadata_token
+     - metadata_endpoint
 
     """
 
@@ -10535,6 +10584,7 @@ class start_server_with_custom_key_args(object):
         volume_ids_path_attach=None,
         additional_security_group_ids=None,
         metadata_token=None,
+        metadata_endpoint=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -10545,6 +10595,7 @@ class start_server_with_custom_key_args(object):
         self.volume_ids_path_attach = volume_ids_path_attach
         self.additional_security_group_ids = additional_security_group_ids
         self.metadata_token = metadata_token
+        self.metadata_endpoint = metadata_endpoint
 
     def read(self, iprot):
         if (
@@ -10685,6 +10736,15 @@ class start_server_with_custom_key_args(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.metadata_endpoint = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -10796,6 +10856,14 @@ class start_server_with_custom_key_args(object):
                 else self.metadata_token
             )
             oprot.writeFieldEnd()
+        if self.metadata_endpoint is not None:
+            oprot.writeFieldBegin("metadata_endpoint", TType.STRING, 11)
+            oprot.writeString(
+                self.metadata_endpoint.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.metadata_endpoint
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -10880,6 +10948,13 @@ start_server_with_custom_key_args.thrift_spec = (
         "UTF8",
         None,
     ),  # 10
+    (
+        11,
+        TType.STRING,
+        "metadata_endpoint",
+        "UTF8",
+        None,
+    ),  # 11
 )
 
 
@@ -13002,6 +13077,7 @@ class set_metadata_server_data_args(object):
     """
     Attributes:
      - ip
+     - endpoint
      - metadata
 
     """
@@ -13009,9 +13085,11 @@ class set_metadata_server_data_args(object):
     def __init__(
         self,
         ip=None,
+        endpoint=None,
         metadata=None,
     ):
         self.ip = ip
+        self.endpoint = endpoint
         self.metadata = metadata
 
     def read(self, iprot):
@@ -13037,6 +13115,15 @@ class set_metadata_server_data_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.STRING:
+                    self.endpoint = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.STRUCT:
                     self.metadata = VirtualMachineServerMetadata()
                     self.metadata.read(iprot)
@@ -13060,8 +13147,16 @@ class set_metadata_server_data_args(object):
                 self.ip.encode("utf-8") if sys.version_info[0] == 2 else self.ip
             )
             oprot.writeFieldEnd()
+        if self.endpoint is not None:
+            oprot.writeFieldBegin("endpoint", TType.STRING, 2)
+            oprot.writeString(
+                self.endpoint.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.endpoint
+            )
+            oprot.writeFieldEnd()
         if self.metadata is not None:
-            oprot.writeFieldBegin("metadata", TType.STRUCT, 2)
+            oprot.writeFieldBegin("metadata", TType.STRUCT, 3)
             self.metadata.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -13093,11 +13188,18 @@ set_metadata_server_data_args.thrift_spec = (
     ),  # 1
     (
         2,
+        TType.STRING,
+        "endpoint",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
         TType.STRUCT,
         "metadata",
         [VirtualMachineServerMetadata, None],
         None,
-    ),  # 2
+    ),  # 3
 )
 
 
