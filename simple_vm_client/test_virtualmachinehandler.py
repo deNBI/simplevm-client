@@ -31,7 +31,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
     @patch("simple_vm_client.VirtualMachineHandler.OpenStackConnector")
     @patch("simple_vm_client.VirtualMachineHandler.BibigridConnector")
     @patch("simple_vm_client.VirtualMachineHandler.ForcConnector")
-    def setUp(self, mock_template, mock_redis, mock_connection_pool):
+    @patch("simple_vm_client.VirtualMachineHandler.MetadataConnector")
+    def setUp(self, mock_template, mock_redis, mock_connection_pool, mock_meta):
         self.handler = VirtualMachineHandler(config_file="config_path")
 
     @patch("simple_vm_client.VirtualMachineHandler.thrift_converter")
@@ -440,6 +441,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_keys=[],
             research_environment="de",
             additional_security_group_ids=[],
+            metadata_token="test",
         )
         self.handler.openstack_connector.start_server.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -453,6 +455,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment_metadata="res_metadata",
             additional_security_group_ids=[],
             slurm_version=None,
+            metadata_token="test",
         )
 
     def test_start_server(self):
@@ -467,6 +470,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_keys=[],
             research_environment="",
             additional_security_group_ids=[],
+            metadata_token="test",
         )
         self.handler.openstack_connector.start_server.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -480,6 +484,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment_metadata=None,
             additional_security_group_ids=[],
             slurm_version=None,
+            metadata_token="test",
         )
 
     def test_start_server_with_custom_key(self):
@@ -496,6 +501,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="",
             additional_security_group_ids=[],
+            metadata_token="test",
         )
         self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -506,6 +512,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             additional_security_group_ids=[],
             research_environment_metadata=None,
+            metadata_token="test",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -528,6 +535,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="de",
             additional_security_group_ids=[],
+            metadata_token="test",
         )
         self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -538,6 +546,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             additional_security_group_ids=[],
             research_environment_metadata="res_metadata",
+            metadata_token="test",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name

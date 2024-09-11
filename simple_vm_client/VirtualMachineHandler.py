@@ -12,6 +12,7 @@ from simple_vm_client.openstack_connector.openstack_connector import OpenStackCo
 from simple_vm_client.util import thrift_converter
 from simple_vm_client.util.logger import setup_custom_logger
 
+from .metadata_connector.metadata_connector import MetadataConnector
 from .ttypes import (
     VM,
     Backend,
@@ -23,6 +24,7 @@ from .ttypes import (
     PlaybookResult,
     ResearchEnvironmentTemplate,
     Snapshot,
+    VirtualMachineServerMetadata,
     Volume,
 )
 from .VirtualMachineService import Iface
@@ -37,6 +39,7 @@ class VirtualMachineHandler(Iface):
         self.openstack_connector = OpenStackConnector(config_file=config_file)
         self.bibigrid_connector = BibigridConnector(config_file=config_file)
         self.forc_connector = ForcConnector(config_file=config_file)
+        self.metadata_connetor = MetadataConnector(config_file=config_file)
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
         for k, v in self.forc_connector._active_playbooks.items():
@@ -49,6 +52,15 @@ class VirtualMachineHandler(Iface):
             v.stop(k)
             self.openstack_connector.delete_server(openstack_id=k)
         raise SystemExit(0)
+
+    def is_metadata_server_available(self):
+        return self.metadata_connetor.is_metadata_server_available()
+
+    def set_metadata_server_data(self, ip: str, metadata: VirtualMachineServerMetadata):
+        return self.metadata_connetor.set_metadata(ip=ip, metadata=metadata)
+
+    def remove_metadata_server_data(self, ip: str):
+        return self.metadata_connetor.remove_metadata(ip=ip)
 
     def get_images(self) -> list[Image]:
         images: list[Image] = thrift_converter.os_to_thrift_images(
@@ -370,6 +382,7 @@ class VirtualMachineHandler(Iface):
         research_environment: str,
         additional_security_group_ids: list[str],
         slurm_version: str = None,
+        metadata_token: str = None,
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -391,6 +404,7 @@ class VirtualMachineHandler(Iface):
             research_environment_metadata=research_environment_metadata,
             additional_security_group_ids=additional_security_group_ids,
             slurm_version=slurm_version,
+            metadata_token=metadata_token,
         )
 
     def start_server_with_custom_key(
@@ -403,6 +417,7 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_security_group_ids: list[str],
+        metadata_token: str = None,
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -421,6 +436,7 @@ class VirtualMachineHandler(Iface):
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
             additional_security_group_ids=additional_security_group_ids,
+            metadata_token=metadata_token,
         )
         self.forc_connector.set_vm_wait_for_playbook(
             openstack_id=openstack_id, private_key=private_key, name=servername

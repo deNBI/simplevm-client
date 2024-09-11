@@ -1550,6 +1550,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_ids_path_attach,
             additional_keys,
             additional_security_group_ids,
+            metadata_token="test",
         )
 
         # Assertions
@@ -1569,6 +1570,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
             additional_keys=additional_keys,
+            metadata_token="test",
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(
@@ -1837,6 +1839,7 @@ class TestOpenStackConnector(unittest.TestCase):
             additional_keys=additional_keys,
             additional_security_group_ids=additional_security_group_ids,
             public_key=public_key,
+            metadata_token="test",
         )
 
         # Assertions
@@ -1856,6 +1859,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
             additional_keys=additional_keys,
+            metadata_token="test",
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(
