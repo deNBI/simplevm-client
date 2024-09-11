@@ -1,6 +1,6 @@
 setuptools==74.1.2
 thrift==0.20.0
-openstacksdk==3.0.0
+openstacksdk==3.3.0
 deprecated==1.2.14
 Click==8.1.7
 ansible==10.3.0
