@@ -1430,6 +1430,7 @@ class OpenStackConnector:
                 volumes=volumes,
                 userdata=init_script,
                 security_groups=security_groups,
+                boot_from_volume=False,
             )
 
             openstack_id: str = server["id"]

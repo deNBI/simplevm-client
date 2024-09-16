@@ -7,11 +7,24 @@ typedef i32 int
 const string VERSION= '1.0.0'
 
 
-struct VirtualMachineServerMetadata {
-    1: list<string> public_keys
-    2: string hashed_auth_token
-    3: string ip
+struct User {
+  1: optional string username,
+  2: required string user_id,
+  3: optional list<string> public_keys,
 }
+
+struct UserData {
+  2: required map<string, User> data = {},
+}
+
+struct VirtualMachineServerMetadata {
+  1: required string ip,
+  2: required string hashed_auth_token,
+  3: optional UserData userdata,
+  4: required i64 last_time_updated,
+}
+
+
 struct Backend {
     1: i64 id,
     2: string owner,
