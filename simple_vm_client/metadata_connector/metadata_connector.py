@@ -82,10 +82,21 @@ class MetadataConnector:
             logger.error(f"Failed to remove metadata for {ip}: {e}")
 
     def _serialize_metadata(self, metadata: VirtualMachineServerMetadata):
+        userdata_dict = None
+        if metadata.userdata is not None:
+            userdata_dict = {
+                user_id: {
+                    "username": user.username,
+                    "user_id": user.user_id,
+                    "public_keys": user.public_keys,
+                }
+                for user_id, user in metadata.userdata.data.items()
+            }
+
         return {
-            "public_keys": metadata.public_keys,
-            "hashed_auth_token": metadata.hashed_auth_token,
             "ip": metadata.ip,
+            "hashed_auth_token": metadata.hashed_auth_token,
+            "userdata": userdata_dict,
         }
 
     def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
