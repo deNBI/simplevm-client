@@ -499,9 +499,11 @@ class OpenStackConnector:
 
             # Use a unique placeholder in the script for replacement
             placeholder = "REPLACE_WITH_ACTUAL_TOKEN"
+            endpoint_placeholder = "REPLACE_WITH_ACTUAL_METADATA_INFO_ENDPOINT"
 
             # Replace the placeholder with the actual token
             text = text.replace(placeholder, token)
+            text = text.replace(endpoint_placeholder, metadata_endpoint)
 
             text = encodeutils.safe_encode(text.encode("utf-8"))
 
@@ -1331,15 +1333,9 @@ class OpenStackConnector:
             unlock_ubuntu_user_script.encode("utf-8")
         )
         init_script = unlock_ubuntu_user_script_encoded
-        if metadata_token and metadata_endpoint:
-            save_metadata_token_script = self.create_save_metadata_auth_token_script(
-                token=metadata_token, metadata_endpoint=metadata_endpoint
-            )
-            init_script = (
-                init_script
-                + encodeutils.safe_encode("\n".encode("utf-8"))
-                + save_metadata_token_script
-            )
+        logger.info(
+            f"Metadata token {metadata_token} | Metadata Endpoint {metadata_endpoint}"
+        )
         if additional_keys:
             add_key_script = self.create_add_keys_script(keys=additional_keys)
             init_script = (
@@ -1357,6 +1353,16 @@ class OpenStackConnector:
                 + encodeutils.safe_encode("\n".encode("utf-8"))
                 + mount_script
             )
+        if metadata_token and metadata_endpoint:
+            save_metadata_token_script = self.create_save_metadata_auth_token_script(
+                token=metadata_token, metadata_endpoint=metadata_endpoint
+            )
+            init_script = (
+                init_script
+                + encodeutils.safe_encode("\n".encode("utf-8"))
+                + save_metadata_token_script
+            )
+
         return init_script
 
     def start_server(
