@@ -21,7 +21,6 @@ struct VirtualMachineServerMetadata {
   1: required string ip,
   2: required string hashed_auth_token,
   3: optional UserData userdata,
-  4: required i64 last_time_updated,
 }
 
 
@@ -574,7 +573,7 @@ service VirtualMachineService {
     ) throws (1:BackendNotFoundException b,2:DefaultException d)
 
 
-    void set_metadata_server_data(1:string ip,2:string endpoint,3:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+    void set_metadata_server_data(1:string ip,3:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
         void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
         void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
 

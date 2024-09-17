@@ -227,7 +227,6 @@ class VirtualMachineServerMetadata(object):
      - ip
      - hashed_auth_token
      - userdata
-     - last_time_updated
 
     """
 
@@ -236,12 +235,10 @@ class VirtualMachineServerMetadata(object):
         ip=None,
         hashed_auth_token=None,
         userdata=None,
-        last_time_updated=None,
     ):
         self.ip = ip
         self.hashed_auth_token = hashed_auth_token
         self.userdata = userdata
-        self.last_time_updated = last_time_updated
 
     def read(self, iprot):
         if (
@@ -280,11 +277,6 @@ class VirtualMachineServerMetadata(object):
                     self.userdata.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I64:
-                    self.last_time_updated = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -315,10 +307,6 @@ class VirtualMachineServerMetadata(object):
             oprot.writeFieldBegin("userdata", TType.STRUCT, 3)
             self.userdata.write(oprot)
             oprot.writeFieldEnd()
-        if self.last_time_updated is not None:
-            oprot.writeFieldBegin("last_time_updated", TType.I64, 4)
-            oprot.writeI64(self.last_time_updated)
-            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -328,10 +316,6 @@ class VirtualMachineServerMetadata(object):
         if self.hashed_auth_token is None:
             raise TProtocolException(
                 message="Required field hashed_auth_token is unset!"
-            )
-        if self.last_time_updated is None:
-            raise TProtocolException(
-                message="Required field last_time_updated is unset!"
             )
         return
 
@@ -4390,13 +4374,6 @@ VirtualMachineServerMetadata.thrift_spec = (
         [UserData, None],
         None,
     ),  # 3
-    (
-        4,
-        TType.I64,
-        "last_time_updated",
-        None,
-        None,
-    ),  # 4
 )
 all_structs.append(Backend)
 Backend.thrift_spec = (

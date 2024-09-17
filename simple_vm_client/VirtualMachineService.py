@@ -361,11 +361,10 @@ class Iface(object):
 
         """
 
-    def set_metadata_server_data(self, ip, endpoint, metadata):
+    def set_metadata_server_data(self, ip, metadata):
         """
         Parameters:
          - ip
-         - endpoint
          - metadata
 
         """
@@ -2192,24 +2191,22 @@ class Client(Iface):
             "get_backend_by_id failed: unknown result",
         )
 
-    def set_metadata_server_data(self, ip, endpoint, metadata):
+    def set_metadata_server_data(self, ip, metadata):
         """
         Parameters:
          - ip
-         - endpoint
          - metadata
 
         """
-        self.send_set_metadata_server_data(ip, endpoint, metadata)
+        self.send_set_metadata_server_data(ip, metadata)
         self.recv_set_metadata_server_data()
 
-    def send_set_metadata_server_data(self, ip, endpoint, metadata):
+    def send_set_metadata_server_data(self, ip, metadata):
         self._oprot.writeMessageBegin(
             "set_metadata_server_data", TMessageType.CALL, self._seqid
         )
         args = set_metadata_server_data_args()
         args.ip = ip
-        args.endpoint = endpoint
         args.metadata = metadata
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -4912,9 +4909,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = set_metadata_server_data_result()
         try:
-            self._handler.set_metadata_server_data(
-                args.ip, args.endpoint, args.metadata
-            )
+            self._handler.set_metadata_server_data(args.ip, args.metadata)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -13077,7 +13072,6 @@ class set_metadata_server_data_args(object):
     """
     Attributes:
      - ip
-     - endpoint
      - metadata
 
     """
@@ -13085,11 +13079,9 @@ class set_metadata_server_data_args(object):
     def __init__(
         self,
         ip=None,
-        endpoint=None,
         metadata=None,
     ):
         self.ip = ip
-        self.endpoint = endpoint
         self.metadata = metadata
 
     def read(self, iprot):
@@ -13108,15 +13100,6 @@ class set_metadata_server_data_args(object):
             if fid == 1:
                 if ftype == TType.STRING:
                     self.ip = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.endpoint = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -13145,14 +13128,6 @@ class set_metadata_server_data_args(object):
             oprot.writeFieldBegin("ip", TType.STRING, 1)
             oprot.writeString(
                 self.ip.encode("utf-8") if sys.version_info[0] == 2 else self.ip
-            )
-            oprot.writeFieldEnd()
-        if self.endpoint is not None:
-            oprot.writeFieldBegin("endpoint", TType.STRING, 2)
-            oprot.writeString(
-                self.endpoint.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.endpoint
             )
             oprot.writeFieldEnd()
         if self.metadata is not None:
@@ -13186,13 +13161,7 @@ set_metadata_server_data_args.thrift_spec = (
         "UTF8",
         None,
     ),  # 1
-    (
-        2,
-        TType.STRING,
-        "endpoint",
-        "UTF8",
-        None,
-    ),  # 2
+    None,  # 2
     (
         3,
         TType.STRUCT,
