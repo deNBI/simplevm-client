@@ -140,3 +140,20 @@ def os_to_thrift_servers(openstack_servers: list[OpenStack_Server]) -> list[VM]:
         os_to_thrift_server(openstack_server=openstack_server)
         for openstack_server in openstack_servers
     ]
+
+
+def thrift_to_dict(obj):
+    if hasattr(obj, "thrift_spec"):
+        result = {}
+        for k in obj.thrift_spec:
+            if obj.thrift_spec[k] is not None:
+                field = obj.thrift_spec[k][2]
+                value = getattr(obj, field)
+                result[field] = thrift_to_dict(value)
+        return result
+    elif isinstance(obj, list):
+        return [thrift_to_dict(x) for x in obj]
+    elif isinstance(obj, dict):
+        return {thrift_to_dict(k): thrift_to_dict(v) for k, v in obj.items()}
+    else:
+        return obj

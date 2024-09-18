@@ -1,3 +1,4 @@
+import json
 import os
 from urllib.parse import urljoin
 
@@ -6,6 +7,7 @@ import yaml
 
 from simple_vm_client.ttypes import VirtualMachineServerMetadata
 from simple_vm_client.util.logger import setup_custom_logger
+from simple_vm_client.util.thrift_converter import thrift_to_dict
 
 logger = setup_custom_logger(__name__)
 
@@ -81,23 +83,9 @@ class MetadataConnector:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to remove metadata for {ip}: {e}")
 
-    def _serialize_metadata(self, metadata: VirtualMachineServerMetadata):
-        userdata_dict = None
-        if metadata.userdata is not None:
-            userdata_dict = {
-                user_id: {
-                    "username": user.username,
-                    "user_id": user.user_id,
-                    "public_keys": user.public_keys,
-                }
-                for user_id, user in metadata.userdata.data.items()
-            }
-
-        return {
-            "ip": metadata.ip,
-            "hashed_auth_token": metadata.hashed_auth_token,
-            "userdata": userdata_dict,
-        }
+    def _serialize_metadata(self, metadata: VirtualMachineServerMetadata) -> str:
+        metadata_dict = thrift_to_dict(metadata)
+        return json.dumps(metadata_dict)
 
     def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
         if not ip:
@@ -109,12 +97,14 @@ class MetadataConnector:
         logger.info(f"Setting Metadata for {ip}")
         set_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
         try:
+            serialized_data = self._serialize_metadata(metadata=metadata)
             response = requests.post(
                 set_metadata_url,
-                json=self._serialize_metadata(metadata=metadata),
+                data=serialized_data,
                 timeout=(30, 30),
                 headers={
                     "X-Auth-Token": self.METADATA_SERVER_TOKEN,
+                    "Content-Type": "application/json",
                 },
                 verify=False,
             )
