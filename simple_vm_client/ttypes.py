@@ -16,24 +16,24 @@ from thrift.TRecursive import fix_spec
 all_structs = []
 
 
-class VirtualMachineServerMetadata(object):
+class User(object):
     """
     Attributes:
+     - username
+     - user_id
      - public_keys
-     - hashed_auth_token
-     - ip
 
     """
 
     def __init__(
         self,
+        username=None,
+        user_id=None,
         public_keys=None,
-        hashed_auth_token=None,
-        ip=None,
     ):
+        self.username = username
+        self.user_id = user_id
         self.public_keys = public_keys
-        self.hashed_auth_token = hashed_auth_token
-        self.ip = ip
 
     def read(self, iprot):
         if (
@@ -49,6 +49,24 @@ class VirtualMachineServerMetadata(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
+                if ftype == TType.STRING:
+                    self.username = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.user_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.LIST:
                     self.public_keys = []
                     (_etype3, _size0) = iprot.readListBegin()
@@ -62,6 +80,188 @@ class VirtualMachineServerMetadata(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("User")
+        if self.username is not None:
+            oprot.writeFieldBegin("username", TType.STRING, 1)
+            oprot.writeString(
+                self.username.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.username
+            )
+            oprot.writeFieldEnd()
+        if self.user_id is not None:
+            oprot.writeFieldBegin("user_id", TType.STRING, 2)
+            oprot.writeString(
+                self.user_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.user_id
+            )
+            oprot.writeFieldEnd()
+        if self.public_keys is not None:
+            oprot.writeFieldBegin("public_keys", TType.LIST, 3)
+            oprot.writeListBegin(TType.STRING, len(self.public_keys))
+            for iter6 in self.public_keys:
+                oprot.writeString(
+                    iter6.encode("utf-8") if sys.version_info[0] == 2 else iter6
+                )
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.user_id is None:
+            raise TProtocolException(message="Required field user_id is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserData(object):
+    """
+    Attributes:
+     - data
+
+    """
+
+    def __init__(
+        self,
+        data={},
+    ):
+        if data is self.thrift_spec[2][4]:
+            data = {}
+        self.data = data
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 2:
+                if ftype == TType.MAP:
+                    self.data = {}
+                    (_ktype8, _vtype9, _size7) = iprot.readMapBegin()
+                    for _i11 in range(_size7):
+                        _key12 = (
+                            iprot.readString().decode("utf-8", errors="replace")
+                            if sys.version_info[0] == 2
+                            else iprot.readString()
+                        )
+                        _val13 = User()
+                        _val13.read(iprot)
+                        self.data[_key12] = _val13
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("UserData")
+        if self.data is not None:
+            oprot.writeFieldBegin("data", TType.MAP, 2)
+            oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.data))
+            for kiter14, viter15 in self.data.items():
+                oprot.writeString(
+                    kiter14.encode("utf-8") if sys.version_info[0] == 2 else kiter14
+                )
+                viter15.write(oprot)
+            oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.data is None:
+            raise TProtocolException(message="Required field data is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class VirtualMachineServerMetadata(object):
+    """
+    Attributes:
+     - ip
+     - hashed_auth_token
+     - userdata
+
+    """
+
+    def __init__(
+        self,
+        ip=None,
+        hashed_auth_token=None,
+        userdata=None,
+    ):
+        self.ip = ip
+        self.hashed_auth_token = hashed_auth_token
+        self.userdata = userdata
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.ip = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
                     self.hashed_auth_token = (
@@ -72,12 +272,9 @@ class VirtualMachineServerMetadata(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRING:
-                    self.ip = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
+                if ftype == TType.STRUCT:
+                    self.userdata = UserData()
+                    self.userdata.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -92,14 +289,11 @@ class VirtualMachineServerMetadata(object):
             )
             return
         oprot.writeStructBegin("VirtualMachineServerMetadata")
-        if self.public_keys is not None:
-            oprot.writeFieldBegin("public_keys", TType.LIST, 1)
-            oprot.writeListBegin(TType.STRING, len(self.public_keys))
-            for iter6 in self.public_keys:
-                oprot.writeString(
-                    iter6.encode("utf-8") if sys.version_info[0] == 2 else iter6
-                )
-            oprot.writeListEnd()
+        if self.ip is not None:
+            oprot.writeFieldBegin("ip", TType.STRING, 1)
+            oprot.writeString(
+                self.ip.encode("utf-8") if sys.version_info[0] == 2 else self.ip
+            )
             oprot.writeFieldEnd()
         if self.hashed_auth_token is not None:
             oprot.writeFieldBegin("hashed_auth_token", TType.STRING, 2)
@@ -109,16 +303,20 @@ class VirtualMachineServerMetadata(object):
                 else self.hashed_auth_token
             )
             oprot.writeFieldEnd()
-        if self.ip is not None:
-            oprot.writeFieldBegin("ip", TType.STRING, 3)
-            oprot.writeString(
-                self.ip.encode("utf-8") if sys.version_info[0] == 2 else self.ip
-            )
+        if self.userdata is not None:
+            oprot.writeFieldBegin("userdata", TType.STRUCT, 3)
+            self.userdata.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
+        if self.ip is None:
+            raise TProtocolException(message="Required field ip is unset!")
+        if self.hashed_auth_token is None:
+            raise TProtocolException(
+                message="Required field hashed_auth_token is unset!"
+            )
         return
 
     def __repr__(self):
@@ -390,14 +588,14 @@ class ResearchEnvironmentTemplate(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.incompatible_versions = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = (
+                    (_etype19, _size16) = iprot.readListBegin()
+                    for _i20 in range(_size16):
+                        _elem21 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.incompatible_versions.append(_elem12)
+                        self.incompatible_versions.append(_elem21)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -409,19 +607,19 @@ class ResearchEnvironmentTemplate(object):
             elif fid == 9:
                 if ftype == TType.MAP:
                     self.information_for_display = {}
-                    (_ktype14, _vtype15, _size13) = iprot.readMapBegin()
-                    for _i17 in range(_size13):
-                        _key18 = (
+                    (_ktype23, _vtype24, _size22) = iprot.readMapBegin()
+                    for _i26 in range(_size22):
+                        _key27 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val19 = (
+                        _val28 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.information_for_display[_key18] = _val19
+                        self.information_for_display[_key27] = _val28
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -501,9 +699,9 @@ class ResearchEnvironmentTemplate(object):
         if self.incompatible_versions is not None:
             oprot.writeFieldBegin("incompatible_versions", TType.LIST, 7)
             oprot.writeListBegin(TType.STRING, len(self.incompatible_versions))
-            for iter20 in self.incompatible_versions:
+            for iter29 in self.incompatible_versions:
                 oprot.writeString(
-                    iter20.encode("utf-8") if sys.version_info[0] == 2 else iter20
+                    iter29.encode("utf-8") if sys.version_info[0] == 2 else iter29
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
@@ -516,12 +714,12 @@ class ResearchEnvironmentTemplate(object):
             oprot.writeMapBegin(
                 TType.STRING, TType.STRING, len(self.information_for_display)
             )
-            for kiter21, viter22 in self.information_for_display.items():
+            for kiter30, viter31 in self.information_for_display.items():
                 oprot.writeString(
-                    kiter21.encode("utf-8") if sys.version_info[0] == 2 else kiter21
+                    kiter30.encode("utf-8") if sys.version_info[0] == 2 else kiter30
                 )
                 oprot.writeString(
-                    viter22.encode("utf-8") if sys.version_info[0] == 2 else viter22
+                    viter31.encode("utf-8") if sys.version_info[0] == 2 else viter31
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -1581,14 +1779,14 @@ class Image(object):
             elif fid == 9:
                 if ftype == TType.LIST:
                     self.tags = []
-                    (_etype26, _size23) = iprot.readListBegin()
-                    for _i27 in range(_size23):
-                        _elem28 = (
+                    (_etype35, _size32) = iprot.readListBegin()
+                    for _i36 in range(_size32):
+                        _elem37 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.tags.append(_elem28)
+                        self.tags.append(_elem37)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1691,9 +1889,9 @@ class Image(object):
         if self.tags is not None:
             oprot.writeFieldBegin("tags", TType.LIST, 9)
             oprot.writeListBegin(TType.STRING, len(self.tags))
-            for iter29 in self.tags:
+            for iter38 in self.tags:
                 oprot.writeString(
-                    iter29.encode("utf-8") if sys.version_info[0] == 2 else iter29
+                    iter38.encode("utf-8") if sys.version_info[0] == 2 else iter38
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
@@ -1828,19 +2026,19 @@ class VM(object):
             elif fid == 3:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype31, _vtype32, _size30) = iprot.readMapBegin()
-                    for _i34 in range(_size30):
-                        _key35 = (
+                    (_ktype40, _vtype41, _size39) = iprot.readMapBegin()
+                    for _i43 in range(_size39):
+                        _key44 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val36 = (
+                        _val45 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.metadata[_key35] = _val36
+                        self.metadata[_key44] = _val45
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -1948,12 +2146,12 @@ class VM(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 3)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter37, viter38 in self.metadata.items():
+            for kiter46, viter47 in self.metadata.items():
                 oprot.writeString(
-                    kiter37.encode("utf-8") if sys.version_info[0] == 2 else kiter37
+                    kiter46.encode("utf-8") if sys.version_info[0] == 2 else kiter46
                 )
                 oprot.writeString(
-                    viter38.encode("utf-8") if sys.version_info[0] == 2 else viter38
+                    viter47.encode("utf-8") if sys.version_info[0] == 2 else viter47
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -4115,14 +4313,51 @@ class OpenStackConflictException(TException):
         return not (self == other)
 
 
+all_structs.append(User)
+User.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "username",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "user_id",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.LIST,
+        "public_keys",
+        (TType.STRING, "UTF8", False),
+        None,
+    ),  # 3
+)
+all_structs.append(UserData)
+UserData.thrift_spec = (
+    None,  # 0
+    None,  # 1
+    (
+        2,
+        TType.MAP,
+        "data",
+        (TType.STRING, "UTF8", TType.STRUCT, [User, None], False),
+        {},
+    ),  # 2
+)
 all_structs.append(VirtualMachineServerMetadata)
 VirtualMachineServerMetadata.thrift_spec = (
     None,  # 0
     (
         1,
-        TType.LIST,
-        "public_keys",
-        (TType.STRING, "UTF8", False),
+        TType.STRING,
+        "ip",
+        "UTF8",
         None,
     ),  # 1
     (
@@ -4134,9 +4369,9 @@ VirtualMachineServerMetadata.thrift_spec = (
     ),  # 2
     (
         3,
-        TType.STRING,
-        "ip",
-        "UTF8",
+        TType.STRUCT,
+        "userdata",
+        [UserData, None],
         None,
     ),  # 3
 )
