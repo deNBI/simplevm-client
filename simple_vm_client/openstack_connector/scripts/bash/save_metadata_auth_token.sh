@@ -84,14 +84,14 @@ if [ -z "${REAL_METADATA_ENDPOINT}" ]; then
 fi
 
 # Fetch the actual metadata from the extracted endpoint
-metadata_response=$(curl -s -X GET "${REAL_METADATA_ENDPOINT}" -H "${AUTH_HEADER}")
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+metadata_response=$(curl -s -X GET "${REAL_METADATA_ENDPOINT}/metadata/${LOCAL_IP}" -H "${AUTH_HEADER}")
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to fetch metadata"
     exit 1
 fi
 
-echo "Response:"
 echo "${metadata_response}"
 EOF
 
