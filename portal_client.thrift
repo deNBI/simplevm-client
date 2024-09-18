@@ -6,6 +6,12 @@ typedef i32 int
 /** The Version of the Portal-Client*/
 const string VERSION= '1.0.0'
 
+
+struct VirtualMachineServerMetadata {
+    1: list<string> public_keys
+    2: string hashed_auth_token
+    3: string ip
+}
 struct Backend {
     1: i64 id,
     2: string owner,
@@ -208,6 +214,13 @@ struct PlaybookResult {
     2: required string stdout
     /**The error logs of the run*/
     3: required string stderr
+}
+
+exception MetadataServerNotAvailableException {
+    1: string message
+}
+exception MetadataServerNotAllowedException{
+    1: string message
 }
 
 exception ResourceNotFoundException {
@@ -452,6 +465,7 @@ service VirtualMachineService {
      10:optional string research_environment
      11:optional list<string> additional_security_group_ids,
      12:optional string slurm_version,
+     13:optional string metadata_token,
 
     )
 
@@ -485,6 +499,8 @@ service VirtualMachineService {
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
         9:optional list<string> additional_security_group_ids,
+             10:optional string metadata_token,
+
 )  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
 
     /** Check if there is an instance with name */
@@ -542,6 +558,9 @@ service VirtualMachineService {
     ) throws (1:BackendNotFoundException b,2:DefaultException d)
 
 
+    void set_metadata_server_data(1:string ip,2:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
 
     /** Delete a backend*/
     void delete_backend(
@@ -824,5 +843,8 @@ service VirtualMachineService {
 )
 
     throws (1:ServerNotFoundException e, 2: OpenStackConflictException c)
+
+
+
 
 }
