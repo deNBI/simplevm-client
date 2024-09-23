@@ -240,6 +240,7 @@ class OpenStackConnector:
             key_name=key_name,
             meta=metadata,
             security_groups=security_groups,
+            boot_from_volume=False,
         )
         return server
 
@@ -1437,6 +1438,7 @@ class OpenStackConnector:
                 userdata=init_script,
                 security_groups=security_groups,
                 boot_from_volume=False,
+                boot_volume=None,
             )
 
             openstack_id: str = server["id"]
@@ -1458,15 +1460,13 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]] = None,
     ) -> list[Volume]:
         volume_ids = []
-        volumes = []
         if volume_ids_path_new:
             volume_ids.extend([vol["openstack_id"] for vol in volume_ids_path_new])
         if volume_ids_path_attach:
             volume_ids.extend([vol["openstack_id"] for vol in volume_ids_path_attach])
         logger.info(f"volume ids {volume_ids}")
-        for volume_id in volume_ids:
-            volumes.append(self.openstack_connection.get_volume(name_or_id=volume_id))
-        return volumes
+
+        return volume_ids
 
     def _get_security_groups_starting_machine(
         self,
@@ -1556,6 +1556,7 @@ class OpenStackConnector:
                 volumes=volumes,
                 userdata=init_script,
                 security_groups=security_groups,
+                boot_from_volume=False,
             )
 
             openstack_id = server["id"]
