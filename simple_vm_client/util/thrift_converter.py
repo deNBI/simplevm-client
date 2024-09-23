@@ -18,9 +18,8 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
     if not properties:
         properties = {}
     image_type = properties.get("image_type", "image")
-
     image = Image(
-        name=openstack_image.name or "N/A",
+        name=openstack_image.name,
         min_disk=openstack_image.min_disk,
         min_ram=openstack_image.min_ram,
         status=openstack_image.status,
