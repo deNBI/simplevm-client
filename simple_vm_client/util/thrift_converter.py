@@ -20,7 +20,7 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
     image_type = properties.get("image_type", "image")
 
     image = Image(
-        name=openstack_image.name,
+        name=openstack_image.name or "N/A",
         min_disk=openstack_image.min_disk,
         min_ram=openstack_image.min_ram,
         status=openstack_image.status,
@@ -46,7 +46,7 @@ def os_to_thrift_flavor(openstack_flavor: OpenStack_Flavor) -> Flavor:
         vcpus=openstack_flavor.vcpus,
         ram=openstack_flavor.ram,
         disk=openstack_flavor.disk,
-        name=openstack_flavor.name or openstack_flavor.get("original_name", ""),
+        name=openstack_flavor.name or openstack_flavor.get("original_name", "N/A"),
         ephemeral_disk=openstack_flavor.ephemeral,
         description=openstack_flavor.description or "",
     )

@@ -345,7 +345,7 @@ class OpenStackConnector:
 
     def get_servers(self) -> list[Server]:
         logger.info("Get servers")
-        servers: list[Server] = self.openstack_connection.list_servers()
+        servers: list[Server] = self.openstack_connection.list_servers(detailed=True)
         return servers
 
     def get_servers_by_ids(self, ids: list[str]) -> list[Server]:
