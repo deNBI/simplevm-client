@@ -18,7 +18,6 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
     if not properties:
         properties = {}
     image_type = properties.get("image_type", "image")
-
     image = Image(
         name=openstack_image.name,
         min_disk=openstack_image.min_disk,
@@ -46,7 +45,7 @@ def os_to_thrift_flavor(openstack_flavor: OpenStack_Flavor) -> Flavor:
         vcpus=openstack_flavor.vcpus,
         ram=openstack_flavor.ram,
         disk=openstack_flavor.disk,
-        name=openstack_flavor.name or openstack_flavor.get("original_name", ""),
+        name=openstack_flavor.name or openstack_flavor.get("original_name", "N/A"),
         ephemeral_disk=openstack_flavor.ephemeral,
         description=openstack_flavor.description or "",
     )
@@ -140,3 +139,22 @@ def os_to_thrift_servers(openstack_servers: list[OpenStack_Server]) -> list[VM]:
         os_to_thrift_server(openstack_server=openstack_server)
         for openstack_server in openstack_servers
     ]
+
+
+def thrift_to_dict(obj):
+    if hasattr(obj, "thrift_spec") and obj.thrift_spec is not None:
+        result = {}
+        for field in obj.thrift_spec:
+            if field is not None:
+                field_id, field_type, field_name, *rest = field
+                value = getattr(obj, field_name, None)
+                result[field_name] = thrift_to_dict(value)
+        return result
+    elif isinstance(obj, list):
+        return [thrift_to_dict(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {
+            thrift_to_dict(key): thrift_to_dict(value) for key, value in obj.items()
+        }
+    else:
+        return obj

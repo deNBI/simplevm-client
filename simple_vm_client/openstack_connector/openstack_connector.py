@@ -4,9 +4,9 @@ import math
 import os
 import socket
 import sys
+import threading
 import urllib
 import urllib.parse
-import threading
 from contextlib import closing
 from typing import Union
 from uuid import uuid4
@@ -240,6 +240,7 @@ class OpenStackConnector:
             key_name=key_name,
             meta=metadata,
             security_groups=security_groups,
+            boot_from_volume=False,
         )
         return server
 
@@ -345,6 +346,25 @@ class OpenStackConnector:
     def get_servers(self) -> list[Server]:
         logger.info("Get servers")
         servers: list[Server] = self.openstack_connection.list_servers()
+        flavors = {}
+        images = {}
+        for server in servers:
+            flavor = server.flavor
+            if not flavor.get("name"):
+                if not flavors.get(flavor.id):
+                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    flavors[flavor.id] = openstack_flavor
+                    server.flavor = openstack_flavor
+                else:
+                    server.flavor = flavors.get(flavor.id)
+            image = server.image
+            if not image.get("name"):
+                if not image.get(image.id):
+                    openstack_image = self.openstack_connection.get_image(image.id)
+                    images[image.id] = openstack_image
+                    server.image = openstack_image
+                else:
+                    server.image = images.get(image.id)
         return servers
 
     def get_servers_by_ids(self, ids: list[str]) -> list[Server]:
@@ -361,7 +381,25 @@ class OpenStackConnector:
 
             except Exception as e:
                 logger.exception(f"Requested VM {server_id} not found!\n {e}")
-
+        flavors = {}
+        images = {}
+        for server in servers:
+            flavor = server.flavor
+            if not flavor.get("name"):
+                if not flavors.get(flavor.id):
+                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    flavors[flavor.id] = openstack_flavor
+                    server.flavor = openstack_flavor
+                else:
+                    server.flavor = flavors.get(flavor.id)
+            image = server.image
+            if not image.get("name"):
+                if not image.get(image.id):
+                    openstack_image = self.openstack_connection.get_image(image.id)
+                    images[image.id] = openstack_image
+                    server.image = openstack_image
+                else:
+                    server.image = images.get(image.id)
         return servers
 
     def attach_volume_to_server(
@@ -485,6 +523,30 @@ class OpenStackConnector:
         key_script = text
         return key_script
 
+    def create_save_metadata_auth_token_script(
+        self, token: str, metadata_endpoint: str
+    ) -> str:
+        logger.info("create save metadata auth token script")
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        metadata_token_script_path = os.path.join(
+            file_dir, "scripts/bash/save_metadata_auth_token.sh"
+        )
+
+        with open(metadata_token_script_path, "r") as file:
+            text = file.read()
+
+            # Use a unique placeholder in the script for replacement
+            placeholder = "REPLACE_WITH_ACTUAL_TOKEN"
+            endpoint_placeholder = "REPLACE_WITH_ACTUAL_METADATA_INFO_ENDPOINT"
+
+            # Replace the placeholder with the actual token
+            text = text.replace(placeholder, token)
+            text = text.replace(endpoint_placeholder, metadata_endpoint)
+
+            text = encodeutils.safe_encode(text.encode("utf-8"))
+
+        return text
+
     def netcat(self, host: str, port: int) -> bool:
         logger.info(f"Checking SSH Connection {host}:{port}")
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
@@ -522,6 +584,25 @@ class OpenStackConnector:
         logger.info(f"Get Servery by Bibigrid id: {bibigrid_id}")
         filters = {"bibigrid_id": bibigrid_id, "name": bibigrid_id}
         servers: list[Server] = self.openstack_connection.list_servers(filters=filters)
+        flavors = {}
+        images = {}
+        for server in servers:
+            flavor = server.flavor
+            if not flavor.get("name"):
+                if not flavors.get(flavor.id):
+                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    flavors[flavor.id] = openstack_flavor
+                    server.flavor = openstack_flavor
+                else:
+                    server.flavor = flavors.get(flavor.id)
+            image = server.image
+            if not image.get("name"):
+                if not image.get(image.id):
+                    openstack_image = self.openstack_connection.get_image(image.id)
+                    images[image.id] = openstack_image
+                    server.image = openstack_image
+                else:
+                    server.image = images.get(image.id)
         return servers
 
     def get_active_image_by_os_version(
@@ -1043,7 +1124,7 @@ class OpenStackConnector:
             if security_group_name not in lock_dict:
                 lock_dict[security_group_name] = threading.Lock()
             lock = lock_dict[security_group_name]
-        
+
         with lock:
             logger.info(
                 f"Check if Security Group for project - [{project_name}-{project_id}] exists... "
@@ -1072,7 +1153,6 @@ class OpenStackConnector:
                 remote_group_id=new_security_group["id"],
             )
             return new_security_group["id"]
-        
 
     def get_limits(self) -> dict[str, str]:
         logger.info("Get Limits")
@@ -1302,13 +1382,17 @@ class OpenStackConnector:
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_keys: list[str],
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
             unlock_ubuntu_user_script.encode("utf-8")
         )
         init_script = unlock_ubuntu_user_script_encoded
-
+        logger.info(
+            f"Metadata token {metadata_token} | Metadata Endpoint {metadata_endpoint}"
+        )
         if additional_keys:
             add_key_script = self.create_add_keys_script(keys=additional_keys)
             init_script = (
@@ -1326,6 +1410,15 @@ class OpenStackConnector:
                 + encodeutils.safe_encode("\n".encode("utf-8"))
                 + mount_script
             )
+        if metadata_token and metadata_endpoint:
+            save_metadata_token_script = self.create_save_metadata_auth_token_script(
+                token=metadata_token, metadata_endpoint=metadata_endpoint
+            )
+            init_script = (
+                init_script
+                + encodeutils.safe_encode("\n".encode("utf-8"))
+                + save_metadata_token_script
+            )
 
         return init_script
 
@@ -1342,6 +1435,8 @@ class OpenStackConnector:
         additional_keys: Union[list[str], None] = None,
         additional_security_group_ids: Union[list[str], None] = None,
         slurm_version: str = None,
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1384,6 +1479,8 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
+                metadata_token=metadata_token,
+                metadata_endpoint=metadata_endpoint,
             )
             logger.info(f"Starting Server {servername}...")
             server = self.openstack_connection.create_server(
@@ -1396,6 +1493,8 @@ class OpenStackConnector:
                 volumes=volumes,
                 userdata=init_script,
                 security_groups=security_groups,
+                boot_from_volume=False,
+                boot_volume=None,
             )
 
             openstack_id: str = server["id"]
@@ -1417,15 +1516,13 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]] = None,
     ) -> list[Volume]:
         volume_ids = []
-        volumes = []
         if volume_ids_path_new:
             volume_ids.extend([vol["openstack_id"] for vol in volume_ids_path_new])
         if volume_ids_path_attach:
             volume_ids.extend([vol["openstack_id"] for vol in volume_ids_path_attach])
         logger.info(f"volume ids {volume_ids}")
-        for volume_id in volume_ids:
-            volumes.append(self.openstack_connection.get_volume(name_or_id=volume_id))
-        return volumes
+
+        return volume_ids
 
     def _get_security_groups_starting_machine(
         self,
@@ -1467,6 +1564,8 @@ class OpenStackConnector:
         volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
         additional_keys: list[str] = None,  # type: ignore
         additional_security_group_ids=None,  # type: ignore
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1500,6 +1599,8 @@ class OpenStackConnector:
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
                 additional_keys=additional_keys,
+                metadata_token=metadata_token,
+                metadata_endpoint=metadata_endpoint,
             )
             server = self.openstack_connection.create_server(
                 name=servername,
@@ -1511,6 +1612,7 @@ class OpenStackConnector:
                 volumes=volumes,
                 userdata=init_script,
                 security_groups=security_groups,
+                boot_from_volume=False,
             )
 
             openstack_id = server["id"]
