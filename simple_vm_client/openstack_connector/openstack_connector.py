@@ -381,7 +381,25 @@ class OpenStackConnector:
 
             except Exception as e:
                 logger.exception(f"Requested VM {server_id} not found!\n {e}")
-
+        flavors = {}
+        images = {}
+        for server in servers:
+            flavor = server.flavor
+            if not flavor.get("name"):
+                if not flavors.get(flavor.id):
+                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    flavors[flavor.id] = openstack_flavor
+                    server.flavor = openstack_flavor
+                else:
+                    server.flavor = flavors.get(flavor.id)
+            image = server.image
+            if not image.get("name"):
+                if not image.get(image.id):
+                    openstack_image = self.openstack_connection.get_image(image.id)
+                    images[image.id] = openstack_image
+                    server.image = openstack_image
+                else:
+                    server.image = images.get(image.id)
         return servers
 
     def attach_volume_to_server(
