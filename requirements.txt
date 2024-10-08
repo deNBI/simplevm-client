@@ -3,7 +3,7 @@ thrift==0.21.0
 openstacksdk==4.0.0
 deprecated==1.2.14
 Click==8.1.7
-ansible==10.4.0
+ansible==10.5.0
 flake8==7.1.1
 paramiko==3.5.0
 ruamel.yaml==0.18.6
