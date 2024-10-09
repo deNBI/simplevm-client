@@ -42,6 +42,7 @@ from simple_vm_client.ttypes import (
     ImageNotFoundException,
     OpenStackConflictException,
     ResourceNotAvailableException,
+    SecurityGroupNotFoundException,
     ServerNotFoundException,
     SnapshotNotFoundException,
     VolumeNotFoundException,
@@ -1104,6 +1105,18 @@ class OpenStackConnector:
             remote_group_id=self.FORC_SECURITY_GROUP_ID,
         )
         return new_security_group["id"]
+
+    def get_security_group_id_by_name(self, security_group_name):
+        logger.info(f"Get Security Group ID by name: {security_group_name}")
+        sec = self.openstack_connection.get_security_group(
+            ignore_missing=False, name_or_id=security_group_name
+        )
+        logger.info(f"Got Keypair: {sec}")
+        if not sec:
+            raise SecurityGroupNotFoundException(
+                message=f"SecurityGroup with name {security_group_name} not found!"
+            )
+        return sec["id"]
 
     def get_or_create_vm_security_group(self, openstack_id):
         logger.info(f"Check if Security Group for vm - [{openstack_id}] exists... ")

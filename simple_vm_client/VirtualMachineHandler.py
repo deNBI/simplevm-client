@@ -479,8 +479,13 @@ class VirtualMachineHandler(Iface):
     def is_bibigrid_available(self) -> bool:
         return self.bibigrid_connector.is_bibigrid_available()
 
-    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
-        return self.bibigrid_connector.get_cluster_info(cluster_id=cluster_id)
+    def get_security_group_id_by_name(self, security_group_name) -> str:
+        return self.openstack_connector.get_security_group_id_by_name(
+            security_group_name=security_group_name
+        )
+
+    def get_cluster_info(self, cluster_id) -> ClusterInfo:
+        return self.openstack_connector.get_cluster_info(cluster_id=cluster_id)
 
     def get_cluster_status(self, cluster_id: str) -> dict[str, str]:
         return self.bibigrid_connector.get_cluster_status(cluster_id=cluster_id)
