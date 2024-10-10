@@ -1109,7 +1109,7 @@ class OpenStackConnector:
     def get_security_group_id_by_name(self, security_group_name):
         logger.info(f"Get Security Group ID by name: {security_group_name}")
         sec = self.openstack_connection.get_security_group(
-            ignore_missing=False, name_or_id=security_group_name
+            name_or_id=security_group_name
         )
         logger.info(f"Got Keypair: {sec}")
         if not sec:
