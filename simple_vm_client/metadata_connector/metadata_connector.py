@@ -75,7 +75,7 @@ class MetadataConnector:
                 timeout=(30, 30),
                 headers={
                     "X-Auth-Token": self.METADATA_SERVER_TOKEN,
-                },
+                }
             )
             response.raise_for_status()
             logger.info(f"Metadata removed successfully for {ip}")
@@ -104,7 +104,7 @@ class MetadataConnector:
                 headers={
                     "X-Auth-Token": self.METADATA_SERVER_TOKEN,
                     "Content-Type": "application/json",
-                },
+                }
             )
             response.raise_for_status()
             logger.info(f"Metadata set successfully for {ip}")
@@ -123,7 +123,7 @@ class MetadataConnector:
         try:
             response = requests.get(
                 health_url,
-                timeout=(30, 30),
+                timeout=(30, 30)
             )
             response.raise_for_status()
             logger.info(f"Metadata Health Check --- {response.json()}")

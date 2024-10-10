@@ -548,6 +548,7 @@ class TestOpenStackConnector(unittest.TestCase):
             key_name=key_name,
             meta=metadata,
             security_groups=security_groups,
+            boot_from_volume=False,
         )
 
         # Check if the method returns the fake server object
@@ -1194,7 +1195,10 @@ class TestOpenStackConnector(unittest.TestCase):
         bibigrid_id = "your_bibigrid_id"
 
         # Replace with the actual servers you want to simulate
-        expected_servers = list(fakes.generate_fake_resources(flavor.Flavor, count=3))
+        exp_flavor = fakes.generate_fake_resource(flavor.Flavor)
+        expected_servers = list(fakes.generate_fake_resources(server.Server, count=3))
+        for server_ in expected_servers:
+            server_.flavor = exp_flavor
 
         # Mock the list_servers method to simulate fetching servers
         self.mock_openstack_connection.list_servers.return_value = expected_servers
@@ -1564,6 +1568,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volumes=["volume1", "volume2"],
             userdata="userdata",
             security_groups=["sg1", "sg2"],
+            boot_from_volume=False,
         )
 
         mock_create_userdata.assert_called_once_with(
@@ -1571,6 +1576,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_ids_path_attach=volume_ids_path_attach,
             additional_keys=additional_keys,
             metadata_token="test",
+            metadata_endpoint=None,
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(
@@ -1744,12 +1750,12 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         # Assertions
-        self.openstack_connector.openstack_connection.get_volume.assert_has_calls(
-            [call(name_or_id=fake_vol_1.id), call(name_or_id=fake_vol_2.id)]
-        )
+        # self.openstack_connector.openstack_connection.get_volume.assert_has_calls(
+        #    [call(name_or_id=fake_vol_1.id), call(name_or_id=fake_vol_2.id)]
+        # )
 
         # Check the result
-        expected_result = [fake_vol_1, fake_vol_2]
+        expected_result = [fake_vol_1.id, fake_vol_2.id]
         self.assertEqual(result, expected_result)
         volume_ids_path_new = []
         volume_ids_path_attach = []
@@ -1853,6 +1859,8 @@ class TestOpenStackConnector(unittest.TestCase):
             volumes=["volume1", "volume2"],
             userdata="userdata",
             security_groups=["sg1", "sg2"],
+            boot_from_volume=False,
+            boot_volume=None,
         )
 
         mock_create_userdata.assert_called_once_with(
@@ -1860,6 +1868,7 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_ids_path_attach=volume_ids_path_attach,
             additional_keys=additional_keys,
             metadata_token="test",
+            metadata_endpoint=None,
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(

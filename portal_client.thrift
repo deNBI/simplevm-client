@@ -267,6 +267,11 @@ exception ServerNotFoundException {
     2: string name_or_id
 }
 
+exception SecurityGroupNotFoundException {
+    /** Server not found. */
+    1: string message
+    2: string name_or_id
+}
 exception SecurityGroupRuleNotFoundException {
     /** Server not found. */
     1: string message
@@ -619,6 +624,8 @@ service VirtualMachineService {
     **/
 	list<VM> get_servers_by_bibigrid_id(1:string bibigrid_id)
 
+
+    string get_security_group_id_by_name(1:string name) throws(1:SecurityGroupNotFoundException s)
 	map<string,list<string>> scale_up_cluster(1: string cluster_id,2: string image_name,3:string flavor_name,4:int count,
                           5:list<string>names,6:int start_idx,7:int batch_idx)
 

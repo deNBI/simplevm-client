@@ -47,6 +47,7 @@ def startServer(config: str) -> None:
     click.echo(f"Server is running on port {PORT}")
     handler = VirtualMachineHandler(CONFIG_FILE)
     processor = Processor(handler)
+
     if USE_SSL:
         click.echo("Use SSL")
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
