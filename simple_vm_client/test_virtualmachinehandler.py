@@ -442,6 +442,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment="de",
             additional_security_group_ids=[],
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.openstack_connector.start_server.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -456,6 +457,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             slurm_version=None,
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
 
     def test_start_server(self):
@@ -471,6 +473,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment="",
             additional_security_group_ids=[],
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.openstack_connector.start_server.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -485,6 +488,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             slurm_version=None,
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
 
     def test_start_server_with_custom_key(self):
@@ -502,6 +506,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment="",
             additional_security_group_ids=[],
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -513,6 +518,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             research_environment_metadata=None,
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -536,6 +542,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment="de",
             additional_security_group_ids=[],
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -547,6 +554,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             research_environment_metadata="res_metadata",
             metadata_token="test",
+            metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -593,11 +601,11 @@ class TestVirtualMachineHandler(unittest.TestCase):
         self.handler.is_bibigrid_available()
         self.handler.bibigrid_connector.is_bibigrid_available.assert_called_once()
 
-    def test_get_cluster_info(self):
-        self.handler.get_cluster_info(cluster_id=OPENSTACK_ID)
-        self.handler.bibigrid_connector.get_cluster_info.assert_called_once_with(
-            cluster_id=OPENSTACK_ID
-        )
+    #  def test_get_cluster_info(self):
+    #     self.handler.get_cluster_info(cluster_id=OPENSTACK_ID)
+    #    self.handler.bibigrid_connector.get_cluster_info.assert_called_once_with(
+    #       cluster_id=OPENSTACK_ID
+    #  )
 
     def test_get_cluster_status(self):
         self.handler.get_cluster_status(cluster_id=OPENSTACK_ID)

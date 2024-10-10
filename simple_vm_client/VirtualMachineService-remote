@@ -87,6 +87,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("   get_servers()")
     print("   get_servers_by_ids( server_ids)")
     print("   get_servers_by_bibigrid_id(string bibigrid_id)")
+    print("  string get_security_group_id_by_name(string name)")
     print(
         "   scale_up_cluster(string cluster_id, string image_name, string flavor_name, int count,  names, int start_idx, int batch_idx)"
     )
@@ -647,6 +648,16 @@ elif cmd == "get_servers_by_bibigrid_id":
         sys.exit(1)
     pp.pprint(
         client.get_servers_by_bibigrid_id(
+            args[0],
+        )
+    )
+
+elif cmd == "get_security_group_id_by_name":
+    if len(args) != 1:
+        print("get_security_group_id_by_name requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.get_security_group_id_by_name(
             args[0],
         )
     )
