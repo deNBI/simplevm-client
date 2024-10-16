@@ -18,6 +18,7 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
     if not properties:
         properties = {}
     image_type = properties.get("image_type", "image")
+    slurm_version = properties.get("slurm_version", "")
     image = Image(
         name=openstack_image.name,
         min_disk=openstack_image.min_disk,
@@ -27,6 +28,7 @@ def os_to_thrift_image(openstack_image: OpenStack_Image) -> Image:
         updated_at=openstack_image.updated_at,
         os_version=openstack_image.get("os_version", ""),
         os_distro=openstack_image.get("os_distro", ""),
+        slurm_version=openstack_image.get("slurm_version", slurm_version),
         title=properties.get("title", ""),
         openstack_id=openstack_image.id,
         description=properties.get("description", ""),
