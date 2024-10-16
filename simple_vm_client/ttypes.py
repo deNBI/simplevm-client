@@ -1696,6 +1696,7 @@ class Image(object):
      - os_version: OS version of the image
      - os_distro: OS distro of the image
      - title: Title of the image
+     - slurm_version
 
     """
 
@@ -1716,6 +1717,7 @@ class Image(object):
         os_version=None,
         os_distro=None,
         title=None,
+        slurm_version=None,
     ):
         self.name = name
         self.min_disk = min_disk
@@ -1730,6 +1732,7 @@ class Image(object):
         self.os_version = os_version
         self.os_distro = os_distro
         self.title = title
+        self.slurm_version = slurm_version
 
     def read(self, iprot):
         if (
@@ -1854,6 +1857,15 @@ class Image(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.slurm_version = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1952,6 +1964,14 @@ class Image(object):
             oprot.writeFieldBegin("title", TType.STRING, 13)
             oprot.writeString(
                 self.title.encode("utf-8") if sys.version_info[0] == 2 else self.title
+            )
+            oprot.writeFieldEnd()
+        if self.slurm_version is not None:
+            oprot.writeFieldBegin("slurm_version", TType.STRING, 14)
+            oprot.writeString(
+                self.slurm_version.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.slurm_version
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -5074,6 +5094,13 @@ Image.thrift_spec = (
         "UTF8",
         None,
     ),  # 13
+    (
+        14,
+        TType.STRING,
+        "slurm_version",
+        "UTF8",
+        None,
+    ),  # 14
 )
 all_structs.append(VM)
 VM.thrift_spec = (
