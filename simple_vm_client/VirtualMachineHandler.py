@@ -145,7 +145,10 @@ class VirtualMachineHandler(Iface):
                       image_ref: str = None) -> None:
         return self.openstack_connector.rescue_server(openstack_id=openstack_id, 
                                                       admin_pass=admin_pass, 
-                                                      image_ref=image_ref)    
+                                                      image_ref=image_ref)
+
+    def unrescue_server(self, openstack_id: str) -> None:
+        return self.openstack_connector.unrescue_server(openstack_id=openstack_id)    
 
     def reboot_hard_server(self, openstack_id: str) -> None:
         return self.openstack_connector.reboot_hard_server(openstack_id=openstack_id)

@@ -468,6 +468,13 @@ service VirtualMachineService {
 
 	throws (1:ServerNotFoundException e, 2: OpenStackConflictException c)
 
+    void unrescue_server(
+
+	/** Id of the server. */
+	1:string openstack_id)
+
+	throws (1:ServerNotFoundException e, 2: OpenStackConflictException c)
+
 
 	string start_server(
 	/** Name of the  Flavor to use.*/

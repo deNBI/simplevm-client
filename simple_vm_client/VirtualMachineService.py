@@ -216,6 +216,14 @@ class Iface(object):
         """
         pass
 
+    def unrescue_server(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id: Id of the server.
+
+        """
+        pass
+
     def start_server(self, flavor_name, image_name, public_key, servername, metadata, volume_ids_path_new, volume_ids_path_attach, additional_keys, research_environment, additional_security_group_ids, slurm_version, metadata_token, metadata_endpoint):
         """
         Parameters:
@@ -1484,6 +1492,40 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = rescue_server_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        if result.c is not None:
+            raise result.c
+        return
+
+    def unrescue_server(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id: Id of the server.
+
+        """
+        self.send_unrescue_server(openstack_id)
+        self.recv_unrescue_server()
+
+    def send_unrescue_server(self, openstack_id):
+        self._oprot.writeMessageBegin('unrescue_server', TMessageType.CALL, self._seqid)
+        args = unrescue_server_args()
+        args.openstack_id = openstack_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_unrescue_server(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = unrescue_server_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.e is not None:
@@ -3488,6 +3530,7 @@ class Processor(Iface, TProcessor):
         self._processMap["delete_security_group_rule"] = Processor.process_delete_security_group_rule
         self._processMap["delete_server"] = Processor.process_delete_server
         self._processMap["rescue_server"] = Processor.process_rescue_server
+        self._processMap["unrescue_server"] = Processor.process_unrescue_server
         self._processMap["start_server"] = Processor.process_start_server
         self._processMap["is_bibigrid_available"] = Processor.process_is_bibigrid_available
         self._processMap["detach_ip_from_server"] = Processor.process_detach_ip_from_server
@@ -4099,6 +4142,35 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("rescue_server", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_unrescue_server(self, seqid, iprot, oprot):
+        args = unrescue_server_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = unrescue_server_result()
+        try:
+            self._handler.unrescue_server(args.openstack_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ServerNotFoundException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except OpenStackConflictException as c:
+            msg_type = TMessageType.REPLY
+            result.c = c
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("unrescue_server", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -8345,6 +8417,142 @@ class rescue_server_result(object):
         return not (self == other)
 all_structs.append(rescue_server_result)
 rescue_server_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'e', [ServerNotFoundException, None], None, ),  # 1
+    (2, TType.STRUCT, 'c', [OpenStackConflictException, None], None, ),  # 2
+)
+
+
+class unrescue_server_args(object):
+    """
+    Attributes:
+     - openstack_id: Id of the server.
+
+    """
+
+
+    def __init__(self, openstack_id=None,):
+        self.openstack_id = openstack_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.openstack_id = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('unrescue_server_args')
+        if self.openstack_id is not None:
+            oprot.writeFieldBegin('openstack_id', TType.STRING, 1)
+            oprot.writeString(self.openstack_id.encode('utf-8') if sys.version_info[0] == 2 else self.openstack_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(unrescue_server_args)
+unrescue_server_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'openstack_id', 'UTF8', None, ),  # 1
+)
+
+
+class unrescue_server_result(object):
+    """
+    Attributes:
+     - e
+     - c
+
+    """
+
+
+    def __init__(self, e=None, c=None,):
+        self.e = e
+        self.c = c
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = ServerNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.c = OpenStackConflictException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('unrescue_server_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        if self.c is not None:
+            oprot.writeFieldBegin('c', TType.STRUCT, 2)
+            self.c.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(unrescue_server_result)
+unrescue_server_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'e', [ServerNotFoundException, None], None, ),  # 1
     (2, TType.STRUCT, 'c', [OpenStackConflictException, None], None, ),  # 2
