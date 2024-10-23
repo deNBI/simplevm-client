@@ -1364,6 +1364,41 @@ class OpenStackConnector:
             logger.error(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
+        
+    def rescue_server(self, openstack_id: str, admin_pass: str = None, image_ref: str = None) -> None:
+        logger.info(f"Rescue Server {openstack_id}")
+        try:
+            server: Server = self.get_server(openstack_id=openstack_id)
+            if not server:
+                logger.error(f"Instance {openstack_id} not found")
+                raise ServerNotFoundException(
+                    message=f"Instance {openstack_id} not found",
+                    name_or_id=openstack_id,
+                )
+            self.openstack_connection.compute.rescue_server(server.id, admin_pass, image_ref)
+
+        except ConflictException as e:
+            logger.error(f"Rescue Server {openstack_id} failed!")
+
+            raise OpenStackConflictException(message=e.message)  
+
+    def unrescue_server(self, openstack_id: str) -> None:
+        logger.info(f"Unrescue Server {openstack_id}")
+        try:
+            server: Server = self.get_server(openstack_id=openstack_id)
+            if not server:
+                logger.error(f"Instance {openstack_id} not found")
+                raise ServerNotFoundException(
+                    message=f"Instance {openstack_id} not found",
+                    name_or_id=openstack_id,
+                )
+
+            self.openstack_connection.compute.unrescue_server(server.id,)
+
+        except ConflictException as e:
+            logger.error(f"Unrescue Server {openstack_id} failed!")
+
+            raise OpenStackConflictException(message=e.message)  
 
     def _calculate_vm_ports(self, server: Server):
         fixed_ip = server.private_v4
