@@ -170,6 +170,8 @@ struct Image{
 
     /** Title of the image */
     13:optional string title
+
+    14:optional string slurm_version
 }
 /**
  * This Struct defines a VirtualMachine.

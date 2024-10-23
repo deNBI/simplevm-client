@@ -1209,11 +1209,28 @@ class Image(object):
      - os_version: OS version of the image
      - os_distro: OS distro of the image
      - title: Title of the image
+     - slurm_version
 
     """
 
 
-    def __init__(self, name=None, min_disk=None, min_ram=None, status=None, created_at=None, updated_at=None, openstack_id=None, description=None, tags=None, is_snapshot=None, os_version=None, os_distro=None, title=None,):
+    def __init__(
+        self,
+        name=None,
+        min_disk=None,
+        min_ram=None,
+        status=None,
+        created_at=None,
+        updated_at=None,
+        openstack_id=None,
+        description=None,
+        tags=None,
+        is_snapshot=None,
+        os_version=None,
+        os_distro=None,
+        title=None,
+        slurm_version=None,
+    ):
         self.name = name
         self.min_disk = min_disk
         self.min_ram = min_ram
@@ -1227,6 +1244,7 @@ class Image(object):
         self.os_version = os_version
         self.os_distro = os_distro
         self.title = title
+        self.slurm_version = slurm_version
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1304,7 +1322,20 @@ class Image(object):
                     iprot.skip(ftype)
             elif fid == 13:
                 if ftype == TType.STRING:
-                    self.title = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                    self.title = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.slurm_version = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
                 else:
                     iprot.skip(ftype)
             else:
@@ -1369,8 +1400,18 @@ class Image(object):
             oprot.writeString(self.os_distro.encode('utf-8') if sys.version_info[0] == 2 else self.os_distro)
             oprot.writeFieldEnd()
         if self.title is not None:
-            oprot.writeFieldBegin('title', TType.STRING, 13)
-            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldBegin("title", TType.STRING, 13)
+            oprot.writeString(
+                self.title.encode("utf-8") if sys.version_info[0] == 2 else self.title
+            )
+            oprot.writeFieldEnd()
+        if self.slurm_version is not None:
+            oprot.writeFieldBegin("slurm_version", TType.STRING, 14)
+            oprot.writeString(
+                self.slurm_version.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.slurm_version
+            )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -3376,19 +3417,104 @@ Flavor.thrift_spec = (
 all_structs.append(Image)
 Image.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
-    (2, TType.I32, 'min_disk', None, None, ),  # 2
-    (3, TType.I32, 'min_ram', None, None, ),  # 3
-    (4, TType.STRING, 'status', 'UTF8', None, ),  # 4
-    (5, TType.STRING, 'created_at', 'UTF8', None, ),  # 5
-    (6, TType.STRING, 'updated_at', 'UTF8', None, ),  # 6
-    (7, TType.STRING, 'openstack_id', 'UTF8', None, ),  # 7
-    (8, TType.STRING, 'description', 'UTF8', None, ),  # 8
-    (9, TType.LIST, 'tags', (TType.STRING, 'UTF8', False), None, ),  # 9
-    (10, TType.BOOL, 'is_snapshot', None, None, ),  # 10
-    (11, TType.STRING, 'os_version', 'UTF8', None, ),  # 11
-    (12, TType.STRING, 'os_distro', 'UTF8', None, ),  # 12
-    (13, TType.STRING, 'title', 'UTF8', None, ),  # 13
+    (
+        1,
+        TType.STRING,
+        "name",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.I32,
+        "min_disk",
+        None,
+        None,
+    ),  # 2
+    (
+        3,
+        TType.I32,
+        "min_ram",
+        None,
+        None,
+    ),  # 3
+    (
+        4,
+        TType.STRING,
+        "status",
+        "UTF8",
+        None,
+    ),  # 4
+    (
+        5,
+        TType.STRING,
+        "created_at",
+        "UTF8",
+        None,
+    ),  # 5
+    (
+        6,
+        TType.STRING,
+        "updated_at",
+        "UTF8",
+        None,
+    ),  # 6
+    (
+        7,
+        TType.STRING,
+        "openstack_id",
+        "UTF8",
+        None,
+    ),  # 7
+    (
+        8,
+        TType.STRING,
+        "description",
+        "UTF8",
+        None,
+    ),  # 8
+    (
+        9,
+        TType.LIST,
+        "tags",
+        (TType.STRING, "UTF8", False),
+        None,
+    ),  # 9
+    (
+        10,
+        TType.BOOL,
+        "is_snapshot",
+        None,
+        None,
+    ),  # 10
+    (
+        11,
+        TType.STRING,
+        "os_version",
+        "UTF8",
+        None,
+    ),  # 11
+    (
+        12,
+        TType.STRING,
+        "os_distro",
+        "UTF8",
+        None,
+    ),  # 12
+    (
+        13,
+        TType.STRING,
+        "title",
+        "UTF8",
+        None,
+    ),  # 13
+    (
+        14,
+        TType.STRING,
+        "slurm_version",
+        "UTF8",
+        None,
+    ),  # 14
 )
 all_structs.append(VM)
 VM.thrift_spec = (
