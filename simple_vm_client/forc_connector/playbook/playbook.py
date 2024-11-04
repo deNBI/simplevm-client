@@ -129,7 +129,7 @@ class Playbook(object):
             self.yaml_exec.dump(data_gp, generic_playbook)
 
     def copy_and_init_research_environment(self) -> None:
-        if not self.research_environment_template:
+        if not self.research_environment_template or self.create_only_backend:
             return
 
         shutil.copytree(
