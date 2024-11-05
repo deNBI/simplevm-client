@@ -107,7 +107,11 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         return VM(vm_state=VmStates.NOT_FOUND)
     fixed_ip = ""
     floating_ip = ""
-    flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
+    if openstack_server.flavor:
+
+        flavor = os_to_thrift_flavor(openstack_flavor=openstack_server.flavor)
+    else:
+        flavor = None
     if openstack_server.image:
         image = os_to_thrift_image(openstack_image=openstack_server.image)
     else:
