@@ -572,7 +572,7 @@ class OpenStackConnector:
                     message=f"Flavor {name_or_id} not found!", name_or_id=name_or_id
                 )
             else:
-                return Flavor()
+                return None
 
         return flavor
 
@@ -1263,7 +1263,6 @@ class OpenStackConnector:
                 ignore_not_active=True,
                 ignore_not_found=True,
             )
-
             server.flavor = self.get_flavor(
                 name_or_id=server.flavor["id"], ignore_error=True
             )
