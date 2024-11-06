@@ -18,5 +18,5 @@ colorama==0.4.6
 gevent==24.10.3
 pytest==8.3.3
 types-redis==4.6.0.20241004
-oslo.utils==7.3.0
+oslo.utils==7.4.0
 passlib==1.7.4
