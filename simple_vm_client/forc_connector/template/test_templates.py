@@ -98,28 +98,28 @@ class TestTemplate(unittest.TestCase):
     GITHUB_REPO_STAGING = (
         "https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip"
     )
-    FORC_URL = "https://FAKE_URL.de"
+    FORC_BACKEND_URL = "https://FAKE_URL.de"
 
     def get_metadata_example(self):
         return copy.deepcopy(METADATA_EXAMPLE)
 
     def init_template(
-        self, github_playbook_repo=None, forc_url="", forc_api_key="1234"
+        self, github_playbook_repo=None, forc_backend_url="", forc_api_key="1234"
     ):
         with patch.object(Template, "__init__", lambda x, y, z: None):
             template = Template(None, None)
-            template.FORC_URL = forc_url
+            template.FORC_BACKEND_URL = forc_backend_url
             template.GITHUB_PLAYBOOKS_REPO = github_playbook_repo
             template.FORC_API_KEY = forc_api_key
-            template.TEMPLATES_URL = f"{template.FORC_URL}templates"
-            template.BACKENDS_URL = f"{template.FORC_URL}backends"
+            template.TEMPLATES_URL = f"{template.FORC_BACKEND_URL}templates"
+            template.BACKENDS_URL = f"{template.FORC_BACKEND_URL}backends"
             template.BACKENDS_BY_OWNER_URL = f"{template.BACKENDS_URL}/byOwner"
             template.BACKENDS_BY_TEMPLATE_URL = f"{template.BACKENDS_URL}/byTemplate"
             template._forc_allowed: dict[str, list[str]] = {}
             template._all_templates = [CONDA]
-            template._loaded_resenv_metadata: dict[
-                str, ResearchEnvironmentMetadata
-            ] = {}
+            template._loaded_resenv_metadata: dict[str, ResearchEnvironmentMetadata] = (
+                {}
+            )
             template._allowed_forc_templates: list[ResearchEnvironmentTemplate] = []
 
         return template
@@ -133,7 +133,7 @@ class TestTemplate(unittest.TestCase):
     ):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Set up mock responses
@@ -175,7 +175,7 @@ class TestTemplate(unittest.TestCase):
     ):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Set up mock responses
@@ -212,7 +212,7 @@ class TestTemplate(unittest.TestCase):
     def test_update_loaded_templates(self, mock_isdir, mock_listdir):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Set up mock responses
@@ -285,7 +285,7 @@ class TestTemplate(unittest.TestCase):
         # Create an instance of the Template class
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Call the method to be tested
@@ -305,7 +305,7 @@ class TestTemplate(unittest.TestCase):
         expected_version = "1.2.3"
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         template._forc_allowed = {template_name: [expected_version]}
@@ -321,7 +321,7 @@ class TestTemplate(unittest.TestCase):
         template_name = "nonexistent_template"
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         template._forc_allowed = {}
@@ -336,7 +336,7 @@ class TestTemplate(unittest.TestCase):
     def test_get_allowed_templates(self, mock_logger_info):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         template._allowed_forc_templates = MOCK_TEMPLATES
@@ -359,7 +359,7 @@ class TestTemplate(unittest.TestCase):
         mock_requests_get.return_value = expected_response
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Call the method to be tested
@@ -386,7 +386,7 @@ class TestTemplate(unittest.TestCase):
     def test_update_forc_allowed_versions(self):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Call the method to be tested
@@ -406,7 +406,7 @@ class TestTemplate(unittest.TestCase):
         mock_get_forc_template_version.return_value.status_code = 200
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Call the method to be tested
@@ -431,7 +431,7 @@ class TestTemplate(unittest.TestCase):
     ):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         metadata_example = self.get_metadata_example()
         metadata_example.needs_forc_support = False
@@ -448,7 +448,7 @@ class TestTemplate(unittest.TestCase):
 
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         metadata_example = self.get_metadata_example()
 
@@ -476,7 +476,7 @@ class TestTemplate(unittest.TestCase):
         file_path = "fake/path/to/template_metadata.yml"
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Set the return value for yaml.load
@@ -497,7 +497,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         template_metadata_name = "fake_metadata_name"
         template_name = "fake_template"
@@ -526,7 +526,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         mock_template_metadata: ResearchEnvironmentMetadata = (
             self.get_metadata_example()
@@ -558,7 +558,7 @@ class TestTemplate(unittest.TestCase):
     ):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         mock_template_metadata: ResearchEnvironmentMetadata = (
             self.get_metadata_example()
@@ -578,7 +578,7 @@ class TestTemplate(unittest.TestCase):
     def test_add_forc_allowed_template(self):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         mock_template_metadata: ResearchEnvironmentMetadata = (
             self.get_metadata_example()
@@ -604,7 +604,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         expected_response = [
             {"template_name": "template1"},
@@ -634,7 +634,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         error_msg = "Error fetching FORC templates"
         mock_requests_get.side_effect = requests.RequestException(error_msg)
@@ -661,7 +661,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         tags = ["template1", "template2"]
         allowed_templates = {"template1": ["version1"], "template2": ["version2"]}
@@ -689,7 +689,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         tags = ["template1", "template2"]
         mock_get_forc_templates.side_effect = Exception("Simulated exception")
@@ -711,7 +711,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         metadata = self.get_metadata_example()
 
@@ -733,14 +733,14 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         existing_metadata = self.get_metadata_example()
         new_metadata = self.get_metadata_example()
         new_metadata.port = 9000
-        template._loaded_resenv_metadata[
-            existing_metadata.template_name
-        ] = existing_metadata
+        template._loaded_resenv_metadata[existing_metadata.template_name] = (
+            existing_metadata
+        )
         # Act
         template._process_template_metadata(new_metadata)
 
@@ -767,7 +767,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         # Mocking the _load_resenv_metadata method to return a list of ResearchEnvironmentMetadata instances
         mock_metadata1 = self.get_metadata_example()
@@ -820,7 +820,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
 
         # Act
@@ -843,21 +843,23 @@ class TestTemplate(unittest.TestCase):
     def test_init(self, mock_update_playbooks):
         # Arrange
         github_playbook_repo = "https://github.com/playbooks"
-        forc_url = "https://forc.example.com/"
+        forc_backend_url = "https://forc.example.com/"
         forc_api_key = "your-api-key"
 
         # Act
-        instance = Template(github_playbook_repo, forc_url, forc_api_key)
+        instance = Template(github_playbook_repo, forc_backend_url, forc_api_key)
 
         # Assert
         self.assertEqual(instance.GITHUB_PLAYBOOKS_REPO, github_playbook_repo)
-        self.assertEqual(instance.FORC_URL, forc_url)
+        self.assertEqual(instance.FORC_BACKEND_URL, forc_backend_url)
         self.assertEqual(instance.FORC_API_KEY, forc_api_key)
-        self.assertEqual(instance.TEMPLATES_URL, f"{forc_url}templates")
-        self.assertEqual(instance.BACKENDS_URL, f"{forc_url}backends")
-        self.assertEqual(instance.BACKENDS_BY_OWNER_URL, f"{forc_url}backends/byOwner")
+        self.assertEqual(instance.TEMPLATES_URL, f"{forc_backend_url}templates")
+        self.assertEqual(instance.BACKENDS_URL, f"{forc_backend_url}backends")
         self.assertEqual(
-            instance.BACKENDS_BY_TEMPLATE_URL, f"{forc_url}backends/byTemplate"
+            instance.BACKENDS_BY_OWNER_URL, f"{forc_backend_url}backends/byOwner"
+        )
+        self.assertEqual(
+            instance.BACKENDS_BY_TEMPLATE_URL, f"{forc_backend_url}backends/byTemplate"
         )
         self.assertEqual(instance._forc_allowed, {})
         self.assertEqual(instance._all_templates, [CONDA])
@@ -869,7 +871,7 @@ class TestTemplate(unittest.TestCase):
         # Arrange
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
-            forc_url=TestTemplate.FORC_URL,
+            forc_backend_url=TestTemplate.FORC_BACKEND_URL,
         )
         mock_metadata1 = self.get_metadata_example()
         mock_metadata2 = self.get_metadata_example()

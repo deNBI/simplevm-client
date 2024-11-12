@@ -80,14 +80,25 @@ class ResearchEnvironmentMetadata:
 
 
 class Template(object):
-    def __init__(self, github_playbook_repo: str, forc_url: str, forc_api_key: str):
+    def __init__(
+        self,
+        github_playbook_repo: str,
+        forc_backend_url: str,
+        forc_api_key: str,
+        forc_backend_use_https: bool,
+    ):
         self.GITHUB_PLAYBOOKS_REPO = github_playbook_repo
-        self.FORC_URL = forc_url
+        self.FORC_BACKEND_URL = forc_backend_url
         self.FORC_API_KEY = forc_api_key
-        if not self.FORC_URL:
+        self.FORC_BACKEND_USE_HTTPS = forc_backend_use_https
+        if not self.FORC_BACKEND_URL:
             logger.info("No FORC URL defined. Skipping Forc...")
-        self.TEMPLATES_URL = f"{self.FORC_URL}templates" if self.FORC_URL else ""
-        self.BACKENDS_URL = f"{self.FORC_URL}backends" if self.FORC_URL else ""
+        self.TEMPLATES_URL = (
+            f"{self.FORC_BACKEND_URL}templates" if self.FORC_BACKEND_URL else ""
+        )
+        self.BACKENDS_URL = (
+            f"{self.FORC_BACKEND_URL}backends" if self.FORC_BACKEND_URL else ""
+        )
         self.BACKENDS_BY_OWNER_URL = f"{self.BACKENDS_URL}/byOwner"
         self.BACKENDS_BY_TEMPLATE_URL = f"{self.BACKENDS_URL}/byTemplate"
         self._forc_allowed: dict[str, list[str]] = {}
@@ -187,7 +198,7 @@ class Template(object):
                     self.TEMPLATES_URL,
                     timeout=(30, 30),
                     headers={"X-API-KEY": self.FORC_API_KEY},
-                    verify=True,
+                    verify=self.FORC_BACKEND_USE_HTTPS,
                 )
                 response.raise_for_status()  # Raise HTTPError for bad responses
                 return response.json()
@@ -306,7 +317,7 @@ class Template(object):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.FORC_API_KEY},
-            verify=True,
+            verify=self.FORC_BACKEND_USE_HTTPS,
         )
 
     def _update_forc_allowed_versions(

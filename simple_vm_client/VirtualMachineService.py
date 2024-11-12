@@ -331,7 +331,7 @@ class Iface(object):
 
         """
 
-    def get_forc_url(self):
+    def get_forc_access_url(self):
         pass
 
     def create_backend(self, owner, user_path, template, upstream_url):
@@ -2059,18 +2059,20 @@ class Client(Iface):
             TApplicationException.MISSING_RESULT, "has_forc failed: unknown result"
         )
 
-    def get_forc_url(self):
-        self.send_get_forc_url()
-        return self.recv_get_forc_url()
+    def get_forc_access_url(self):
+        self.send_get_forc_access_url()
+        return self.recv_get_forc_access_url()
 
-    def send_get_forc_url(self):
-        self._oprot.writeMessageBegin("get_forc_url", TMessageType.CALL, self._seqid)
-        args = get_forc_url_args()
+    def send_get_forc_access_url(self):
+        self._oprot.writeMessageBegin(
+            "get_forc_access_url", TMessageType.CALL, self._seqid
+        )
+        args = get_forc_access_url_args()
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_get_forc_url(self):
+    def recv_get_forc_access_url(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -2078,13 +2080,14 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = get_forc_url_result()
+        result = get_forc_access_url_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         raise TApplicationException(
-            TApplicationException.MISSING_RESULT, "get_forc_url failed: unknown result"
+            TApplicationException.MISSING_RESULT,
+            "get_forc_access_url failed: unknown result",
         )
 
     def create_backend(self, owner, user_path, template, upstream_url):
@@ -3936,7 +3939,7 @@ class Processor(Iface, TProcessor):
         )
         self._processMap["get_playbook_logs"] = Processor.process_get_playbook_logs
         self._processMap["has_forc"] = Processor.process_has_forc
-        self._processMap["get_forc_url"] = Processor.process_get_forc_url
+        self._processMap["get_forc_access_url"] = Processor.process_get_forc_access_url
         self._processMap["create_backend"] = Processor.process_create_backend
         self._processMap["get_backends"] = Processor.process_get_backends
         self._processMap["get_backends_by_owner"] = (
@@ -4941,13 +4944,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_get_forc_url(self, seqid, iprot, oprot):
-        args = get_forc_url_args()
+    def process_get_forc_access_url(self, seqid, iprot, oprot):
+        args = get_forc_access_url_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = get_forc_url_result()
+        result = get_forc_access_url_result()
         try:
-            result.success = self._handler.get_forc_url()
+            result.success = self._handler.get_forc_access_url()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -4961,7 +4964,7 @@ class Processor(Iface, TProcessor):
             result = TApplicationException(
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
-        oprot.writeMessageBegin("get_forc_url", msg_type, seqid)
+        oprot.writeMessageBegin("get_forc_access_url", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12796,7 +12799,7 @@ has_forc_result.thrift_spec = (
 )
 
 
-class get_forc_url_args(object):
+class get_forc_access_url_args(object):
     thrift_spec = None
 
     def read(self, iprot):
@@ -12824,7 +12827,7 @@ class get_forc_url_args(object):
                 oprot._fast_encode(self, [self.__class__, self.thrift_spec])
             )
             return
-        oprot.writeStructBegin("get_forc_url_args")
+        oprot.writeStructBegin("get_forc_access_url_args")
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -12842,11 +12845,11 @@ class get_forc_url_args(object):
         return not (self == other)
 
 
-all_structs.append(get_forc_url_args)
-get_forc_url_args.thrift_spec = ()
+all_structs.append(get_forc_access_url_args)
+get_forc_access_url_args.thrift_spec = ()
 
 
-class get_forc_url_result(object):
+class get_forc_access_url_result(object):
     """
     Attributes:
      - success
@@ -12895,7 +12898,7 @@ class get_forc_url_result(object):
                 oprot._fast_encode(self, [self.__class__, self.thrift_spec])
             )
             return
-        oprot.writeStructBegin("get_forc_url_result")
+        oprot.writeStructBegin("get_forc_access_url_result")
         if self.success is not None:
             oprot.writeFieldBegin("success", TType.STRING, 0)
             oprot.writeString(
@@ -12921,8 +12924,8 @@ class get_forc_url_result(object):
         return not (self == other)
 
 
-all_structs.append(get_forc_url_result)
-get_forc_url_result.thrift_spec = (
+all_structs.append(get_forc_access_url_result)
+get_forc_access_url_result.thrift_spec = (
     (
         0,
         TType.STRING,

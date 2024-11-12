@@ -65,6 +65,7 @@ class OpenStackConnector:
         # Config FIle Data
         logger.info("Initializing OpenStack Connector")
         self.GATEWAY_IP: str = ""
+        self.INTERNAL_GATEWAY_IP: str = ""
         self.NETWORK: str = ""
         self.PRODUCTION: bool = True
         self.CLOUD_SITE: str = ""
@@ -147,6 +148,8 @@ class OpenStackConnector:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
 
             self.GATEWAY_IP = cfg["openstack"]["gateway_ip"]
+            self.INTERNAL_GATEWAY_IP = cfg["openstack"].get("internal_gateway_ip")
+
             self.NETWORK = cfg["openstack"]["network"]
             self.PRODUCTION = cfg["production"]
             self.CLOUD_SITE = cfg["openstack"]["cloud_site"]
@@ -549,7 +552,8 @@ class OpenStackConnector:
 
         return text
 
-    def netcat(self, host: str, port: int) -> bool:
+    def netcat(self, port: int) -> bool:
+        host = self.INTERNAL_GATEWAY_IP if self.INTERNAL_GATEWAY_IP else self.GATEWAY_IP
         logger.info(f"Checking SSH Connection {host}:{port}")
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             sock.settimeout(5)
@@ -809,7 +813,10 @@ class OpenStackConnector:
     def get_gateway_ip(self) -> dict[str, str]:
         logger.info("Get Gateway IP")
 
-        return {"gateway_ip": self.GATEWAY_IP}
+        return {
+            "gateway_ip": self.GATEWAY_IP,
+            "internal_gateway_ip": self.INTERNAL_GATEWAY_IP,
+        }
 
     def create_mount_init_script(
         self,
@@ -1218,7 +1225,7 @@ class OpenStackConnector:
             if server.vm_state == VmStates.ACTIVE.value:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
-                if not self.netcat(host=self.GATEWAY_IP, port=ssh_port):
+                if not self.netcat(port=ssh_port):
                     server.task_state = VmTaskStates.CHECKING_SSH_CONNECTION.value
 
             server.image = self.get_image(
@@ -1255,7 +1262,7 @@ class OpenStackConnector:
             if server.vm_state == VmStates.ACTIVE.value:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
-                if not self.netcat(host=self.GATEWAY_IP, port=ssh_port):
+                if not self.netcat(port=ssh_port):
                     server.task_state = VmTaskStates.CHECKING_SSH_CONNECTION.value
 
             server.image = self.get_image(

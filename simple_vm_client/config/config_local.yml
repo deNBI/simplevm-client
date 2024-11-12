@@ -48,6 +48,8 @@ openstack:
   udp_port_calculation: 30000 + x + y * 256
   # Calculation for determining the UDP port. Schema -> 192.168.y.x
   gateway_ip: 129.70.51.75
+  # Can be provided if the external Gateway is not reachable for the Client (Berlin) OPTIONAL
+  internal_gateway_ip: 129.70.51.75
   # IP address of the OpenStack gateway.
   network: portalexternalnetwork
   # Name or identifier of the openstack network
@@ -74,7 +76,8 @@ bibigrid:
 forc:
   activated: True
   # If Forc ist activated  -- defaults to True
-  forc_url: https://proxy-dev.bi.denbi.de:5000/
+  forc_backend_url: https://proxy-dev.bi.denbi.de:5000/
+  forc_backend_use_https: True
   # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.

@@ -70,7 +70,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     )
     print("  PlaybookResult get_playbook_logs(string openstack_id)")
     print("  bool has_forc()")
-    print("  string get_forc_url()")
+    print("  string get_forc_access_url()")
     print(
         "  Backend create_backend(string owner, string user_path, string template, string upstream_url)"
     )
@@ -523,11 +523,11 @@ elif cmd == "has_forc":
         sys.exit(1)
     pp.pprint(client.has_forc())
 
-elif cmd == "get_forc_url":
+elif cmd == "get_forc_access_url":
     if len(args) != 0:
-        print("get_forc_url requires 0 args")
+        print("get_forc_access_url requires 0 args")
         sys.exit(1)
-    pp.pprint(client.get_forc_url())
+    pp.pprint(client.get_forc_access_url())
 
 elif cmd == "create_backend":
     if len(args) != 4:

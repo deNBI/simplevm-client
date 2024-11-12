@@ -569,7 +569,7 @@ service VirtualMachineService {
     /** Get boolean if client has backend url configured*/
     bool has_forc()
 
-    string get_forc_url()
+    string get_forc_access_url()
 
     /** Create a backend*/
     Backend create_backend(

@@ -207,8 +207,11 @@ class VirtualMachineHandler(Iface):
     def has_forc(self) -> bool:
         return self.forc_connector.has_forc()
 
-    def get_forc_url(self) -> str:
+    def get_forc_access_url(self) -> str:
         return self.forc_connector.get_forc_access_url()
+
+    def get_forc_backend_url(self) -> str:
+        return self.forc_connector.get_forc_backend_url()
 
     def create_snapshot(
         self,
@@ -472,8 +475,7 @@ class VirtualMachineHandler(Iface):
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
         )
-        gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
-        if self.openstack_connector.netcat(host=gateway_ip, port=port):
+        if self.openstack_connector.netcat(port=port):
             cloud_site = self.openstack_connector.CLOUD_SITE
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,
@@ -483,7 +485,11 @@ class VirtualMachineHandler(Iface):
                 apt_packages=apt_packages,
                 openstack_id=openstack_id,
                 port=port,
-                ip=gateway_ip,
+                ip=(
+                    self.INTERNAL_GATEWAY_IP
+                    if self.INTERNAL_GATEWAY_IP
+                    else self.GATEWAY_IP
+                ),
                 cloud_site=cloud_site,
                 base_url=base_url,
             )
