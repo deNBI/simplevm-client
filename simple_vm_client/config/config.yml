@@ -75,8 +75,8 @@ forc:
   activated: False
   # If Forc ist activated  -- defaults to True
   forc_url: https://proxy-dev.bi.denbi.de:5000/
-  # URL for FORC.
-  forc_access_url: https://proxy-dev.bi.denbi.de/
+  # URL for FORC backend.
+  forc_backend_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.
   github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
   # GitHub repository URL for FORC playbooks.

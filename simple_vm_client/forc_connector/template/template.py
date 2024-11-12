@@ -26,7 +26,7 @@ SECURITYGROUP_SSH = "securitygroup_ssh"
 DIRECTION = "direction"
 PROTOCOL = "protocol"
 INFORMATION_FOR_DISPLAY = "information_for_display"
-NO_TEMPLATE_NAMES = ["packer", "optional", ".github", "cluster", "conda"]
+NO_TEMPLATE_NAMES = ["packer", "optional", ".github", "cluster", "conda", "generic"]
 NEEDS_FORC_SUPPORT = "needs_forc_support"
 MIN_RAM = "min_ram"
 MIN_CORES = "min_cores"
@@ -95,7 +95,6 @@ class Template(object):
         self._loaded_resenv_metadata: dict[str, ResearchEnvironmentMetadata] = {}
         self._allowed_forc_templates: list[ResearchEnvironmentTemplate] = []
         self.update_playbooks()
-        self.fix_rstudio_ansible_role_vars()
 
     @property
     def loaded_research_env_metadata(self) -> dict[str, ResearchEnvironmentMetadata]:
@@ -159,26 +158,6 @@ class Template(object):
                 self._loaded_resenv_metadata[template_metadata.template_name] = (
                     template_metadata
                 )
-
-    def fix_rstudio_ansible_role_vars(self):
-        def create_vars_file(file_path, rstudio_server_download_url):
-            if not os.path.exists(file_path):
-                with open(file_path, "w") as f:
-                    f.write("# vars file\n")
-                    f.write("---\n")
-                    f.write(f"{rstudio_server_download_url}\n")
-                logger.info(f"File created: {file_path}")
-            else:
-                logger.info(f"The file already exists. Skipping creation: {file_path}")
-
-        focal_file_path = "/root/.ansible/roles/oefenweb.rstudio_server/vars/_focal.yml"
-        noble_file_path = "/root/.ansible/roles/oefenweb.rstudio_server/vars/_noble.yml"
-
-        rstudio_server_download_url_focal = 'rstudio_server_download_url: "https://download2.rstudio.org/server/focal/{{ rstudio_server_machine_map[ansible_machine] }}/rstudio-server-{{ rstudio_server_version }}-{{ rstudio_server_machine_map[ansible_machine] }}.deb"'
-        rstudio_server_download_url_noble = 'rstudio_server_download_url: "https://download2.rstudio.org/server/jammy/{{ rstudio_server_machine_map[ansible_machine] }}/rstudio-server-{{ rstudio_server_version }}-{{ rstudio_server_machine_map[ansible_machine] }}.deb"'
-
-        create_vars_file(focal_file_path, rstudio_server_download_url_focal)
-        create_vars_file(noble_file_path, rstudio_server_download_url_noble)
 
     def update_playbooks(self) -> None:
         if not self.GITHUB_PLAYBOOKS_REPO:

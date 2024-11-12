@@ -140,15 +140,15 @@ class VirtualMachineHandler(Iface):
     def delete_server(self, openstack_id: str) -> None:
         return self.openstack_connector.delete_server(openstack_id=openstack_id)
 
-    def rescue_server(self, openstack_id: str, 
-                      admin_pass: str = None, 
-                      image_ref: str = None) -> None:
-        return self.openstack_connector.rescue_server(openstack_id=openstack_id, 
-                                                      admin_pass=admin_pass, 
-                                                      image_ref=image_ref)
+    def rescue_server(
+        self, openstack_id: str, admin_pass: str = None, image_ref: str = None
+    ) -> None:
+        return self.openstack_connector.rescue_server(
+            openstack_id=openstack_id, admin_pass=admin_pass, image_ref=image_ref
+        )
 
     def unrescue_server(self, openstack_id: str) -> None:
-        return self.openstack_connector.unrescue_server(openstack_id=openstack_id)    
+        return self.openstack_connector.unrescue_server(openstack_id=openstack_id)
 
     def reboot_hard_server(self, openstack_id: str) -> None:
         return self.openstack_connector.reboot_hard_server(openstack_id=openstack_id)
@@ -429,6 +429,7 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_security_group_ids: list[str],
+        additional_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
     ) -> str:
@@ -445,6 +446,7 @@ class VirtualMachineHandler(Iface):
             image_name=image_name,
             servername=servername,
             metadata=metadata,
+            additional_keys=additional_keys,
             research_environment_metadata=research_environment_metadata,
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,

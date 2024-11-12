@@ -111,11 +111,17 @@ class Playbook(object):
         self.copy_and_init_apt_packages()
         self.copy_and_init_research_environment()
         self.copy_and_init_change_keys(public_key=public_key)
+        shutil.copytree(
+            f"{self.playbooks_dir}/generic",
+            self.directory.name,
+            dirs_exist_ok=True,
+        )
 
         # write all vars_files and tasks in generic_playbook
         shutil.copy(
             self.playbooks_dir + "/" + self.playbook_exec_name, self.directory.name
         )
+
         with open(
             self.directory.name + "/" + self.playbook_exec_name, mode="r"
         ) as generic_playbook:
