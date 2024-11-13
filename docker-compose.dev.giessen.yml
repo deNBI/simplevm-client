@@ -1,4 +1,3 @@
-version: '3.5'
 services:
   simplevm-client-giessen:
     container_name: simplevm-client-giessen

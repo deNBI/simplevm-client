@@ -26,7 +26,7 @@ SECURITYGROUP_SSH = "securitygroup_ssh"
 DIRECTION = "direction"
 PROTOCOL = "protocol"
 INFORMATION_FOR_DISPLAY = "information_for_display"
-NO_TEMPLATE_NAMES = ["packer", "optional", ".github", "cluster", "conda"]
+NO_TEMPLATE_NAMES = ["packer", "optional", ".github", "cluster", "conda", "generic"]
 NEEDS_FORC_SUPPORT = "needs_forc_support"
 MIN_RAM = "min_ram"
 MIN_CORES = "min_cores"
@@ -80,14 +80,23 @@ class ResearchEnvironmentMetadata:
 
 
 class Template(object):
-    def __init__(self, github_playbook_repo: str, forc_url: str, forc_api_key: str):
+    def __init__(
+        self,
+        github_playbook_repo: str,
+        forc_backend_url: str,
+        forc_api_key: str,
+    ):
         self.GITHUB_PLAYBOOKS_REPO = github_playbook_repo
-        self.FORC_URL = forc_url
+        self.FORC_BACKEND_URL = forc_backend_url
         self.FORC_API_KEY = forc_api_key
-        if not self.FORC_URL:
+        if not self.FORC_BACKEND_URL:
             logger.info("No FORC URL defined. Skipping Forc...")
-        self.TEMPLATES_URL = f"{self.FORC_URL}templates" if self.FORC_URL else ""
-        self.BACKENDS_URL = f"{self.FORC_URL}backends" if self.FORC_URL else ""
+        self.TEMPLATES_URL = (
+            f"{self.FORC_BACKEND_URL}templates" if self.FORC_BACKEND_URL else ""
+        )
+        self.BACKENDS_URL = (
+            f"{self.FORC_BACKEND_URL}backends" if self.FORC_BACKEND_URL else ""
+        )
         self.BACKENDS_BY_OWNER_URL = f"{self.BACKENDS_URL}/byOwner"
         self.BACKENDS_BY_TEMPLATE_URL = f"{self.BACKENDS_URL}/byTemplate"
         self._forc_allowed: dict[str, list[str]] = {}
@@ -159,7 +168,6 @@ class Template(object):
                     template_metadata
                 )
 
-
     def update_playbooks(self) -> None:
         if not self.GITHUB_PLAYBOOKS_REPO:
             logger.warning(
@@ -188,7 +196,6 @@ class Template(object):
                     self.TEMPLATES_URL,
                     timeout=(30, 30),
                     headers={"X-API-KEY": self.FORC_API_KEY},
-                    verify=True,
                 )
                 response.raise_for_status()  # Raise HTTPError for bad responses
                 return response.json()
@@ -307,7 +314,6 @@ class Template(object):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.FORC_API_KEY},
-            verify=True,
         )
 
     def _update_forc_allowed_versions(

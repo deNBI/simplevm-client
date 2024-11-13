@@ -1,7 +1,6 @@
 import json
 import os
 import urllib
-from urllib.parse import urlparse
 
 import redis
 import requests
@@ -31,7 +30,7 @@ class ForcConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Forc Connector")
 
-        self.FORC_URL: str = ""  # type: ignore
+        self.FORC_BACKEND_URL: str = ""  # type: ignore
         self.FORC_ACCESS_URL: str = ""  # type: ignore
         self.GITHUB_PLAYBOOKS_REPO: str = ""  # type: ignore
         self.REDIS_HOST: str = ""  # type: ignore
@@ -44,7 +43,7 @@ class ForcConnector:
         self.connect_to_redis()
         self.template = Template(
             github_playbook_repo=self.GITHUB_PLAYBOOKS_REPO,
-            forc_url=self.FORC_URL,
+            forc_backend_url=self.FORC_BACKEND_URL,
             forc_api_key=self.FORC_API_KEY,
         )
 
@@ -62,11 +61,8 @@ class ForcConnector:
             if not cfg["forc"].get("activated", True):
                 logger.info("Forc Config available but deactivated. Skipping..")
                 return
-            self.FORC_URL = cfg["forc"]["forc_url"]
-            url_components = urlparse(cfg["forc"]["forc_url"])
-            path = url_components.netloc.split(":")[0]
-
-            self.FORC_ACCESS_URL = f"{url_components.scheme}://{path}/"
+            self.FORC_BACKEND_URL = cfg["forc"]["forc_backend_url"]
+            self.FORC_ACCESS_URL = cfg["forc"]["forc_access_url"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
 
         self.load_env()
@@ -86,13 +82,12 @@ class ForcConnector:
 
     def get_users_from_backend(self, backend_id: str) -> list[str]:
         logger.info(f"Get users from backend {backend_id}")
-        get_url = f"{self.FORC_URL}users/{backend_id}"
+        get_url = f"{self.FORC_BACKEND_URL}users/{backend_id}"
         try:
             response = requests.get(
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 return ["Error: 401"]
@@ -104,7 +99,7 @@ class ForcConnector:
 
     def delete_user_from_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Delete user {user_id} from backend {backend_id}")
-        delete_url = f"{self.FORC_URL}users/{backend_id}"
+        delete_url = f"{self.FORC_BACKEND_URL}users/{backend_id}"
         user_info = {
             "user": user_id,
         }
@@ -114,7 +109,6 @@ class ForcConnector:
                 json=user_info,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             data: dict[str, str] = response.json()
             return data
@@ -127,13 +121,12 @@ class ForcConnector:
 
     def delete_backend(self, backend_id: str) -> None:
         logger.info(f"Delete Backend {backend_id}")
-        delete_url = f"{self.FORC_URL}backends/{backend_id}"
+        delete_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}"
         try:
             response = requests.delete(
                 delete_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code:
                 if response.status_code == 404 or response.status_code == 500:
@@ -155,7 +148,7 @@ class ForcConnector:
 
     def add_user_to_backend(self, backend_id: str, user_id: str) -> dict[str, str]:
         logger.info(f"Add User {user_id} to backend {backend_id}")
-        post_url = f"{self.FORC_URL}users/{backend_id}"
+        post_url = f"{self.FORC_BACKEND_URL}users/{backend_id}"
         user_info = {
             "user": user_id,
         }
@@ -168,7 +161,6 @@ class ForcConnector:
                 headers={
                     "X-API-KEY": self.FORC_API_KEY,
                 },
-                verify=True,
             )
             try:
                 data: dict[str, str] = response.json()
@@ -200,7 +192,7 @@ class ForcConnector:
                 template=template,
             )
 
-        post_url = f"{self.FORC_URL}backends"
+        post_url = f"{self.FORC_BACKEND_URL}backends"
         backend_info = {
             "owner": owner,
             "user_key_url": user_key_url,
@@ -215,7 +207,6 @@ class ForcConnector:
                 json=backend_info,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
 
             data = response.json()
@@ -240,13 +231,12 @@ class ForcConnector:
 
     def get_backends(self) -> list[Backend]:
         logger.info("Get Backends")
-        get_url = f"{self.FORC_URL}backends"
+        get_url = f"{self.FORC_BACKEND_URL}backends"
         try:
             response = requests.get(
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
@@ -269,13 +259,12 @@ class ForcConnector:
 
     def get_backends_by_template(self, template: str) -> list[Backend]:
         logger.info(f"Get Backends by template: {template}")
-        get_url = f"{self.FORC_URL}backends/byTemplate/{template}"
+        get_url = f"{self.FORC_BACKEND_URL}backends/byTemplate/{template}"
         try:
             response = requests.get(
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
@@ -299,13 +288,12 @@ class ForcConnector:
 
     def get_backend_by_id(self, id: str) -> Backend:
         logger.info(f"Get backends by id: {id}")
-        get_url = f"{self.FORC_URL}backends/{id}"
+        get_url = f"{self.FORC_BACKEND_URL}backends/{id}"
         try:
             response = requests.get(
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             try:
                 data = response.json()
@@ -326,13 +314,12 @@ class ForcConnector:
 
     def get_backends_by_owner(self, owner: str) -> list[Backend]:
         logger.info(f"Get backends by owner: {owner}")
-        get_url = f"{self.FORC_URL}backends/byOwner/{owner}"
+        get_url = f"{self.FORC_BACKEND_URL}backends/byOwner/{owner}"
         try:
             response = requests.get(
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
@@ -356,11 +343,11 @@ class ForcConnector:
 
     def has_forc(self) -> bool:
         logger.info("Check has forc")
-        return self.FORC_URL is not None
+        return self.FORC_BACKEND_URL is not None
 
-    def get_forc_url(self) -> str:
+    def get_forc_backend_url(self) -> str:
         logger.info("Get Forc Url")
-        return self.FORC_URL
+        return self.FORC_BACKEND_URL
 
     def get_forc_access_url(self) -> str:
         logger.info("Get Forc Access Url")

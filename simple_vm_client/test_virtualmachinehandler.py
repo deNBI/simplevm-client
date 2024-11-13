@@ -229,7 +229,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
         self.handler.forc_connector.has_forc.assert_called_once()
 
     def test_get_forc_url(self):
-        self.handler.get_forc_url()
+        self.handler.get_forc_access_url()
         self.handler.forc_connector.get_forc_access_url.assert_called_once()
 
     def test_create_snapshot(self):
@@ -505,6 +505,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="",
             additional_security_group_ids=[],
+            additional_keys=[],
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
         )
@@ -516,6 +517,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
             additional_security_group_ids=[],
+            additional_keys=[],
             research_environment_metadata=None,
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
@@ -541,6 +543,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="de",
             additional_security_group_ids=[],
+            additional_keys=[],
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
         )
@@ -554,6 +557,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             research_environment_metadata="res_metadata",
             metadata_token="test",
+            additional_keys=[],
             metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
@@ -583,7 +587,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
         self.handler.openstack_connector.get_vm_ports.assert_called_once_with(
             openstack_id=OPENSTACK_ID
         )
-        self.handler.openstack_connector.get_gateway_ip.assert_called_once()
+        self.handler.openstack_connector.get_gateway_ip.assert_called()
         self.handler.forc_connector.create_and_deploy_playbook.assert_called_once_with(
             public_key="pub",
             openstack_id=OPENSTACK_ID,
