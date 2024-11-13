@@ -140,15 +140,15 @@ class VirtualMachineHandler(Iface):
     def delete_server(self, openstack_id: str) -> None:
         return self.openstack_connector.delete_server(openstack_id=openstack_id)
 
-    def rescue_server(self, openstack_id: str, 
-                      admin_pass: str = None, 
-                      image_ref: str = None) -> None:
-        return self.openstack_connector.rescue_server(openstack_id=openstack_id, 
-                                                      admin_pass=admin_pass, 
-                                                      image_ref=image_ref)
+    def rescue_server(
+        self, openstack_id: str, admin_pass: str = None, image_ref: str = None
+    ) -> None:
+        return self.openstack_connector.rescue_server(
+            openstack_id=openstack_id, admin_pass=admin_pass, image_ref=image_ref
+        )
 
     def unrescue_server(self, openstack_id: str) -> None:
-        return self.openstack_connector.unrescue_server(openstack_id=openstack_id)    
+        return self.openstack_connector.unrescue_server(openstack_id=openstack_id)
 
     def reboot_hard_server(self, openstack_id: str) -> None:
         return self.openstack_connector.reboot_hard_server(openstack_id=openstack_id)
@@ -207,8 +207,11 @@ class VirtualMachineHandler(Iface):
     def has_forc(self) -> bool:
         return self.forc_connector.has_forc()
 
-    def get_forc_url(self) -> str:
+    def get_forc_access_url(self) -> str:
         return self.forc_connector.get_forc_access_url()
+
+    def get_forc_backend_url(self) -> str:
+        return self.forc_connector.get_forc_backend_url()
 
     def create_snapshot(
         self,
@@ -429,6 +432,7 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_security_group_ids: list[str],
+        additional_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
     ) -> str:
@@ -445,6 +449,7 @@ class VirtualMachineHandler(Iface):
             image_name=image_name,
             servername=servername,
             metadata=metadata,
+            additional_keys=additional_keys,
             research_environment_metadata=research_environment_metadata,
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
@@ -470,9 +475,12 @@ class VirtualMachineHandler(Iface):
         port = int(
             self.openstack_connector.get_vm_ports(openstack_id=openstack_id)["port"]
         )
-        gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
-        if self.openstack_connector.netcat(host=gateway_ip, port=port):
+        if self.openstack_connector.netcat(port=port):
             cloud_site = self.openstack_connector.CLOUD_SITE
+            gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
+            internal_gateway_ip = self.openstack_connector.get_gateway_ip().get(
+                "internal_gateway_ip"
+            )
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,
                 research_environment_template=research_environment_template,
@@ -481,7 +489,7 @@ class VirtualMachineHandler(Iface):
                 apt_packages=apt_packages,
                 openstack_id=openstack_id,
                 port=port,
-                ip=gateway_ip,
+                ip=(internal_gateway_ip if internal_gateway_ip else gateway_ip),
                 cloud_site=cloud_site,
                 base_url=base_url,
             )

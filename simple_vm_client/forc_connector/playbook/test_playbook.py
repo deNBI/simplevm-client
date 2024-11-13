@@ -548,7 +548,7 @@ class TestPlaybook(unittest.TestCase):
         instance.research_environment_template = "template_name"
         instance.cloud_site = "cloud_site"
         instance.research_environment_template_version = "template_version"
-        instance.create_only_backend = True
+        instance.create_only_backend = False
         instance.base_url = "base_url"
 
         # Act
@@ -592,6 +592,7 @@ class TestPlaybook(unittest.TestCase):
         # Arrange
         obj = self.init_playbook()
         obj.research_environment_template = "template_name"
+        obj.create_only_backend = False
         obj.add_tasks_only = MagicMock()
 
         # Act and Assert

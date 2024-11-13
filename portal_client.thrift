@@ -534,9 +534,11 @@ service VirtualMachineService {
     5:optional string research_environment,
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
-        9:optional list<string> additional_security_group_ids,
-             10:optional string metadata_token,
-                  11:optional string metadata_endpoint
+    9:optional list<string> additional_security_group_ids,
+    10:optional list<string> additional_keys,
+    11:optional string metadata_token,
+    12:optional string metadata_endpoint,
+
 
 
 )  throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,3: ImageNotFoundException i,4: FlavorNotFoundException f,5:DefaultException d)
@@ -567,7 +569,7 @@ service VirtualMachineService {
     /** Get boolean if client has backend url configured*/
     bool has_forc()
 
-    string get_forc_url()
+    string get_forc_access_url()
 
     /** Create a backend*/
     Backend create_backend(

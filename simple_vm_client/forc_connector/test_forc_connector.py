@@ -17,7 +17,7 @@ from simple_vm_client.ttypes import (
 )
 from simple_vm_client.util.state_enums import VmTaskStates
 
-FORC_URL = "https://proxy-dev.bi.denbi.de:5000/"
+FORC_BACKEND_URL = "https://proxy-dev.bi.denbi.de:5000/"
 FORC_ACCESS_URL = "https://proxy-dev.bi.denbi.de/"
 GITHUB_REPO = "https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip"
 FORC_SECRUITY_GROUP_ID = "9a08eecc-d9a5-405b-aeda-9d4180fc94d6"
@@ -30,7 +30,7 @@ CONFIG_DATA = f"""
                   port: {REDIS_PORT}
                   password: ""
                 forc:
-                  forc_url: {FORC_URL}
+                  forc_backend_url: {FORC_BACKEND_URL}
                   forc_access_url: {FORC_ACCESS_URL}
                   github_playbooks_repo: {GITHUB_REPO}
                   forc_security_group_id: {FORC_SECRUITY_GROUP_ID}
@@ -65,7 +65,7 @@ class TestForcConnector(unittest.TestCase):
 
         mock_template.assert_called_with(
             github_playbook_repo=GITHUB_REPO,
-            forc_url=FORC_URL,
+            forc_backend_url=FORC_BACKEND_URL,
             forc_api_key=FORC_API_KEY,
         )
         mock_connection_pool.assert_called_with(host=REDIS_HOST, port=REDIS_PORT)
@@ -79,7 +79,7 @@ class TestForcConnector(unittest.TestCase):
 
         self.forc_connector.load_config(config_file=temp_file.name)
         os.remove(temp_file.name)
-        self.assertEqual(self.forc_connector.FORC_URL, FORC_URL)
+        self.assertEqual(self.forc_connector.FORC_BACKEND_URL, FORC_BACKEND_URL)
         self.assertEqual(self.forc_connector.FORC_ACCESS_URL, FORC_ACCESS_URL)
         self.assertEqual(self.forc_connector.GITHUB_PLAYBOOKS_REPO, GITHUB_REPO)
         self.assertEqual(self.forc_connector.REDIS_HOST, REDIS_HOST)
@@ -109,7 +109,7 @@ class TestForcConnector(unittest.TestCase):
     @patch("simple_vm_client.forc_connector.forc_connector.requests.get")
     def test_get_users_from_backend(self, mock_get):
         backend_id = "backend_id"
-        get_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        get_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         return_value = MagicMock(status_code=200, body={"data"})
         return_value.json.return_value = "data"
         mock_get.return_value = return_value
@@ -118,14 +118,13 @@ class TestForcConnector(unittest.TestCase):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, ["data"])
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.get")
     def test_get_users_from_backend_401(self, mock_get):
         backend_id = "backend_id"
-        get_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        get_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         return_value = MagicMock(status_code=401, body={"data"})
         mock_get.return_value = return_value
         result = self.forc_connector.get_users_from_backend(backend_id)
@@ -133,14 +132,13 @@ class TestForcConnector(unittest.TestCase):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, ["Error: 401"])
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.get")
     def test_get_users_from_backend_timeout(self, mock_get):
         backend_id = "backend_id"
-        get_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        get_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         mock_get.side_effect = requests.Timeout("UNit Test")
 
         result = self.forc_connector.get_users_from_backend(backend_id)
@@ -148,7 +146,6 @@ class TestForcConnector(unittest.TestCase):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, [])
 
@@ -156,7 +153,7 @@ class TestForcConnector(unittest.TestCase):
     def test_delete_user_from_backend(self, mock_delete):
         backend_id = "backend_id"
         user_id = "user_id"
-        delete_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         user_info = {"user": user_id}
 
         return_value = MagicMock(status_code=200)
@@ -170,7 +167,6 @@ class TestForcConnector(unittest.TestCase):
             json=user_info,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         self.assertEqual(result, {"data": "success"})
@@ -179,7 +175,7 @@ class TestForcConnector(unittest.TestCase):
     def test_delete_user_from_backend_timeout(self, mock_delete):
         backend_id = "backend_id"
         user_id = "user_id"
-        delete_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         user_info = {"user": user_id}
 
         mock_delete.side_effect = requests.Timeout("Unit Test Timeout")
@@ -191,7 +187,6 @@ class TestForcConnector(unittest.TestCase):
             json=user_info,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         self.assertEqual(result, {"Error": "Timeout."})
@@ -200,7 +195,7 @@ class TestForcConnector(unittest.TestCase):
     def test_delete_user_from_backend_exception(self, mock_delete):
         backend_id = "backend_id"
         user_id = "user_id"
-        delete_url = f"{self.forc_connector.FORC_URL}users/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}users/{backend_id}"
         user_info = {"user": user_id}
 
         mock_delete.side_effect = Exception("Unit Test Exception")
@@ -213,7 +208,6 @@ class TestForcConnector(unittest.TestCase):
             json=user_info,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.delete")
@@ -231,7 +225,7 @@ class TestForcConnector(unittest.TestCase):
     @patch("simple_vm_client.forc_connector.forc_connector.requests.delete")
     def test_delete_backend(self, mock_delete):
         backend_id = "backend_id"
-        delete_url = f"{self.forc_connector.FORC_URL}backends/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}"
 
         return_value = MagicMock(status_code=200)
         return_value.json.return_value = {"data": "success"}
@@ -243,13 +237,12 @@ class TestForcConnector(unittest.TestCase):
             delete_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.delete")
     def test_delete_backend_not_found(self, mock_delete):
         backend_id = "backend_id"
-        delete_url = f"{self.forc_connector.FORC_URL}backends/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}"
 
         return_value = MagicMock(status_code=404)
         return_value.json.return_value = {"error": "Backend not found"}
@@ -262,13 +255,12 @@ class TestForcConnector(unittest.TestCase):
             delete_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.delete")
     def test_delete_backend_server_error(self, mock_delete):
         backend_id = "backend_id"
-        delete_url = f"{self.forc_connector.FORC_URL}backends/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}"
 
         return_value = MagicMock(status_code=500)
         return_value.json.return_value = {"error": "Internal Server Error"}
@@ -281,13 +273,12 @@ class TestForcConnector(unittest.TestCase):
             delete_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.delete")
     def test_delete_backend_timeout(self, mock_delete):
         backend_id = "backend_id"
-        delete_url = f"{self.forc_connector.FORC_URL}backends/{backend_id}"
+        delete_url = f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}"
 
         mock_delete.side_effect = requests.Timeout("Unit Test Timeout")
 
@@ -298,7 +289,6 @@ class TestForcConnector(unittest.TestCase):
             delete_url,
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.post")
@@ -325,11 +315,10 @@ class TestForcConnector(unittest.TestCase):
 
         # Assertions
         mock_post.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}users/backend_id",
+            f"{self.forc_connector.FORC_BACKEND_URL}users/backend_id",
             json={"user": "user_id"},
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, {"key": "value"})
 
@@ -342,11 +331,10 @@ class TestForcConnector(unittest.TestCase):
         )
 
         mock_post.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}users/backend_id",
+            f"{self.forc_connector.FORC_BACKEND_URL}users/backend_id",
             json={"user": "user_id"},
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, {"Error": "Timeout."})
 
@@ -360,21 +348,20 @@ class TestForcConnector(unittest.TestCase):
             )
 
         mock_post.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}users/backend_id",
+            f"{self.forc_connector.FORC_BACKEND_URL}users/backend_id",
             json={"user": "user_id"},
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
     def test_has_forc(self):
         result = self.forc_connector.has_forc()
-        self.assertEqual(result, self.forc_connector.FORC_URL is not None)
+        self.assertEqual(result, self.forc_connector.FORC_BACKEND_URL is not None)
 
-    def test_get_forc_url(self):
-        result = self.forc_connector.get_forc_url()
+    def test_get_forc_backend_url(self):
+        result = self.forc_connector.get_forc_backend_url()
 
-        self.assertEqual(result, self.forc_connector.FORC_URL)
+        self.assertEqual(result, self.forc_connector.FORC_BACKEND_URL)
 
     def test_get_forc_access_url(self):
         result = self.forc_connector.get_forc_access_url()
@@ -490,7 +477,7 @@ class TestForcConnector(unittest.TestCase):
 
         # Assert
         mock_post.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}backends",
+            f"{self.forc_connector.FORC_BACKEND_URL}backends",
             json={
                 "owner": owner,
                 "user_key_url": user_key_url,
@@ -500,7 +487,6 @@ class TestForcConnector(unittest.TestCase):
             },
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         mock_response.json.assert_called_once()
@@ -580,10 +566,9 @@ class TestForcConnector(unittest.TestCase):
 
         # Assert
         mock_get.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}backends",
+            f"{self.forc_connector.FORC_BACKEND_URL}backends",
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         mock_response.json.assert_called_once()
@@ -701,10 +686,9 @@ class TestForcConnector(unittest.TestCase):
 
         # Assert
         mock_get.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}backends/byTemplate/{template}",
+            f"{self.forc_connector.FORC_BACKEND_URL}backends/byTemplate/{template}",
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         mock_response.json.assert_called_once()
@@ -802,10 +786,9 @@ class TestForcConnector(unittest.TestCase):
         result = self.forc_connector.get_backend_by_id(backend_id)
 
         mock_get.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}backends/{backend_id}",
+            f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}",
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         expected_backend = Backend(
@@ -860,10 +843,9 @@ class TestForcConnector(unittest.TestCase):
         result = self.forc_connector.get_backends_by_owner(owner)
 
         mock_get.assert_called_once_with(
-            f"{self.forc_connector.FORC_URL}backends/byOwner/{owner}",
+            f"{self.forc_connector.FORC_BACKEND_URL}backends/byOwner/{owner}",
             timeout=(30, 30),
             headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
-            verify=True,
         )
 
         expected_backends = [

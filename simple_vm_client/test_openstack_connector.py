@@ -1127,23 +1127,41 @@ class TestOpenStackConnector(unittest.TestCase):
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
     def test_netcat(self, mock_logger_info, mock_socket):
         # Replace with the actual host and port
-        host = "example.com"
         port = 22
 
         # Mock the connect_ex method to simulate the connection result
         mock_socket.return_value.connect_ex.return_value = 0
 
         # Call the netcat method
-        result = self.openstack_connector.netcat(host, port)
+        result = self.openstack_connector.netcat(port)
 
         # Assertions
         self.assertTrue(result)  # Adjust based on your logic
-        mock_logger_info.assert_any_call(f"Checking SSH Connection {host}:{port}")
         mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
         mock_socket.return_value.settimeout.assert_called_once_with(5)
-        mock_socket.return_value.connect_ex.assert_called_once_with((host, port))
-        mock_logger_info.assert_any_call(
-            f"Checking SSH Connection {host}:{port} Result = 0"
+        mock_socket.return_value.connect_ex.assert_called_once_with(
+            (self.openstack_connector.GATEWAY_IP, port)
+        )
+
+    @patch("simple_vm_client.openstack_connector.openstack_connector.socket.socket")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
+    def test_netcat_internal_gateway(self, mock_logger_info, mock_socket):
+        # Replace with the actual host and port
+        port = 22
+        self.openstack_connector.INTERNAL_GATEWAY_IP = "example.com"
+
+        # Mock the connect_ex method to simulate the connection result
+        mock_socket.return_value.connect_ex.return_value = 0
+
+        # Call the netcat method
+        result = self.openstack_connector.netcat(port)
+
+        # Assertions
+        self.assertTrue(result)  # Adjust based on your logic
+        mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
+        mock_socket.return_value.settimeout.assert_called_once_with(5)
+        mock_socket.return_value.connect_ex.assert_called_once_with(
+            (self.openstack_connector.INTERNAL_GATEWAY_IP, port)
         )
 
     def test_get_flavor_exception(self):
@@ -2274,9 +2292,7 @@ class TestOpenStackConnector(unittest.TestCase):
             id=openstack_id
         )
         mock_calculate_ports.assert_called_once_with(server=server_mock)
-        mock_netcat.assert_called_once_with(
-            host=self.openstack_connector.GATEWAY_IP, port=30111
-        )
+        mock_netcat.assert_called_once_with(port=30111)
         mock_get_image.assert_called_once_with(
             name_or_id=image_mock.id,
             ignore_not_active=True,
@@ -2842,7 +2858,13 @@ class TestOpenStackConnector(unittest.TestCase):
 
     def test_get_gateway_ip(self):
         result = self.openstack_connector.get_gateway_ip()
-        self.assertEqual(result, {"gateway_ip": self.openstack_connector.GATEWAY_IP})
+        self.assertEqual(
+            result,
+            {
+                "gateway_ip": self.openstack_connector.GATEWAY_IP,
+                "internal_gateway_ip": None,
+            },
+        )
 
     def test_get_calculation_values(self):
         result = self.openstack_connector.get_calculation_values()
