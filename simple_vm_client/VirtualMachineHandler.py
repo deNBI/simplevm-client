@@ -477,6 +477,10 @@ class VirtualMachineHandler(Iface):
         )
         if self.openstack_connector.netcat(port=port):
             cloud_site = self.openstack_connector.CLOUD_SITE
+            gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
+            internal_gateway_ip = self.openstack_connector.get_gateway_ip()[
+                "internal_gateway_ip"
+            ]
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,
                 research_environment_template=research_environment_template,
@@ -485,11 +489,7 @@ class VirtualMachineHandler(Iface):
                 apt_packages=apt_packages,
                 openstack_id=openstack_id,
                 port=port,
-                ip=(
-                    self.INTERNAL_GATEWAY_IP
-                    if self.INTERNAL_GATEWAY_IP
-                    else self.GATEWAY_IP
-                ),
+                ip=(internal_gateway_ip if internal_gateway_ip else gateway_ip),
                 cloud_site=cloud_site,
                 base_url=base_url,
             )

@@ -31,7 +31,6 @@ class ForcConnector:
         logger.info("Initializing Forc Connector")
 
         self.FORC_BACKEND_URL: str = ""  # type: ignore
-        self.FORC_BACKEND_USE_HTTPS: bool = True
         self.FORC_ACCESS_URL: str = ""  # type: ignore
         self.GITHUB_PLAYBOOKS_REPO: str = ""  # type: ignore
         self.REDIS_HOST: str = ""  # type: ignore
@@ -45,7 +44,6 @@ class ForcConnector:
         self.template = Template(
             github_playbook_repo=self.GITHUB_PLAYBOOKS_REPO,
             forc_backend_url=self.FORC_BACKEND_URL,
-            forc_backend_use_https=self.FORC_BACKEND_USE_HTTPS,
             forc_api_key=self.FORC_API_KEY,
         )
 
@@ -64,9 +62,6 @@ class ForcConnector:
                 logger.info("Forc Config available but deactivated. Skipping..")
                 return
             self.FORC_BACKEND_URL = cfg["forc"]["forc_backend_url"]
-            self.FORC_BACKEND_USE_HTTPS = cfg["forc"].get(
-                "forc_backend_use_https", True
-            )
             self.FORC_ACCESS_URL = cfg["forc"]["forc_access_url"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
 
@@ -93,7 +88,6 @@ class ForcConnector:
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=self.FORC_BACKEND_USE_HTTPS,
             )
             if response.status_code == 401:
                 return ["Error: 401"]
@@ -115,7 +109,6 @@ class ForcConnector:
                 json=user_info,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=self.FORC_BACKEND_USE_HTTPS,
             )
             data: dict[str, str] = response.json()
             return data
@@ -134,7 +127,6 @@ class ForcConnector:
                 delete_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code:
                 if response.status_code == 404 or response.status_code == 500:
