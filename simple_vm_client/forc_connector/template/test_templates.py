@@ -380,7 +380,6 @@ class TestTemplate(unittest.TestCase):
             get_url,
             timeout=(30, 30),
             headers={"X-API-KEY": template.FORC_API_KEY},
-            verify=True,
         )
 
     def test_update_forc_allowed_versions(self):
@@ -460,7 +459,6 @@ class TestTemplate(unittest.TestCase):
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": template.FORC_API_KEY},
-                verify=True,
             )
 
         # Check that logger.error is called for each forc_version
@@ -620,7 +618,6 @@ class TestTemplate(unittest.TestCase):
             template.TEMPLATES_URL,
             timeout=(30, 30),
             headers={"X-API-KEY": template.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(
             result, expected_response
@@ -647,7 +644,6 @@ class TestTemplate(unittest.TestCase):
             template.TEMPLATES_URL,
             timeout=(30, 30),
             headers={"X-API-KEY": template.FORC_API_KEY},
-            verify=True,
         )
         self.assertEqual(result, [])
         mock_logger_exception.assert_called_once_with(

@@ -478,9 +478,9 @@ class VirtualMachineHandler(Iface):
         if self.openstack_connector.netcat(port=port):
             cloud_site = self.openstack_connector.CLOUD_SITE
             gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
-            internal_gateway_ip = self.openstack_connector.get_gateway_ip()[
+            internal_gateway_ip = self.openstack_connector.get_gateway_ip().get(
                 "internal_gateway_ip"
-            ]
+            )
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,
                 research_environment_template=research_environment_template,

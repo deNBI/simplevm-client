@@ -161,7 +161,6 @@ class ForcConnector:
                 headers={
                     "X-API-KEY": self.FORC_API_KEY,
                 },
-                verify=True,
             )
             try:
                 data: dict[str, str] = response.json()
@@ -208,7 +207,6 @@ class ForcConnector:
                 json=backend_info,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
 
             data = response.json()
@@ -239,7 +237,6 @@ class ForcConnector:
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
@@ -268,7 +265,6 @@ class ForcConnector:
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
@@ -298,7 +294,6 @@ class ForcConnector:
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             try:
                 data = response.json()
@@ -325,7 +320,6 @@ class ForcConnector:
                 get_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                verify=True,
             )
             if response.status_code == 401:
                 raise DefaultException(message=str(response.json()))
