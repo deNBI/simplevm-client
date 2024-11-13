@@ -77,7 +77,6 @@ forc:
   activated: True
   # If Forc ist activated  -- defaults to True
   forc_backend_url: https://proxy-dev.bi.denbi.de:5000/
-  forc_backend_use_https: True
   # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.
