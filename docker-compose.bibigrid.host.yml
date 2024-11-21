@@ -42,7 +42,7 @@ services:
 
   simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
-    image: docker.elastic.co/beats/filebeat:8.16.0
+    image: docker.elastic.co/beats/filebeat:8.16.1
     network_mode: host  # Use the host network namespace
 
     env_file:
