@@ -1,7 +1,7 @@
-setuptools==75.3.0
+setuptools==75.5.0
 thrift==0.21.0
 openstacksdk==4.0.1
-deprecated==1.2.14
+deprecated==1.2.15
 Click==8.1.7
 ansible==10.5.0
 flake8==7.1.1
@@ -15,8 +15,8 @@ pre-commit==4.0.1
 types-PyYAML==6.0.12.20240917
 sympy==1.13.3
 colorama==0.4.6
-gevent==24.10.3
+gevent==24.11.1
 pytest==8.3.3
 types-redis==4.6.0.20241004
-oslo.utils==7.3.0
+oslo.utils==7.4.0
 passlib==1.7.4
