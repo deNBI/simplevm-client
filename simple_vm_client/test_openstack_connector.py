@@ -2308,6 +2308,8 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(DefaultException):
             self.openstack_connector.get_server("someid")
 
+
+
     @patch.object(OpenStackConnector, "get_server")
     def test_rescue_server_success(self, mock_get_server):
         # Arrange
@@ -2319,7 +2321,7 @@ class TestOpenStackConnector(unittest.TestCase):
         # Assert
         # Ensure the stop_server method is called with the correct server
         self.openstack_connector.openstack_connection.compute.rescue_server.assert_called_once_with(
-            server_mock
+            server_mock, None, None
         )
 
     @patch.object(OpenStackConnector, "get_server")
@@ -2330,7 +2332,8 @@ class TestOpenStackConnector(unittest.TestCase):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
-        self.openstack_connector.openstack_connection.compute.rescue_server.side_effect = ConflictException(
+        self.openstack_connector.openstack_connection.compute.rescue_server.side_effect = ConflictException
+        (
             "Unit Test"
         )
         # Act
@@ -2370,7 +2373,7 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.unrescue_server(openstack_id="some_openstack_id")
         mock_logger_exception.assert_called_once_with(
             "Unrescue Server some_openstack_id failed!"
-        )    
+        )
     
 
     @patch.object(OpenStackConnector, "get_server")
