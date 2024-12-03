@@ -1375,6 +1375,7 @@ class OpenStackConnector:
         self, openstack_id: str, admin_pass: str = None, image_ref: str = None
     ) -> None:
         logger.info(f"Rescue Server {openstack_id}")
+
         try:
             server: Server = self.get_server(openstack_id=openstack_id)
             if not server:
@@ -1384,11 +1385,11 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
             self.openstack_connection.compute.rescue_server(
-                server.id, admin_pass, image_ref
+                server, admin_pass, image_ref
             )
 
         except ConflictException as e:
-            logger.error(f"Rescue Server {openstack_id} failed!")
+            logger.exception(f"Rescue Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
 
@@ -1404,11 +1405,11 @@ class OpenStackConnector:
                 )
 
             self.openstack_connection.compute.unrescue_server(
-                server.id,
+                server
             )
 
         except ConflictException as e:
-            logger.error(f"Unrescue Server {openstack_id} failed!")
+            logger.exception(f"Unrescue Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
 

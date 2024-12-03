@@ -2324,6 +2324,74 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(DefaultException):
             self.openstack_connector.get_server("someid")
 
+
+
+    @patch.object(OpenStackConnector, "get_server")
+    def test_rescue_server_success(self, mock_get_server):
+        # Arrange
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+        # Act
+        self.openstack_connector.rescue_server(openstack_id="some_openstack_id")
+
+        # Assert
+        # Ensure the stop_server method is called with the correct server
+        self.openstack_connector.openstack_connection.compute.rescue_server.assert_called_once_with(
+            server_mock, None, None
+        )
+
+    @patch.object(OpenStackConnector, "get_server")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    def test_rescue_server_conflict_exception(
+        self, mock_logger_exception, mock_get_server
+    ):
+        # Arrange
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+        self.openstack_connector.openstack_connection.compute.rescue_server.side_effect = ConflictException
+        (
+            "Unit Test"
+        )
+        # Act
+        with self.assertRaises(OpenStackConflictException):
+            self.openstack_connector.rescue_server(openstack_id="some_openstack_id")
+        mock_logger_exception.assert_called_once_with(
+            "Rescue Server some_openstack_id failed!"
+        )
+
+    @patch.object(OpenStackConnector, "get_server")
+    def test_unrescue_server_success(self, mock_get_server):
+        # Arrange
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+        # Act
+        self.openstack_connector.unrescue_server(openstack_id="some_openstack_id")
+
+        # Assert
+        # Ensure the stop_server method is called with the correct server
+        self.openstack_connector.openstack_connection.compute.unrescue_server.assert_called_once_with(
+            server_mock
+        )
+
+    @patch.object(OpenStackConnector, "get_server")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    def test_unrescue_server_conflict_exception(
+        self, mock_logger_exception, mock_get_server
+    ):
+        # Arrange
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+        self.openstack_connector.openstack_connection.compute.unrescue_server.side_effect = ConflictException(
+            "Unit Test"
+        )
+        # Act
+        with self.assertRaises(OpenStackConflictException):
+            self.openstack_connector.unrescue_server(openstack_id="some_openstack_id")
+        mock_logger_exception.assert_called_once_with(
+            "Unrescue Server some_openstack_id failed!"
+        )
+    
+
     @patch.object(OpenStackConnector, "get_server")
     def test_set_server_metadata_success(self, mock_get_server):
         # Arrange
