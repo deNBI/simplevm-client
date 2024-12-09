@@ -10,7 +10,11 @@ import yaml
 
 from simple_vm_client.ttypes import ResearchEnvironmentTemplate
 from simple_vm_client.util.logger import setup_custom_logger
-
+import threading
+from apscheduler.schedulers.background import BackgroundScheduler
+import os
+import tempfile
+import shutil
 # from resenv.backend.Backend import Backend
 
 TEMPLATE_NAME = "template_name"
@@ -103,22 +107,60 @@ class Template(object):
         self._all_templates = [CONDA]
         self._loaded_resenv_metadata: dict[str, ResearchEnvironmentMetadata] = {}
         self._allowed_forc_templates: list[ResearchEnvironmentTemplate] = []
+
         self.update_playbooks()
+        #schedule.every().day.at("02:00").do(self.update_playbooks)  # run every day at 2am
+       # self.schedule_time = self.get_schedule_time()
+        self.start_scheduler()
+
 
     @property
     def loaded_research_env_metadata(self) -> dict[str, ResearchEnvironmentMetadata]:
         return self._loaded_resenv_metadata
 
+    def start_scheduler(self):
+        logger.info(f"Setting Update Playbook Schedule to: ")
+
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.add_job(self.update_playbooks, 'interval', seconds=60)
+        self.scheduler.start()
+
+
     def _download_and_extract_playbooks(self) -> None:
         logger.info(f"STARTED update of playbooks from - {self.GITHUB_PLAYBOOKS_REPO}")
-        r = requests.get(self.GITHUB_PLAYBOOKS_REPO)
-        with open(FILENAME, "wb") as output_file:
-            output_file.write(r.content)
-        logger.info("Downloading Completed")
-
-        with zipfile.ZipFile(FILENAME, "r") as zip_ref:
-            zip_ref.extractall(Template.get_playbook_dir())
-
+        
+        # Create a temporary file for downloading and extracting the playbook
+        temp_filename = tempfile.mkstemp()[1]
+        
+        try:
+            r = requests.get(self.GITHUB_PLAYBOOKS_REPO)
+            with open(temp_filename, "wb") as output_file:
+                output_file.write(r.content)
+            
+            logger.info("Downloading Completed")
+            
+            # Extract the zip file to a temporary directory
+            temp_dir = tempfile.mkdtemp()
+            try:
+                with zipfile.ZipFile(temp_filename, "r") as zip_ref:
+                    zip_ref.extractall(temp_dir)
+                
+                # Atomically replace the old playbook directory with the new one
+                shutil.rmtree(Template.get_playbook_dir())
+                shutil.copytree(temp_dir, Template.get_playbook_dir(), dirs_exist_ok=True)
+            
+            except Exception as e:
+                logger.error(f"Error downloading or extracting playbook: {e}")
+                raise
+        
+        finally:
+            # Clean up the temporary file and directory
+            if os.path.exists(temp_filename):
+                os.remove(temp_filename)
+        
+        if not os.path.exists(Template.get_playbook_dir()):
+            raise FileNotFoundError("Playbook directory does not exist")
+        
     def _copy_resenvs_templates(self) -> None:
         resenvs_unziped_dir = next(
             filter(
