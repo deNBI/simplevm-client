@@ -1367,7 +1367,7 @@ class OpenStackConnector:
             self.openstack_connection.compute.delete_server(server.id, force=True)
 
         except ConflictException as e:
-            logger.error(f"Delete Server {openstack_id} failed!")
+            logger.exception(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
 
@@ -1404,9 +1404,7 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
 
-            self.openstack_connection.compute.unrescue_server(
-                server
-            )
+            self.openstack_connection.compute.unrescue_server(server)
 
         except ConflictException as e:
             logger.exception(f"Unrescue Server {openstack_id} failed!")
