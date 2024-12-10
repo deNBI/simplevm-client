@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+import tempfile
 import zipfile
 from distutils.version import LooseVersion
 from pathlib import Path
@@ -10,11 +11,7 @@ import yaml
 
 from simple_vm_client.ttypes import ResearchEnvironmentTemplate
 from simple_vm_client.util.logger import setup_custom_logger
-import threading
-from apscheduler.schedulers.background import BackgroundScheduler
-import os
-import tempfile
-import shutil
+
 # from resenv.backend.Backend import Backend
 
 TEMPLATE_NAME = "template_name"
@@ -84,6 +81,8 @@ class ResearchEnvironmentMetadata:
 
 
 class Template(object):
+    is_locked = False
+
     def __init__(
         self,
         github_playbook_repo: str,
@@ -109,76 +108,71 @@ class Template(object):
         self._allowed_forc_templates: list[ResearchEnvironmentTemplate] = []
 
         self.update_playbooks()
-        #schedule.every().day.at("02:00").do(self.update_playbooks)  # run every day at 2am
-       # self.schedule_time = self.get_schedule_time()
-        self.start_scheduler()
-
 
     @property
     def loaded_research_env_metadata(self) -> dict[str, ResearchEnvironmentMetadata]:
         return self._loaded_resenv_metadata
 
-    def start_scheduler(self):
-        logger.info(f"Setting Update Playbook Schedule to: ")
-
-        self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(self.update_playbooks, 'interval', seconds=60)
-        self.scheduler.start()
-
-
     def _download_and_extract_playbooks(self) -> None:
         logger.info(f"STARTED update of playbooks from - {self.GITHUB_PLAYBOOKS_REPO}")
-        
+
         # Create a temporary file for downloading and extracting the playbook
         temp_filename = tempfile.mkstemp()[1]
-        
+
         try:
             r = requests.get(self.GITHUB_PLAYBOOKS_REPO)
             with open(temp_filename, "wb") as output_file:
                 output_file.write(r.content)
-            
+
             logger.info("Downloading Completed")
-            
+
             # Extract the zip file to a temporary directory
             temp_dir = tempfile.mkdtemp()
             try:
                 with zipfile.ZipFile(temp_filename, "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
-                
+
                 # Atomically replace the old playbook directory with the new one
-                shutil.rmtree(Template.get_playbook_dir())
-                shutil.copytree(temp_dir, Template.get_playbook_dir(), dirs_exist_ok=True)
-            
+                shutil.rmtree(Template.get_playbook_resenvs_dir())
+                for src_path in Path(temp_dir).rglob("*"):
+                    rel_path = os.path.relpath(src_path, temp_dir)
+                    dest_path = Path(Template.get_playbook_resenvs_dir(), rel_path)
+
+                    if not dest_path.parent.exists():
+                        dest_path.parent.mkdir(parents=True)
+
+                    shutil.move(str(src_path), str(dest_path))
+
             except Exception as e:
                 logger.error(f"Error downloading or extracting playbook: {e}")
                 raise
-        
+
         finally:
             # Clean up the temporary file and directory
             if os.path.exists(temp_filename):
                 os.remove(temp_filename)
-        
-        if not os.path.exists(Template.get_playbook_dir()):
+
+        if not os.path.exists(Template.get_playbook_resenvs_dir()):
             raise FileNotFoundError("Playbook directory does not exist")
-        
+
     def _copy_resenvs_templates(self) -> None:
         resenvs_unziped_dir = next(
             filter(
                 lambda f: os.path.isdir(f) and "resenvs" in f,
-                glob.glob(Template.get_playbook_dir() + "*"),
+                glob.glob(Template.get_playbook_resenvs_dir() + "*"),
             )
         )
         shutil.copytree(
-            resenvs_unziped_dir, Template.get_playbook_dir(), dirs_exist_ok=True
+            resenvs_unziped_dir, Template.get_playbook_resenvs_dir(), dirs_exist_ok=True
         )
         shutil.rmtree(resenvs_unziped_dir, ignore_errors=True)
 
     def _update_loaded_templates(self) -> None:
         self._all_templates = [
             name
-            for name in os.listdir(Template.get_playbook_dir())
+            for name in os.listdir(Template.get_playbook_resenvs_dir())
             if name not in NO_TEMPLATE_NAMES
-            and os.path.isdir(os.path.join(Template.get_playbook_dir(), name))
+            and os.path.isdir(os.path.join(Template.get_playbook_resenvs_dir(), name))
         ]
 
     def _load_and_update_resenv_metadata(self) -> None:
@@ -216,20 +210,29 @@ class Template(object):
                 "Github playbooks repo URL is None. Aborting download of playbooks."
             )
             return
+        Template.is_locked = True
+        try:
+            self._download_and_extract_playbooks()
 
-        self._download_and_extract_playbooks()
+            self._copy_resenvs_templates()
 
-        self._copy_resenvs_templates()
+            self._update_loaded_templates()
 
-        self._update_loaded_templates()
+            logger.info(f"Loaded Template Names: {self._all_templates}")
 
-        logger.info(f"Loaded Template Names: {self._all_templates}")
+            self._install_ansible_galaxy_requirements()
 
-        self._install_ansible_galaxy_requirements()
+            self._load_and_update_resenv_metadata()
 
-        self._load_and_update_resenv_metadata()
+            logger.info(f"Allowed Forc {self._forc_allowed}")
+        except Exception:
+            logger.exception("Could not update playbooks")
+        finally:
 
-        logger.info(f"Allowed Forc {self._forc_allowed}")
+            Template.is_locked = False
+
+    def is_update_locked(self):
+        return Template.is_locked
 
     def _get_forc_templates(self) -> list[dict]:
         if self.TEMPLATES_URL:
@@ -272,6 +275,14 @@ class Template(object):
         dir_path = f"{os.path.dirname(os.path.realpath(__file__))}/plays/"
         return dir_path
 
+    @staticmethod
+    def get_playbook_resenvs_dir() -> str:
+        Path(f"{os.path.dirname(os.path.realpath(__file__))}/plays/resenvs/").mkdir(
+            parents=True, exist_ok=True
+        )
+        dir_path = f"{os.path.dirname(os.path.realpath(__file__))}/plays/resenvs/"
+        return dir_path
+
     def _add_forc_allowed_template(self, metadata: ResearchEnvironmentMetadata) -> None:
         if metadata.needs_forc_support:
             logger.info(f"Add {metadata.template_name} - to allowed templates")
@@ -299,7 +310,9 @@ class Template(object):
                 template_metadata_name = f"{template}_metadata.yml"
                 try:
                     metadata_path = os.path.join(
-                        Template.get_playbook_dir(), template, template_metadata_name
+                        Template.get_playbook_resenvs_dir(),
+                        template,
+                        template_metadata_name,
                     )
 
                     loaded_metadata = self._load_yaml(metadata_path)
@@ -335,7 +348,7 @@ class Template(object):
     def _install_ansible_galaxy_requirements(self):
         logger.info("Installing Ansible galaxy requirements..")
         stream = os.popen(
-            f"ansible-galaxy install -r {Template.get_playbook_dir()}/packer/requirements.yml"
+            f"ansible-galaxy install -r {Template.get_playbook_resenvs_dir()}/packer/requirements.yml"
         )
         output = stream.read()
         logger.info(output)

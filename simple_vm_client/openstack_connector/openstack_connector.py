@@ -1404,9 +1404,7 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
 
-            self.openstack_connection.compute.unrescue_server(
-                server
-            )
+            self.openstack_connection.compute.unrescue_server(server)
 
         except ConflictException as e:
             logger.exception(f"Unrescue Server {openstack_id} failed!")

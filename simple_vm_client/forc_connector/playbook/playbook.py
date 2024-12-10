@@ -54,9 +54,8 @@ class Playbook(object):
         self.base_url = base_url
         # init temporary directories and mandatory generic files
 
-        self.playbooks_dir: str = Template.get_playbook_dir()
         self.directory: TemporaryDirectory = TemporaryDirectory(
-            dir=f"{self.playbooks_dir}"
+            dir=f"{Template.get_playbook_dir()}"
         )
         self.private_key = NamedTemporaryFile(
             mode="w+", dir=self.directory.name, delete=False, prefix="private_key_"
@@ -89,9 +88,12 @@ class Playbook(object):
         self.inventory.close()
 
     def copy_and_init_change_keys(self, public_key) -> None:
-        shutil.copy(self.playbooks_dir + "/change_key.yml", self.directory.name)
         shutil.copy(
-            self.playbooks_dir + "/change_key_vars_file.yml", self.directory.name
+            Template.get_playbook_dir() + "/change_key.yml", self.directory.name
+        )
+        shutil.copy(
+            Template.get_playbook_dir() + "/change_key_vars_file.yml",
+            self.directory.name,
         )
         with open(
             self.directory.name + "/change_key_vars_file.yml", mode="r"
@@ -112,14 +114,15 @@ class Playbook(object):
         self.copy_and_init_research_environment()
         self.copy_and_init_change_keys(public_key=public_key)
         shutil.copytree(
-            f"{self.playbooks_dir}/generic",
+            f"{Template.get_playbook_resenvs_dir()}",
             self.directory.name,
             dirs_exist_ok=True,
         )
 
         # write all vars_files and tasks in generic_playbook
         shutil.copy(
-            self.playbooks_dir + "/" + self.playbook_exec_name, self.directory.name
+            Template.get_playbook_dir() + "/" + self.playbook_exec_name,
+            self.directory.name,
         )
 
         with open(
@@ -139,7 +142,7 @@ class Playbook(object):
             return
 
         shutil.copytree(
-            f"{self.playbooks_dir}/{self.research_environment_template}",
+            f"{Template.get_playbook_resenvs_dir()}/{self.research_environment_template}",
             self.directory.name,
             dirs_exist_ok=True,
         )
@@ -183,19 +186,21 @@ class Playbook(object):
         site_specific_yml = f"{OPTIONAL}{'-' + self.cloud_site}.yml"
         playbook_name_local = OPTIONAL
 
-        if os.path.isfile(self.playbooks_dir + site_specific_yml):
+        if os.path.isfile(Template.get_playbook_dir() + site_specific_yml):
             playbook_name_local = OPTIONAL + "-" + self.cloud_site
 
         playbook_yml = f"{playbook_name_local}.yml"
         playbook_var_yml = f"{OPTIONAL}_vars_file.yml"
 
         try:
-            full_playbook_path = os.path.join(self.playbooks_dir, playbook_yml)
+            full_playbook_path = os.path.join(Template.get_playbook_dir(), playbook_yml)
             # Copy playbook YAML
             shutil.copy(full_playbook_path, self.directory.name)
 
             try:
-                full_vars_path = os.path.join(self.playbooks_dir, playbook_var_yml)
+                full_vars_path = os.path.join(
+                    Template.get_playbook_dir(), playbook_var_yml
+                )
                 # Copy playbook vars YAML
                 shutil.copy(full_vars_path, self.directory.name)
 
@@ -227,7 +232,9 @@ class Playbook(object):
             return
 
         shutil.copytree(
-            f"{self.playbooks_dir}/{CONDA}", self.directory.name, dirs_exist_ok=True
+            f"{Template.get_playbook_resenvs_dir()}/{CONDA}",
+            self.directory.name,
+            dirs_exist_ok=True,
         )
 
         site_specific_yml = f"/{CONDA}{'-' + self.cloud_site}.yml"
