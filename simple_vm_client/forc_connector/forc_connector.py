@@ -77,7 +77,6 @@ class ForcConnector:
     def update_templates(self):
         max_retries = 5
         retry_interval = 900  # 15 minutes in seconds
-        logger.info(f"\n\n {ForcConnector.active_playbooks}")
 
         for _ in range(max_retries):
             if self.is_any_playbook_active():
@@ -402,7 +401,6 @@ class ForcConnector:
         self.FORC_API_KEY = os.environ.get("FORC_API_KEY", None)
 
     def is_any_playbook_active(self) -> bool:
-        logger.info(f"key ---\n\n {self.redis_connection.keys()}\n\n")
         for openstack_id in ForcConnector.active_playbooks:
             if (
                 self.redis_connection.exists(openstack_id) == 1
