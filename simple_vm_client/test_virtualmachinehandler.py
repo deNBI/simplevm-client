@@ -163,6 +163,20 @@ class TestVirtualMachineHandler(unittest.TestCase):
             openstack_id=OPENSTACK_ID
         )
 
+    def test_rescue_server(self) -> None:
+        self.handler.rescue_server(openstack_id=OPENSTACK_ID)
+        self.handler.openstack_connector.rescue_server.assert_called_once_with(
+            openstack_id=OPENSTACK_ID,
+            admin_pass=None,
+            image_ref=None
+        )
+    
+    def test_unrescue_server(self) -> None:
+        self.handler.unrescue_server(openstack_id=OPENSTACK_ID)
+        self.handler.openstack_connector.unrescue_server.assert_called_once_with(
+            openstack_id=OPENSTACK_ID
+        )
+
     def test_set_server_metadata(self):
         self.handler.set_server_metadata(openstack_id=OPENSTACK_ID, metadata=METADATA)
         self.handler.openstack_connector.set_server_metadata.assert_called_once_with(
