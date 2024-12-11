@@ -398,7 +398,7 @@ class TestForcConnector(unittest.TestCase):
         fake_server = fakes.generate_fake_resource(Server)
         fake_server.task_state = None
         fake_playbook = MagicMock()
-        self.forc_connector._active_playbooks[fake_server.id] = fake_playbook
+        ForcConnector.active_playbooks[fake_server.id] = fake_playbook
         self.forc_connector.redis_connection.exists.return_value = 1
         self.forc_connector.redis_connection.hget.return_value = (
             VmTaskStates.PREPARE_PLAYBOOK_BUILD.value.encode("utf-8")
@@ -428,24 +428,28 @@ class TestForcConnector(unittest.TestCase):
         playbook_mock = MagicMock()
         mock_playbook.return_value = playbook_mock
 
-        self.forc_connector.redis_connection.hget.return_value = key.encode("utf-8")
-        res = self.forc_connector.create_and_deploy_playbook(
-            public_key=key,
-            research_environment_template="vscode",
-            create_only_backend=False,
-            conda_packages=[],
-            apt_packages=[],
-            openstack_id=openstack_id,
-            port=80,
-            ip="192.168.0.1",
-            cloud_site="Bielefeld",
-            base_url="base_url",
-        )
+        with patch.object(
+            self.forc_connector.template, "is_update_locked", return_value=False
+        ) as mock_is_update_locked:
+
+            self.forc_connector.redis_connection.hget.return_value = key.encode("utf-8")
+            res = self.forc_connector.create_and_deploy_playbook(
+                public_key=key,
+                research_environment_template="vscode",
+                create_only_backend=False,
+                conda_packages=[],
+                apt_packages=[],
+                openstack_id=openstack_id,
+                port=80,
+                ip="192.168.0.1",
+                cloud_site="Bielefeld",
+                base_url="base_url",
+            )
         self.forc_connector.redis_connection.hset.assert_called_once_with(
             openstack_id, "status", VmTaskStates.BUILD_PLAYBOOK.value
         )
         self.assertEqual(res, 0)
-        active_play = self.forc_connector._active_playbooks[openstack_id]
+        active_play = ForcConnector.active_playbooks[openstack_id]
         self.assertEqual(active_play, playbook_mock)
 
     @patch("simple_vm_client.forc_connector.forc_connector.requests.post")
@@ -617,7 +621,7 @@ class TestForcConnector(unittest.TestCase):
         self.forc_connector.redis_connection.exists.return_value = 1
         playbook_mock = MagicMock()
         playbook_mock.get_logs.return_value = "status", "stdout", "stderr"
-        self.forc_connector._active_playbooks = {openstack_id: playbook_mock}
+        ForcConnector.active_playbooks = {openstack_id: playbook_mock}
         self.forc_connector.get_playbook_logs(openstack_id=openstack_id)
         self.forc_connector.redis_connection.exists.assert_called_once_with(
             openstack_id

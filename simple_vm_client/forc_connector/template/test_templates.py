@@ -184,7 +184,7 @@ class TestTemplate(unittest.TestCase):
         mock_glob.return_value = ["/path/to/directory/resenvs"]
 
         def mock_glob_side_effect(pattern):
-            if pattern == Template.get_playbook_dir() + "*":
+            if pattern == Template.get_playbook_resenvs_dir() + "*":
                 return ["/path/to/directory/resenvs"]
             else:
                 return []
@@ -195,12 +195,12 @@ class TestTemplate(unittest.TestCase):
         template._copy_resenvs_templates()
 
         # Assert that glob.glob was called with the correct parameters
-        mock_glob.assert_called_once_with(Template.get_playbook_dir() + "*")
+        mock_glob.assert_called_once_with(Template.get_playbook_resenvs_dir() + "*")
 
         # Assert that shutil.copytree was called with the correct parameters
         mock_copytree.assert_called_once_with(
             "/path/to/directory/resenvs",
-            Template.get_playbook_dir(),
+            Template.get_playbook_resenvs_dir(),
             dirs_exist_ok=True,
         )
 
