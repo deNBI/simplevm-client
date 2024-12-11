@@ -142,7 +142,7 @@ class Playbook(object):
             return
 
         shutil.copytree(
-            f"{Template.get_playbook_resenvs_dir()}/{self.research_environment_template}",
+            f"{Template.get_playbook_resenvs_dir()}{self.research_environment_template}",
             self.directory.name,
             dirs_exist_ok=True,
         )
@@ -232,7 +232,7 @@ class Playbook(object):
             return
 
         shutil.copytree(
-            f"{Template.get_playbook_resenvs_dir()}/{CONDA}",
+            f"{Template.get_playbook_resenvs_dir()}{CONDA}",
             self.directory.name,
             dirs_exist_ok=True,
         )
