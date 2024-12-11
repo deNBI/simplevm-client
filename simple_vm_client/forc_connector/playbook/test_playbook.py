@@ -369,7 +369,9 @@ class TestPlaybook(unittest.TestCase):
 
         # Assert
         mock_copytree.assert_called_once_with(
-            f"{instance.playbooks_dir}/{CONDA}", mock_tempdir.name, dirs_exist_ok=True
+            f"{instance.playbooks_dir}resenvs/{CONDA}",
+            mock_tempdir.name,
+            dirs_exist_ok=True,
         )
 
         mock_open.assert_any_call(
@@ -556,7 +558,7 @@ class TestPlaybook(unittest.TestCase):
 
         # Assert
         mock_copytree.assert_called_once_with(
-            f"{instance.playbooks_dir}/template_name",
+            f"{instance.playbooks_dir}resenvs/template_name",
             instance.directory.name,
             dirs_exist_ok=True,
         )

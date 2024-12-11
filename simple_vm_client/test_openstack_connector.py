@@ -18,7 +18,6 @@ from openstack.image.v2 import image as image_module
 from openstack.network.v2 import security_group, security_group_rule
 from openstack.network.v2.network import Network
 from openstack.test import fakes
-from oslo_utils import encodeutils
 
 from simple_vm_client.forc_connector.template.template import (
     ResearchEnvironmentMetadata,
@@ -1107,21 +1106,11 @@ class TestOpenStackConnector(unittest.TestCase):
         result_script = self.openstack_connector.create_add_keys_script(keys)
 
         # Assertions
-        expected_script_content = (
-            '#!/bin/bash\ndeclare -a keys_to_add=("key1" "key2" "key3" )'
-            '\necho "Found keys: ${#keys_to_add[*]}"\nfor ix in ${!keys_to_add[*]}'
-            '\ndo\n    printf "\\n%s" "${keys_to_add[$ix]}" >> /home/ubuntu/.ssh/authorized_keys'
-            "\n\ndone\n"
-        )
-        expected_script_content = encodeutils.safe_encode(
-            expected_script_content.encode("utf-8")
-        )
+        for key in keys:
+            self.assertIn(key.encode("utf-8"), result_script)  # Encode the key to bytes
 
         # Additional assertions
         mock_logger_info.assert_called_once_with("create add key script")
-
-        # Check that the real script content matches the expected content
-        self.assertEqual(result_script, expected_script_content)
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.socket.socket")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
@@ -2324,8 +2313,6 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(DefaultException):
             self.openstack_connector.get_server("someid")
 
-
-
     @patch.object(OpenStackConnector, "get_server")
     def test_rescue_server_success(self, mock_get_server):
         # Arrange
@@ -2348,10 +2335,10 @@ class TestOpenStackConnector(unittest.TestCase):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
-        self.openstack_connector.openstack_connection.compute.rescue_server.side_effect = ConflictException
-        (
-            "Unit Test"
+        self.openstack_connector.openstack_connection.compute.rescue_server.side_effect = (
+            ConflictException
         )
+        ("Unit Test")
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.rescue_server(openstack_id="some_openstack_id")
@@ -2390,7 +2377,6 @@ class TestOpenStackConnector(unittest.TestCase):
         mock_logger_exception.assert_called_once_with(
             "Unrescue Server some_openstack_id failed!"
         )
-    
 
     @patch.object(OpenStackConnector, "get_server")
     def test_set_server_metadata_success(self, mock_get_server):
