@@ -458,7 +458,7 @@ service VirtualMachineService {
 
 	void delete_security_group_rule(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
 
-    void delete_server_security_groups(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
+    void remove_security_groups_from_server(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:OpenStackConflictException f)
 
 
 	 /**

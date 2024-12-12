@@ -347,8 +347,8 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id
         )
     
-    def delete_server_security_groups(self, openstack_id):
-        return self.openstack_connector.delete_server_security_groups(
+    def remove_security_groups_from_server(self, openstack_id):
+        return self.openstack_connector.remove_security_groups_from_server(
             openstack_id=openstack_id
         )
 

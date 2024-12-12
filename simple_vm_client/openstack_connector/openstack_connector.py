@@ -909,15 +909,6 @@ class OpenStackConnector:
             raise DefaultException(
                 message=f"Could not delete security group rule - {openstack_id}"
             )
-    
-    def delete_server_security_groups(self, openstack_id):
-        logger.info(f"Delete Security Groups for {openstack_id}")
-        try:
-            server: Server = self.get_server(openstack_id=openstack_id)
-            self._remove_security_groups_from_server(server)
-        except ConflictException as e:
-            logger.error(f"Delete Security Groups for {openstack_id} failed!")
-            raise OpenStackConflictException(message=e.message)
 
     def open_port_range_for_vm_in_project(
         self, range_start, range_stop, openstack_id, ethertype="IPv4", protocol="TCP"
@@ -1350,6 +1341,15 @@ class OpenStackConnector:
                         logger.info(
                             f"Could not remoeve security group {sec.id} from server"
                         )
+    
+    def remove_security_groups_from_server(self, openstack_id):
+        logger.info(f"Delete Security Groups for {openstack_id}")
+        try:
+            server: Server = self.get_server(openstack_id=openstack_id)
+            self._remove_security_groups_from_server(server)
+        except ConflictException as e:
+            logger.error(f"Delete Security Groups for {openstack_id} failed!")
+            raise OpenStackConflictException(message=e.message)
 
     def _validate_server_for_deletion(self, server: Server) -> None:
         task_state = server.task_state

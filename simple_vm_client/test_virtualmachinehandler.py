@@ -421,9 +421,9 @@ class TestVirtualMachineHandler(unittest.TestCase):
             openstack_id=OPENSTACK_ID
         )
 
-    def test_delete_server_security_groups(self):
-        self.handler.delete_server_security_groups(openstack_id=OPENSTACK_ID)
-        self.handler.openstack_connector.delete_server_security_groups.assert_called_once_with(
+    def test_remove_security_groups_from_server(self):
+        self.handler.remove_security_groups_from_server(openstack_id=OPENSTACK_ID)
+        self.handler.openstack_connector.remove_security_groups_from_server.assert_called_once_with(
             openstack_id=OPENSTACK_ID
         )    
 

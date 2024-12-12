@@ -205,7 +205,7 @@ class Iface(object):
         """
         pass
 
-    def delete_server_security_groups(self, openstack_id):
+    def remove_security_groups_from_server(self, openstack_id):
         """
         Parameters:
          - openstack_id
@@ -1484,24 +1484,24 @@ class Client(Iface):
             raise result.f
         return
 
-    def delete_server_security_groups(self, openstack_id):
+    def remove_security_groups_from_server(self, openstack_id):
         """
         Parameters:
          - openstack_id
 
         """
-        self.send_delete_server_security_groups(openstack_id)
-        self.recv_delete_server_security_groups()
+        self.send_remove_security_groups_from_server(openstack_id)
+        self.recv_remove_security_groups_from_server()
 
-    def send_delete_server_security_groups(self, openstack_id):
-        self._oprot.writeMessageBegin('delete_server_security_groups', TMessageType.CALL, self._seqid)
-        args = delete_server_security_groups_args()
+    def send_remove_security_groups_from_server(self, openstack_id):
+        self._oprot.writeMessageBegin('remove_security_groups_from_server', TMessageType.CALL, self._seqid)
+        args = remove_security_groups_from_server_args()
         args.openstack_id = openstack_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_delete_server_security_groups(self):
+    def recv_remove_security_groups_from_server(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -1509,7 +1509,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = delete_server_security_groups_result()
+        result = remove_security_groups_from_server_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.e is not None:
@@ -3628,7 +3628,7 @@ class Processor(Iface, TProcessor):
         self._processMap["resize_volume"] = Processor.process_resize_volume
         self._processMap["open_port_range_for_vm_in_project"] = Processor.process_open_port_range_for_vm_in_project
         self._processMap["delete_security_group_rule"] = Processor.process_delete_security_group_rule
-        self._processMap["delete_server_security_groups"] = Processor.process_delete_server_security_groups
+        self._processMap["remove_security_groups_from_server"] = Processor.process_remove_security_groups_from_server
         self._processMap["delete_server"] = Processor.process_delete_server
         self._processMap["rescue_server"] = Processor.process_rescue_server
         self._processMap["unrescue_server"] = Processor.process_unrescue_server
@@ -4218,20 +4218,20 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_delete_server_security_groups(self, seqid, iprot, oprot):
-        args = delete_server_security_groups_args()
+    def process_remove_security_groups_from_server(self, seqid, iprot, oprot):
+        args = remove_security_groups_from_server_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = delete_server_security_groups_result()
+        result = remove_security_groups_from_server_result()
         try:
-            self._handler.delete_server_security_groups(args.openstack_id)
+            self._handler.remove_security_groups_from_server(args.openstack_id)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
         except SecurityGroupRuleNotFoundException as e:
             msg_type = TMessageType.REPLY
             result.e = e
-        except DefaultException as f:
+        except OpenStackConflictException as f:
             msg_type = TMessageType.REPLY
             result.f = f
         except TApplicationException as ex:
@@ -4242,7 +4242,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("delete_server_security_groups", msg_type, seqid)
+        oprot.writeMessageBegin("remove_security_groups_from_server", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -8446,7 +8446,7 @@ delete_security_group_rule_result.thrift_spec = (
 )
 
 
-class delete_server_security_groups_args(object):
+class remove_security_groups_from_server_args(object):
     """
     Attributes:
      - openstack_id
@@ -8480,7 +8480,7 @@ class delete_server_security_groups_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('delete_server_security_groups_args')
+        oprot.writeStructBegin('remove_security_groups_from_server_args')
         if self.openstack_id is not None:
             oprot.writeFieldBegin('openstack_id', TType.STRING, 1)
             oprot.writeString(self.openstack_id.encode('utf-8') if sys.version_info[0] == 2 else self.openstack_id)
@@ -8501,14 +8501,14 @@ class delete_server_security_groups_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(delete_server_security_groups_args)
-delete_server_security_groups_args.thrift_spec = (
+all_structs.append(remove_security_groups_from_server_args)
+remove_security_groups_from_server_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'openstack_id', 'UTF8', None, ),  # 1
 )
 
 
-class delete_server_security_groups_result(object):
+class remove_security_groups_from_server_result(object):
     """
     Attributes:
      - e
@@ -8537,7 +8537,7 @@ class delete_server_security_groups_result(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self.f = DefaultException.read(iprot)
+                    self.f = OpenStackConflictException.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -8549,7 +8549,7 @@ class delete_server_security_groups_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('delete_server_security_groups_result')
+        oprot.writeStructBegin('remove_security_groups_from_server_result')
         if self.e is not None:
             oprot.writeFieldBegin('e', TType.STRUCT, 1)
             self.e.write(oprot)
@@ -8574,11 +8574,11 @@ class delete_server_security_groups_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(delete_server_security_groups_result)
-delete_server_security_groups_result.thrift_spec = (
+all_structs.append(remove_security_groups_from_server_result)
+remove_security_groups_from_server_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'e', [SecurityGroupRuleNotFoundException, None], None, ),  # 1
-    (2, TType.STRUCT, 'f', [DefaultException, None], None, ),  # 2
+    (2, TType.STRUCT, 'f', [OpenStackConflictException, None], None, ),  # 2
 )
 
 

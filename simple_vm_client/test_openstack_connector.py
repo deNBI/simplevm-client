@@ -2925,17 +2925,17 @@ class TestOpenStackConnector(unittest.TestCase):
             )
 
     @patch.object(OpenStackConnector, "get_server")
-    def test_delete_server_security_groups_sucess(self, mock_get_server):
+    def test_remove_security_groups_from_server_sucess(self, mock_get_server):
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
 
-        self.openstack_connector.delete_server_security_groups(server_mock.id)
+        self.openstack_connector.remove_security_groups_from_server(server_mock.id)
         self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
             server_mock, server_mock.security_groups
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    def test_delete_server_security_groups_failure(self, mock_get_server):
+    def test_remove_security_groups_from_server_failure(self, mock_get_server):
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
 
@@ -2943,7 +2943,7 @@ class TestOpenStackConnector(unittest.TestCase):
             False
         )
         with self.assertRaises(DefaultException):
-            self.openstack_connector.delete_server_security_groups(server_mock.id)
+            self.openstack_connector.remove_security_groups_from_server(server_mock.id)
             self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
                 server_mock, server_mock.security_groups
             )
