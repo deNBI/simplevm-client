@@ -164,16 +164,17 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id, metadata=metadata
         )
 
-    def get_server_by_unique_name(self, unique_name: str) -> VM:
+    def get_server_by_unique_name(self, unique_name: str, no_connection: bool = False) -> VM:
         server = self.openstack_connector.get_server_by_unique_name(
-            unique_name=unique_name
+            unique_name=unique_name,
+            no_connection=no_connection
         )
         server = self.forc_connector.get_playbook_status(server=server)
         server = thrift_converter.os_to_thrift_server(openstack_server=server)
         return server
 
-    def get_server(self, openstack_id: str) -> VM:
-        server = self.openstack_connector.get_server(openstack_id=openstack_id)
+    def get_server(self, openstack_id: str, no_connection: bool = False) -> VM:
+        server = self.openstack_connector.get_server(openstack_id=openstack_id, no_connection=no_connection)
         server = self.forc_connector.get_playbook_status(server=server)
         server = thrift_converter.os_to_thrift_server(openstack_server=server)
         return server
@@ -345,6 +346,11 @@ class VirtualMachineHandler(Iface):
         return self.openstack_connector.delete_security_group_rule(
             openstack_id=openstack_id
         )
+    
+    def delete_server_security_groups(self, openstack_id):
+        return self.openstack_connector.delete_server_security_groups(
+            openstack_id=openstack_id
+        )
 
     def add_default_security_groups_to_server(self, openstack_id):
         return self.openstack_connector.add_default_security_groups_to_server(
@@ -372,6 +378,13 @@ class VirtualMachineHandler(Iface):
     ) -> None:
         return self.openstack_connector.add_research_environment_security_group(
             server_id=server_id, security_group_name=security_group_name
+        )
+
+    def add_project_security_group_to_server(
+        self, server_id: str, project_name: str, project_id: str
+    ) -> None:
+        return self.openstack_connector.add_project_security_group_to_server(
+            server_id=server_id, project_name=project_name, project_id=project_id
         )
 
     def add_udp_security_group(self, server_id: str) -> None:

@@ -391,6 +391,15 @@ service VirtualMachineService {
     throws (1:DefaultException r,2:ServerNotFoundException s
 
     )
+
+    void add_project_security_group_to_server(
+    /** OpenStack id of the server*/
+    1:string server_id,2:string project_name, 3:string project_id)
+
+    throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
+
     /**
 	 * Add metadata to a server.
 	 */
@@ -448,6 +457,8 @@ service VirtualMachineService {
 	string open_port_range_for_vm_in_project(1:int range_start,2:int range_stop,3:string openstack_id,4: string ethertype = "IPv4",5:string protocol ="TCP") throws (1:ServerNotFoundException e,2: DefaultException v,3:OpenStackConflictException o)
 
 	void delete_security_group_rule(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
+
+    void delete_server_security_groups(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
 
 
 	 /**
@@ -669,14 +680,16 @@ service VirtualMachineService {
 	VM get_server(
 
 	/** Id of the server.*/
-	1:string openstack_id)
+	1:string openstack_id,
+    2:optional bool no_connection)
 
 	 throws (1:ServerNotFoundException e),
 
 	VM get_server_by_unique_name(
 
 	/** Id of the server.*/
-	1:string unique_name)
+	1:string unique_name,
+    2:optional bool no_connection)
 
 	 throws (1:ServerNotFoundException e),
 

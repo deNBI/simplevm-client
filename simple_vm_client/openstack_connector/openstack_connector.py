@@ -909,6 +909,18 @@ class OpenStackConnector:
             raise DefaultException(
                 message=f"Could not delete security group rule - {openstack_id}"
             )
+    
+    def delete_server_security_groups(self, openstack_id):
+        logger.info(f"Delete Security Groups for {openstack_id}")
+        server = self.get_server(openstack_id=openstack_id)
+        deleted = self.openstack_connection.remove_server_security_groups(
+            server, server.security_groups
+        )
+        logger.info(f"Delete Result -- {deleted}")
+        if not deleted:
+            raise DefaultException(
+                message=f"Could not delete security groups for {openstack_id}"
+            )
 
     def open_port_range_for_vm_in_project(
         self, range_start, range_stop, openstack_id, ethertype="IPv4", protocol="TCP"
@@ -1212,7 +1224,7 @@ class OpenStackConnector:
                 message=f"Error when setting server {openstack_id} metadata --> {metadata}! - {e}"
             )
 
-    def get_server_by_unique_name(self, unique_name: str) -> Server:
+    def get_server_by_unique_name(self, unique_name: str, no_connection: bool = False) -> Server:
         logger.info(f"Get Server by unique_name: {unique_name}")
 
         filters = {"name": unique_name}
@@ -1222,7 +1234,7 @@ class OpenStackConnector:
         if len(servers) == 1:
             server = list(servers)[0]
             logger.info(server)
-            if server.vm_state == VmStates.ACTIVE.value:
+            if server.vm_state == VmStates.ACTIVE.value and not no_connection:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
                 if not self.netcat(port=ssh_port):
@@ -1249,7 +1261,7 @@ class OpenStackConnector:
                 message=f"Error when getting server {unique_name}! - multiple entries"
             )
 
-    def get_server(self, openstack_id: str) -> Server:
+    def get_server(self, openstack_id: str, no_connection: bool = False) -> Server:
         try:
             logger.info(f"Get Server by id: {openstack_id}")
             server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
@@ -1259,7 +1271,7 @@ class OpenStackConnector:
                     message=f"Instance {openstack_id} not found",
                     name_or_id=openstack_id,
                 )
-            if server.vm_state == VmStates.ACTIVE.value:
+            if server.vm_state == VmStates.ACTIVE.value and not no_connection:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
                 if not self.netcat(port=ssh_port):
@@ -1707,6 +1719,23 @@ class OpenStackConnector:
         security_group: SecurityGroup = self.get_research_environment_security_group(
             security_group_name=security_group_name
         )
+        if self._is_security_group_already_added_to_server(
+            server=server, security_group_name=security_group.name
+        ):
+            return
+        self.openstack_connection.compute.add_security_group_to_server(
+            server=server, security_group=security_group
+        )
+    
+    def add_project_security_group_to_server(
+        self, server_id: str, project_name: str, project_id: str
+    ):
+        logger.info(f"Setting up {project_name} security group for {server_id}")
+        server: Server = self.get_server(openstack_id=server_id)
+        security_group_id = self.get_or_create_project_security_group(
+            project_name=project_name, project_id=project_id
+        )
+        security_group = self.openstack_connection.get_security_group(name_or_id=security_group_id)
         if self._is_security_group_already_added_to_server(
             server=server, security_group_name=security_group.name
         ):
