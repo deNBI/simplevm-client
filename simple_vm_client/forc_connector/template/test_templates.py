@@ -124,12 +124,13 @@ class TestTemplate(unittest.TestCase):
 
         return template
 
+    @patch("tempfile.mkstemp")
     @patch("requests.get")
     @patch("zipfile.ZipFile")
     @patch("builtins.open", create=True)
     @patch("simple_vm_client.forc_connector.template.template.logger.info")
     def test_download_and_extract_playbooks(
-        self, mock_logger_info, mock_open, mock_zipfile, mock_requests
+        self, mock_logger_info, mock_open, mock_zipfile, mock_requests, mock_tempfile
     ):
         template = self.init_template(
             github_playbook_repo=TestTemplate.GITHUB_REPO_STAGING,
@@ -140,6 +141,7 @@ class TestTemplate(unittest.TestCase):
         mock_response = Mock()
         mock_response.content = b"Mock content"
         mock_requests.return_value = mock_response
+        mock_tempfile.return_value = ["", FILENAME]
 
         # Call the method to test
         template._download_and_extract_playbooks()
@@ -182,7 +184,7 @@ class TestTemplate(unittest.TestCase):
         mock_glob.return_value = ["/path/to/directory/resenvs"]
 
         def mock_glob_side_effect(pattern):
-            if pattern == Template.get_playbook_dir() + "*":
+            if pattern == Template.get_playbook_resenvs_dir() + "*":
                 return ["/path/to/directory/resenvs"]
             else:
                 return []
@@ -193,12 +195,12 @@ class TestTemplate(unittest.TestCase):
         template._copy_resenvs_templates()
 
         # Assert that glob.glob was called with the correct parameters
-        mock_glob.assert_called_once_with(Template.get_playbook_dir() + "*")
+        mock_glob.assert_called_once_with(Template.get_playbook_resenvs_dir() + "*")
 
         # Assert that shutil.copytree was called with the correct parameters
         mock_copytree.assert_called_once_with(
             "/path/to/directory/resenvs",
-            Template.get_playbook_dir(),
+            Template.get_playbook_resenvs_dir(),
             dirs_exist_ok=True,
         )
 
@@ -233,33 +235,33 @@ class TestTemplate(unittest.TestCase):
         template._update_loaded_templates()
 
         # Assert that os.listdir was called with the correct parameters
-        mock_listdir.assert_called_once_with(Template.get_playbook_dir())
+        mock_listdir.assert_called_once_with(Template.get_playbook_resenvs_dir())
 
         # Assert that os.path.isdir was called for each template
         mock_isdir.assert_any_call(
-            os.path.join(Template.get_playbook_dir(), "template1")
+            os.path.join(Template.get_playbook_resenvs_dir(), "template1")
         )
         mock_isdir.assert_any_call(
-            os.path.join(Template.get_playbook_dir(), "template2")
+            os.path.join(Template.get_playbook_resenvs_dir(), "template2")
         )
         mock_isdir.assert_any_call(
-            os.path.join(Template.get_playbook_dir(), "non_template")
+            os.path.join(Template.get_playbook_resenvs_dir(), "non_template")
         )
         with pytest.raises(AssertionError):
             mock_isdir.assert_called_with(
-                os.path.join(Template.get_playbook_dir(), "packer")
+                os.path.join(Template.get_playbook_resenvs_dir(), "packer")
             )
         with pytest.raises(AssertionError):
             mock_isdir.assert_called_with(
-                os.path.join(Template.get_playbook_dir(), ".github")
+                os.path.join(Template.get_playbook_resenvs_dir(), ".github")
             )
         with pytest.raises(AssertionError):
             mock_isdir.assert_called_with(
-                os.path.join(Template.get_playbook_dir(), "cluster")
+                os.path.join(Template.get_playbook_resenvs_dir(), "cluster")
             )
         with pytest.raises(AssertionError):
             mock_isdir.assert_called_with(
-                os.path.join(Template.get_playbook_dir(), "optional")
+                os.path.join(Template.get_playbook_resenvs_dir(), "optional")
             )
 
         # Assert that the _all_templates attribute is updated correctly
@@ -294,7 +296,7 @@ class TestTemplate(unittest.TestCase):
         # Assertions
         mock_logger_info.assert_any_call("Installing Ansible galaxy requirements..")
         mock_os_popen.assert_called_with(
-            f"ansible-galaxy install -r {Template.get_playbook_dir()}/packer/requirements.yml"
+            f"ansible-galaxy install -r {Template.get_playbook_resenvs_dir()}/packer/requirements.yml"
         )
         mock_os_popen_instance.read.assert_called_once()
         mock_logger_info.assert_any_call("Mocked output")

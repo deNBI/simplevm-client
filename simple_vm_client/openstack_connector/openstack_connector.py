@@ -1316,6 +1316,23 @@ class OpenStackConnector:
             logger.exception(f"Stop Server {openstack_id} failed!")
             raise OpenStackConflictException(message=e.message)
 
+    def _delete_security_groups_if_not_used(self, security_groups: list[SecurityGroup]):
+        if security_groups is not None:
+            for sg in security_groups:
+                sec = self.openstack_connection.get_security_group(
+                    name_or_id=sg["name"]
+                )
+                if sg[
+                    "name"
+                ] != self.DEFAULT_SECURITY_GROUP_NAME and not self.is_security_group_in_use(
+                    security_group_id=sec.id
+                ):
+                    logger.info(f"Delete security group {sec}")
+                    try:
+                        self.openstack_connection.delete_security_group(sec)
+                    except ResourceNotFound:
+                        logger.info(f"Could not delete security group {sec.id}")
+
     def _remove_security_groups_from_server(self, server: Server) -> None:
         security_groups = server.security_groups
 
@@ -1372,11 +1389,15 @@ class OpenStackConnector:
                 )
 
             self._validate_server_for_deletion(server=server)
-            self._remove_security_groups_from_server(server=server)
+
+            logger.info(f"Start deleting Server {openstack_id}")
             self.openstack_connection.compute.delete_server(server.id, force=True)
 
+            security_groups = server.security_groups
+            self._delete_security_groups_if_not_used(security_groups)
+
         except ConflictException as e:
-            logger.error(f"Delete Server {openstack_id} failed!")
+            logger.exception(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
 
@@ -1413,9 +1434,7 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
 
-            self.openstack_connection.compute.unrescue_server(
-                server
-            )
+            self.openstack_connection.compute.unrescue_server(server)
 
         except ConflictException as e:
             logger.exception(f"Unrescue Server {openstack_id} failed!")
