@@ -421,6 +421,12 @@ class TestVirtualMachineHandler(unittest.TestCase):
             openstack_id=OPENSTACK_ID
         )
 
+    def test_remove_security_groups_from_server(self):
+        self.handler.remove_security_groups_from_server(openstack_id=OPENSTACK_ID)
+        self.handler.openstack_connector.remove_security_groups_from_server.assert_called_once_with(
+            openstack_id=OPENSTACK_ID
+        )    
+
     def test_open_port_range_for_vm_in_project(self):
         self.handler.open_port_range_for_vm_in_project(
             range_start=1000, range_stop=1000, openstack_id=OPENSTACK_ID

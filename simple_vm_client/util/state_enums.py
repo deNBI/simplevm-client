@@ -77,3 +77,4 @@ class VmStates(Enum):
     CLIENT_OFFLINE = "client_offline"
     PLANNED = "planned"
     PORT_CLOSED = "port_closed"
+    CONNECTION_DISABLED = "connection_disabled"
