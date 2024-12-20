@@ -507,12 +507,13 @@ service VirtualMachineService {
 
      7:list<map<string,string>> volume_ids_path_new,
      8:list<map<string,string>> volume_ids_path_attach,
-     9:list <string> additional_keys,
-     10:optional string research_environment
-     11:optional list<string> additional_security_group_ids,
-     12:optional string slurm_version,
-     13:optional string metadata_token,
-     14:optional string metadata_endpoint
+     9:list <string> additional_owner_keys,
+     10:list <string> addtional_user_keys,
+     11:optional string research_environment
+     12:optional list<string> additional_security_group_ids,
+     13:optional string slurm_version,
+     14:optional string metadata_token,
+     15:optional string metadata_endpoint
 
     )
 
@@ -546,9 +547,10 @@ service VirtualMachineService {
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
     9:optional list<string> additional_security_group_ids,
-    10:optional list<string> additional_keys,
-    11:optional string metadata_token,
-    12:optional string metadata_endpoint,
+    10:list <string> additional_owner_keys,
+    11:list <string> addtional_user_keys,
+    12:optional string metadata_token,
+    13:optional string metadata_endpoint,
 
 
 
