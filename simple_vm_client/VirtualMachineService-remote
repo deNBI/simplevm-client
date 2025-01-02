@@ -61,12 +61,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     )
     print("  void unrescue_server(string openstack_id)")
     print(
-        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  addtional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint)"
+        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  additional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint)"
     )
     print("  bool is_bibigrid_available()")
     print("  void detach_ip_from_server(string server_id, string floating_ip)")
     print(
-        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  addtional_user_keys, string metadata_token, string metadata_endpoint)"
+        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  additional_user_keys, string metadata_token, string metadata_endpoint)"
     )
     print("  bool exist_server(string name)")
     print(

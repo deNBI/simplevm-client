@@ -232,7 +232,7 @@ class Iface(object):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         research_environment,
         additional_security_group_ids,
         slurm_version,
@@ -249,7 +249,7 @@ class Iface(object):
          - volume_ids_path_new
          - volume_ids_path_attach
          - additional_owner_keys
-         - addtional_user_keys
+         - additional_user_keys
          - research_environment
          - additional_security_group_ids
          - slurm_version
@@ -280,7 +280,7 @@ class Iface(object):
         volume_ids_path_attach,
         additional_security_group_ids,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         metadata_token,
         metadata_endpoint,
     ):
@@ -297,7 +297,7 @@ class Iface(object):
          - volume_ids_path_attach
          - additional_security_group_ids
          - additional_owner_keys
-         - addtional_user_keys
+         - additional_user_keys
          - metadata_token
          - metadata_endpoint
 
@@ -1697,7 +1697,7 @@ class Client(Iface):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         research_environment,
         additional_security_group_ids,
         slurm_version,
@@ -1714,7 +1714,7 @@ class Client(Iface):
          - volume_ids_path_new
          - volume_ids_path_attach
          - additional_owner_keys
-         - addtional_user_keys
+         - additional_user_keys
          - research_environment
          - additional_security_group_ids
          - slurm_version
@@ -1731,7 +1731,7 @@ class Client(Iface):
             volume_ids_path_new,
             volume_ids_path_attach,
             additional_owner_keys,
-            addtional_user_keys,
+            additional_user_keys,
             research_environment,
             additional_security_group_ids,
             slurm_version,
@@ -1750,7 +1750,7 @@ class Client(Iface):
         volume_ids_path_new,
         volume_ids_path_attach,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         research_environment,
         additional_security_group_ids,
         slurm_version,
@@ -1767,7 +1767,7 @@ class Client(Iface):
         args.volume_ids_path_new = volume_ids_path_new
         args.volume_ids_path_attach = volume_ids_path_attach
         args.additional_owner_keys = additional_owner_keys
-        args.addtional_user_keys = addtional_user_keys
+        args.additional_user_keys = additional_user_keys
         args.research_environment = research_environment
         args.additional_security_group_ids = additional_security_group_ids
         args.slurm_version = slurm_version
@@ -1882,7 +1882,7 @@ class Client(Iface):
         volume_ids_path_attach,
         additional_security_group_ids,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         metadata_token,
         metadata_endpoint,
     ):
@@ -1899,7 +1899,7 @@ class Client(Iface):
          - volume_ids_path_attach
          - additional_security_group_ids
          - additional_owner_keys
-         - addtional_user_keys
+         - additional_user_keys
          - metadata_token
          - metadata_endpoint
 
@@ -1914,7 +1914,7 @@ class Client(Iface):
             volume_ids_path_attach,
             additional_security_group_ids,
             additional_owner_keys,
-            addtional_user_keys,
+            additional_user_keys,
             metadata_token,
             metadata_endpoint,
         )
@@ -1931,7 +1931,7 @@ class Client(Iface):
         volume_ids_path_attach,
         additional_security_group_ids,
         additional_owner_keys,
-        addtional_user_keys,
+        additional_user_keys,
         metadata_token,
         metadata_endpoint,
     ):
@@ -1948,7 +1948,7 @@ class Client(Iface):
         args.volume_ids_path_attach = volume_ids_path_attach
         args.additional_security_group_ids = additional_security_group_ids
         args.additional_owner_keys = additional_owner_keys
-        args.addtional_user_keys = addtional_user_keys
+        args.additional_user_keys = additional_user_keys
         args.metadata_token = metadata_token
         args.metadata_endpoint = metadata_endpoint
         args.write(self._oprot)
@@ -4872,7 +4872,7 @@ class Processor(Iface, TProcessor):
                 args.volume_ids_path_new,
                 args.volume_ids_path_attach,
                 args.additional_owner_keys,
-                args.addtional_user_keys,
+                args.additional_user_keys,
                 args.research_environment,
                 args.additional_security_group_ids,
                 args.slurm_version,
@@ -4981,7 +4981,7 @@ class Processor(Iface, TProcessor):
                 args.volume_ids_path_attach,
                 args.additional_security_group_ids,
                 args.additional_owner_keys,
-                args.addtional_user_keys,
+                args.additional_user_keys,
                 args.metadata_token,
                 args.metadata_endpoint,
             )
@@ -10984,7 +10984,7 @@ class start_server_args(object):
      - volume_ids_path_new
      - volume_ids_path_attach
      - additional_owner_keys
-     - addtional_user_keys
+     - additional_user_keys
      - research_environment
      - additional_security_group_ids
      - slurm_version
@@ -11005,7 +11005,7 @@ class start_server_args(object):
         volume_ids_path_new=None,
         volume_ids_path_attach=None,
         additional_owner_keys=None,
-        addtional_user_keys=None,
+        additional_user_keys=None,
         research_environment=None,
         additional_security_group_ids=None,
         slurm_version=None,
@@ -11020,7 +11020,7 @@ class start_server_args(object):
         self.volume_ids_path_new = volume_ids_path_new
         self.volume_ids_path_attach = volume_ids_path_attach
         self.additional_owner_keys = additional_owner_keys
-        self.addtional_user_keys = addtional_user_keys
+        self.additional_user_keys = additional_user_keys
         self.research_environment = research_environment
         self.additional_security_group_ids = additional_security_group_ids
         self.slurm_version = slurm_version
@@ -11159,7 +11159,7 @@ class start_server_args(object):
                     iprot.skip(ftype)
             elif fid == 10:
                 if ftype == TType.LIST:
-                    self.addtional_user_keys = []
+                    self.additional_user_keys = []
                     (_etype168, _size165) = iprot.readListBegin()
                     for _i169 in range(_size165):
                         _elem170 = (
@@ -11167,7 +11167,7 @@ class start_server_args(object):
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.addtional_user_keys.append(_elem170)
+                        self.additional_user_keys.append(_elem170)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -11325,10 +11325,10 @@ class start_server_args(object):
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.addtional_user_keys is not None:
-            oprot.writeFieldBegin("addtional_user_keys", TType.LIST, 10)
-            oprot.writeListBegin(TType.STRING, len(self.addtional_user_keys))
-            for iter186 in self.addtional_user_keys:
+        if self.additional_user_keys is not None:
+            oprot.writeFieldBegin("additional_user_keys", TType.LIST, 10)
+            oprot.writeListBegin(TType.STRING, len(self.additional_user_keys))
+            for iter186 in self.additional_user_keys:
                 oprot.writeString(
                     iter186.encode("utf-8") if sys.version_info[0] == 2 else iter186
                 )
@@ -11455,7 +11455,7 @@ start_server_args.thrift_spec = (
     (
         10,
         TType.LIST,
-        "addtional_user_keys",
+        "additional_user_keys",
         (TType.STRING, "UTF8", False),
         None,
     ),  # 10
@@ -12017,7 +12017,7 @@ class start_server_with_custom_key_args(object):
      - volume_ids_path_attach
      - additional_security_group_ids
      - additional_owner_keys
-     - addtional_user_keys
+     - additional_user_keys
      - metadata_token
      - metadata_endpoint
 
@@ -12036,7 +12036,7 @@ class start_server_with_custom_key_args(object):
         volume_ids_path_attach=None,
         additional_security_group_ids=None,
         additional_owner_keys=None,
-        addtional_user_keys=None,
+        additional_user_keys=None,
         metadata_token=None,
         metadata_endpoint=None,
     ):
@@ -12049,7 +12049,7 @@ class start_server_with_custom_key_args(object):
         self.volume_ids_path_attach = volume_ids_path_attach
         self.additional_security_group_ids = additional_security_group_ids
         self.additional_owner_keys = additional_owner_keys
-        self.addtional_user_keys = addtional_user_keys
+        self.additional_user_keys = additional_user_keys
         self.metadata_token = metadata_token
         self.metadata_endpoint = metadata_endpoint
 
@@ -12199,7 +12199,7 @@ class start_server_with_custom_key_args(object):
                     iprot.skip(ftype)
             elif fid == 11:
                 if ftype == TType.LIST:
-                    self.addtional_user_keys = []
+                    self.additional_user_keys = []
                     (_etype236, _size233) = iprot.readListBegin()
                     for _i237 in range(_size233):
                         _elem238 = (
@@ -12207,7 +12207,7 @@ class start_server_with_custom_key_args(object):
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.addtional_user_keys.append(_elem238)
+                        self.additional_user_keys.append(_elem238)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -12342,10 +12342,10 @@ class start_server_with_custom_key_args(object):
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.addtional_user_keys is not None:
-            oprot.writeFieldBegin("addtional_user_keys", TType.LIST, 11)
-            oprot.writeListBegin(TType.STRING, len(self.addtional_user_keys))
-            for iter249 in self.addtional_user_keys:
+        if self.additional_user_keys is not None:
+            oprot.writeFieldBegin("additional_user_keys", TType.LIST, 11)
+            oprot.writeListBegin(TType.STRING, len(self.additional_user_keys))
+            for iter249 in self.additional_user_keys:
                 oprot.writeString(
                     iter249.encode("utf-8") if sys.version_info[0] == 2 else iter249
                 )
@@ -12454,7 +12454,7 @@ start_server_with_custom_key_args.thrift_spec = (
     (
         11,
         TType.LIST,
-        "addtional_user_keys",
+        "additional_user_keys",
         (TType.STRING, "UTF8", False),
         None,
     ),  # 11
