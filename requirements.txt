@@ -1,4 +1,4 @@
-setuptools==75.6.0
+setuptools==75.7.0
 thrift==0.21.0
 openstacksdk==4.0.1
 deprecated==1.2.15
