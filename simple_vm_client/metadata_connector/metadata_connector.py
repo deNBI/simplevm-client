@@ -50,7 +50,7 @@ class MetadataConnector:
 
     def load_env_config(self):
         required_keys = [
-            "METADATA_SERVER_TOKEN",
+            "METADATA_WRITE_TOKEN",
         ]
         missing_keys = [key for key in required_keys if key not in os.environ]
         if missing_keys:
@@ -58,7 +58,7 @@ class MetadataConnector:
             logger.error(
                 f"MetadataServer missing keys {missing_keys_str} not provided in env!"
             )
-        self.METADATA_SERVER_TOKEN = os.environ.get("METADATA_SERVER_TOKEN")
+        self.METADATA_WRITE_TOKEN = os.environ.get("METADATA_WRITE_TOKEN")
         logger.info("Metadata Environment loaded")
 
     def remove_metadata(self, ip: str):
@@ -74,8 +74,8 @@ class MetadataConnector:
                 remove_metadata_url,
                 timeout=(30, 30),
                 headers={
-                    "X-Auth-Token": self.METADATA_SERVER_TOKEN,
-                }
+                    "X-Auth-Token": self.METADATA_WRITE_TOKEN,
+                },
             )
             response.raise_for_status()
             logger.info(f"Metadata removed successfully for {ip}")
@@ -102,9 +102,9 @@ class MetadataConnector:
                 data=serialized_data,
                 timeout=(30, 30),
                 headers={
-                    "X-Auth-Token": self.METADATA_SERVER_TOKEN,
+                    "X-Auth-Token": self.METADATA_WRITE_TOKEN,
                     "Content-Type": "application/json",
-                }
+                },
             )
             response.raise_for_status()
             logger.info(f"Metadata set successfully for {ip}")
@@ -121,10 +121,7 @@ class MetadataConnector:
         health_url = urljoin(self.METADATA_BASE_URL, "health")
 
         try:
-            response = requests.get(
-                health_url,
-                timeout=(30, 30)
-            )
+            response = requests.get(health_url, timeout=(30, 30))
             response.raise_for_status()
             logger.info(f"Metadata Health Check --- {response.json()}")
             return True
