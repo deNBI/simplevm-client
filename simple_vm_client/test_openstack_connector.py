@@ -24,8 +24,8 @@ from simple_vm_client.forc_connector.template.template import (
 )
 from simple_vm_client.util.state_enums import VmStates, VmTaskStates
 
-from .openstack_connector.openstack_connector import OpenStackConnector
-from .ttypes import (
+from openstack_connector.openstack_connector import OpenStackConnector
+from ttypes import (
     DefaultException,
     FlavorNotFoundException,
     ImageNotFoundException,
@@ -2908,6 +2908,30 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.delete_security_group_rule("rule_id")
             self.openstack_connector.openstack_connection.delete_security_group_rule.assert_called_once_with(
                 rule_id="rule_id"
+            )
+
+    @patch.object(OpenStackConnector, "get_server")
+    def test_remove_security_groups_from_server_sucess(self, mock_get_server):
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+
+        self.openstack_connector.remove_security_groups_from_server(server_mock.id)
+        self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
+            server_mock, server_mock.security_groups
+        )
+
+    @patch.object(OpenStackConnector, "get_server")
+    def test_remove_security_groups_from_server_failure(self, mock_get_server):
+        server_mock = fakes.generate_fake_resource(server.Server)
+        mock_get_server.return_value = server_mock
+
+        self.openstack_connector.openstack_connection.remove_server_security_groups.return_value = (
+            False
+        )
+        with self.assertRaises(DefaultException):
+            self.openstack_connector.remove_security_groups_from_server(server_mock.id)
+            self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
+                server_mock, server_mock.security_groups
             )
 
     def test_get_gateway_ip(self):

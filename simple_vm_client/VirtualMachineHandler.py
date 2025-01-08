@@ -164,16 +164,20 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id, metadata=metadata
         )
 
-    def get_server_by_unique_name(self, unique_name: str) -> VM:
+    def get_server_by_unique_name(
+        self, unique_name: str, no_connection: bool = False
+    ) -> VM:
         server = self.openstack_connector.get_server_by_unique_name(
-            unique_name=unique_name
+            unique_name=unique_name, no_connection=no_connection
         )
         server = self.forc_connector.get_playbook_status(server=server)
         server = thrift_converter.os_to_thrift_server(openstack_server=server)
         return server
 
-    def get_server(self, openstack_id: str) -> VM:
-        server = self.openstack_connector.get_server(openstack_id=openstack_id)
+    def get_server(self, openstack_id: str, no_connection: bool = False) -> VM:
+        server = self.openstack_connector.get_server(
+            openstack_id=openstack_id, no_connection=no_connection
+        )
         server = self.forc_connector.get_playbook_status(server=server)
         server = thrift_converter.os_to_thrift_server(openstack_server=server)
         return server
@@ -346,6 +350,11 @@ class VirtualMachineHandler(Iface):
             openstack_id=openstack_id
         )
 
+    def remove_security_groups_from_server(self, openstack_id):
+        return self.openstack_connector.remove_security_groups_from_server(
+            openstack_id=openstack_id
+        )
+
     def add_default_security_groups_to_server(self, openstack_id):
         return self.openstack_connector.add_default_security_groups_to_server(
             openstack_id=openstack_id
@@ -374,6 +383,13 @@ class VirtualMachineHandler(Iface):
             server_id=server_id, security_group_name=security_group_name
         )
 
+    def add_project_security_group_to_server(
+        self, server_id: str, project_name: str, project_id: str
+    ) -> None:
+        return self.openstack_connector.add_project_security_group_to_server(
+            server_id=server_id, project_name=project_name, project_id=project_id
+        )
+
     def add_udp_security_group(self, server_id: str) -> None:
         return self.openstack_connector.add_udp_security_group(server_id=server_id)
 
@@ -391,7 +407,8 @@ class VirtualMachineHandler(Iface):
         metadata: dict[str, str],
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
-        additional_keys: list[str],
+        additional_owner_keys: list[str],
+        additional_user_keys: list[str],
         research_environment: str,
         additional_security_group_ids: list[str],
         slurm_version: str = None,
@@ -414,7 +431,8 @@ class VirtualMachineHandler(Iface):
             metadata=metadata,
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
-            additional_keys=additional_keys,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
             research_environment_metadata=research_environment_metadata,
             additional_security_group_ids=additional_security_group_ids,
             slurm_version=slurm_version,
@@ -432,7 +450,8 @@ class VirtualMachineHandler(Iface):
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
         additional_security_group_ids: list[str],
-        additional_keys: list[str],
+        additional_owner_keys: list[str],
+        additional_user_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
     ) -> str:
@@ -449,7 +468,8 @@ class VirtualMachineHandler(Iface):
             image_name=image_name,
             servername=servername,
             metadata=metadata,
-            additional_keys=additional_keys,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
             research_environment_metadata=research_environment_metadata,
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
