@@ -2484,7 +2484,7 @@ class Client(Iface):
 
     def is_metadata_server_available(self):
         self.send_is_metadata_server_available()
-        self.recv_is_metadata_server_available()
+        return self.recv_is_metadata_server_available()
 
     def send_is_metadata_server_available(self):
         self._oprot.writeMessageBegin(
@@ -2506,11 +2506,16 @@ class Client(Iface):
         result = is_metadata_server_available_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.m is not None:
             raise result.m
         if result.b is not None:
             raise result.b
-        return
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "is_metadata_server_available failed: unknown result",
+        )
 
     def delete_backend(self, id):
         """
@@ -5373,7 +5378,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = is_metadata_server_available_result()
         try:
-            self._handler.is_metadata_server_available()
+            result.success = self._handler.is_metadata_server_available()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -15094,6 +15099,7 @@ is_metadata_server_available_args.thrift_spec = ()
 class is_metadata_server_available_result(object):
     """
     Attributes:
+     - success
      - m
      - b
 
@@ -15103,9 +15109,11 @@ class is_metadata_server_available_result(object):
 
     def __init__(
         self,
+        success=None,
         m=None,
         b=None,
     ):
+        self.success = success
         self.m = m
         self.b = b
 
@@ -15122,7 +15130,12 @@ class is_metadata_server_available_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
+                if ftype == TType.BOOL:
+                    self.success = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
                 if ftype == TType.STRUCT:
                     self.m = MetadataServerNotAvailableException.read(iprot)
                 else:
@@ -15145,6 +15158,10 @@ class is_metadata_server_available_result(object):
             )
             return
         oprot.writeStructBegin("is_metadata_server_available_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.BOOL, 0)
+            oprot.writeBool(self.success)
+            oprot.writeFieldEnd()
         if self.m is not None:
             oprot.writeFieldBegin("m", TType.STRUCT, 1)
             self.m.write(oprot)
@@ -15172,7 +15189,13 @@ class is_metadata_server_available_result(object):
 
 all_structs.append(is_metadata_server_available_result)
 is_metadata_server_available_result.thrift_spec = (
-    None,  # 0
+    (
+        0,
+        TType.BOOL,
+        "success",
+        None,
+        None,
+    ),  # 0
     (
         1,
         TType.STRUCT,
