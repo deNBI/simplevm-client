@@ -86,7 +86,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  void set_metadata_server_data(string ip, VirtualMachineServerMetadata metadata)"
     )
     print("  void remove_metadata_server_data(string ip)")
-    print("  void is_metadata_server_available()")
+    print("  bool is_metadata_server_available()")
     print("  void delete_backend(i64 id)")
     print("   add_user_to_backend(i64 backend_id, string user_id)")
     print("   get_users_from_backend(i64 backend_id)")
