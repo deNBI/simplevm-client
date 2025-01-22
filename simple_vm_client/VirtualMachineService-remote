@@ -103,7 +103,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  string add_cluster_machine(string cluster_id, string cluster_user, string cluster_group_id, string image_name, string flavor_name, string name, string key_name, int batch_idx, int worker_idx)"
     )
     print("  ClusterInfo get_cluster_info(string cluster_id)")
-    print("   get_cluster_status(string cluster_id)")
+    print("  ClusterLog get_cluster_log(string cluster_id)")
     print("  string get_keypair_public_key_by_name(string key_name)")
     print("  void delete_keypair(string key_name)")
     print("  void add_default_security_groups_to_server(string openstack_id)")
@@ -115,9 +115,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     )
     print("   get_limits()")
     print(
-        "   start_cluster( public_keys, ClusterInstance master_instance,  worker_instances, string user)"
+        "  ClusterMessage start_cluster( public_keys, ClusterInstance master_instance,  worker_instances)"
     )
-    print("   terminate_cluster(string cluster_id)")
+    print("  void terminate_cluster(string cluster_id)")
     print("  void delete_image(string image_id)")
     print("  void detach_volume(string volume_id, string server_id)")
     print("  void delete_volume(string volume_id)")
@@ -761,12 +761,12 @@ elif cmd == "get_cluster_info":
         )
     )
 
-elif cmd == "get_cluster_status":
+elif cmd == "get_cluster_log":
     if len(args) != 1:
-        print("get_cluster_status requires 1 args")
+        print("get_cluster_log requires 1 args")
         sys.exit(1)
     pp.pprint(
-        client.get_cluster_status(
+        client.get_cluster_log(
             args[0],
         )
     )
@@ -854,15 +854,14 @@ elif cmd == "get_limits":
     pp.pprint(client.get_limits())
 
 elif cmd == "start_cluster":
-    if len(args) != 4:
-        print("start_cluster requires 4 args")
+    if len(args) != 3:
+        print("start_cluster requires 3 args")
         sys.exit(1)
     pp.pprint(
         client.start_cluster(
             eval(args[0]),
             eval(args[1]),
             eval(args[2]),
-            args[3],
         )
     )
 

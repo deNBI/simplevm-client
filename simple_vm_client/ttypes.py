@@ -920,231 +920,6 @@ class CondaPackage(object):
         return not (self == other)
 
 
-class ClusterInfo(object):
-    """
-    Attributes:
-     - launch_date
-     - group_id
-     - network_id
-     - public_ip
-     - subnet_id
-     - user
-     - inst_counter
-     - cluster_id
-     - key_name
-
-    """
-
-    thrift_spec = None
-
-    def __init__(
-        self,
-        launch_date=None,
-        group_id=None,
-        network_id=None,
-        public_ip=None,
-        subnet_id=None,
-        user=None,
-        inst_counter=None,
-        cluster_id=None,
-        key_name=None,
-    ):
-        self.launch_date = launch_date
-        self.group_id = group_id
-        self.network_id = network_id
-        self.public_ip = public_ip
-        self.subnet_id = subnet_id
-        self.user = user
-        self.inst_counter = inst_counter
-        self.cluster_id = cluster_id
-        self.key_name = key_name
-
-    def read(self, iprot):
-        if (
-            iprot._fast_decode is not None
-            and isinstance(iprot.trans, TTransport.CReadableTransport)
-            and self.thrift_spec is not None
-        ):
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.launch_date = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.group_id = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.network_id = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRING:
-                    self.public_ip = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.STRING:
-                    self.subnet_id = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.STRING:
-                    self.user = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 7:
-                if ftype == TType.I32:
-                    self.inst_counter = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 8:
-                if ftype == TType.STRING:
-                    self.cluster_id = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 9:
-                if ftype == TType.STRING:
-                    self.key_name = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        self.validate()
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(
-                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
-            )
-            return
-        oprot.writeStructBegin("ClusterInfo")
-        if self.launch_date is not None:
-            oprot.writeFieldBegin("launch_date", TType.STRING, 1)
-            oprot.writeString(
-                self.launch_date.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.launch_date
-            )
-            oprot.writeFieldEnd()
-        if self.group_id is not None:
-            oprot.writeFieldBegin("group_id", TType.STRING, 2)
-            oprot.writeString(
-                self.group_id.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.group_id
-            )
-            oprot.writeFieldEnd()
-        if self.network_id is not None:
-            oprot.writeFieldBegin("network_id", TType.STRING, 3)
-            oprot.writeString(
-                self.network_id.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.network_id
-            )
-            oprot.writeFieldEnd()
-        if self.public_ip is not None:
-            oprot.writeFieldBegin("public_ip", TType.STRING, 4)
-            oprot.writeString(
-                self.public_ip.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.public_ip
-            )
-            oprot.writeFieldEnd()
-        if self.subnet_id is not None:
-            oprot.writeFieldBegin("subnet_id", TType.STRING, 5)
-            oprot.writeString(
-                self.subnet_id.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.subnet_id
-            )
-            oprot.writeFieldEnd()
-        if self.user is not None:
-            oprot.writeFieldBegin("user", TType.STRING, 6)
-            oprot.writeString(
-                self.user.encode("utf-8") if sys.version_info[0] == 2 else self.user
-            )
-            oprot.writeFieldEnd()
-        if self.inst_counter is not None:
-            oprot.writeFieldBegin("inst_counter", TType.I32, 7)
-            oprot.writeI32(self.inst_counter)
-            oprot.writeFieldEnd()
-        if self.cluster_id is not None:
-            oprot.writeFieldBegin("cluster_id", TType.STRING, 8)
-            oprot.writeString(
-                self.cluster_id.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.cluster_id
-            )
-            oprot.writeFieldEnd()
-        if self.key_name is not None:
-            oprot.writeFieldBegin("key_name", TType.STRING, 9)
-            oprot.writeString(
-                self.key_name.encode("utf-8")
-                if sys.version_info[0] == 2
-                else self.key_name
-            )
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
-        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
 class Volume(object):
     """
     Attributes:
@@ -2315,7 +2090,103 @@ class ClusterInstance(object):
     Attributes:
      - type
      - image
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        type=None,
+        image=None,
+    ):
+        self.type = type
+        self.image = image
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.type = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.image = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterInstance")
+        if self.type is not None:
+            oprot.writeFieldBegin("type", TType.STRING, 1)
+            oprot.writeString(
+                self.type.encode("utf-8") if sys.version_info[0] == 2 else self.type
+            )
+            oprot.writeFieldEnd()
+        if self.image is not None:
+            oprot.writeFieldBegin("image", TType.STRING, 2)
+            oprot.writeString(
+                self.image.encode("utf-8") if sys.version_info[0] == 2 else self.image
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.type is None:
+            raise TProtocolException(message="Required field type is unset!")
+        if self.image is None:
+            raise TProtocolException(message="Required field image is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ClusterWorker(object):
+    """
+    Attributes:
+     - type
+     - image
      - count
+     - onDemand
 
     """
 
@@ -2326,10 +2197,12 @@ class ClusterInstance(object):
         type=None,
         image=None,
         count=None,
+        onDemand=False,
     ):
         self.type = type
         self.image = image
         self.count = count
+        self.onDemand = onDemand
 
     def read(self, iprot):
         if (
@@ -2367,6 +2240,11 @@ class ClusterInstance(object):
                     self.count = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BOOL:
+                    self.onDemand = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2379,7 +2257,7 @@ class ClusterInstance(object):
                 oprot._fast_encode(self, [self.__class__, self.thrift_spec])
             )
             return
-        oprot.writeStructBegin("ClusterInstance")
+        oprot.writeStructBegin("ClusterWorker")
         if self.type is not None:
             oprot.writeFieldBegin("type", TType.STRING, 1)
             oprot.writeString(
@@ -2396,6 +2274,10 @@ class ClusterInstance(object):
             oprot.writeFieldBegin("count", TType.I32, 3)
             oprot.writeI32(self.count)
             oprot.writeFieldEnd()
+        if self.onDemand is not None:
+            oprot.writeFieldBegin("onDemand", TType.BOOL, 4)
+            oprot.writeBool(self.onDemand)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -2404,6 +2286,339 @@ class ClusterInstance(object):
             raise TProtocolException(message="Required field type is unset!")
         if self.image is None:
             raise TProtocolException(message="Required field image is unset!")
+        if self.count is None:
+            raise TProtocolException(message="Required field count is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ClusterMessage(object):
+    """
+    Attributes:
+     - message
+     - cluster_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        message=None,
+        cluster_id=None,
+    ):
+        self.message = message
+        self.cluster_id = cluster_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.message = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.cluster_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterMessage")
+        if self.message is not None:
+            oprot.writeFieldBegin("message", TType.STRING, 1)
+            oprot.writeString(
+                self.message.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.message
+            )
+            oprot.writeFieldEnd()
+        if self.cluster_id is not None:
+            oprot.writeFieldBegin("cluster_id", TType.STRING, 2)
+            oprot.writeString(
+                self.cluster_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.cluster_id
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.message is None:
+            raise TProtocolException(message="Required field message is unset!")
+        if self.cluster_id is None:
+            raise TProtocolException(message="Required field cluster_id is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ClusterInfo(object):
+    """
+    Attributes:
+     - message
+     - cluster_id
+     - ready
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        message=None,
+        cluster_id=None,
+        ready=None,
+    ):
+        self.message = message
+        self.cluster_id = cluster_id
+        self.ready = ready
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.message = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.cluster_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.ready = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterInfo")
+        if self.message is not None:
+            oprot.writeFieldBegin("message", TType.STRING, 1)
+            oprot.writeString(
+                self.message.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.message
+            )
+            oprot.writeFieldEnd()
+        if self.cluster_id is not None:
+            oprot.writeFieldBegin("cluster_id", TType.STRING, 2)
+            oprot.writeString(
+                self.cluster_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.cluster_id
+            )
+            oprot.writeFieldEnd()
+        if self.ready is not None:
+            oprot.writeFieldBegin("ready", TType.BOOL, 3)
+            oprot.writeBool(self.ready)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.message is None:
+            raise TProtocolException(message="Required field message is unset!")
+        if self.cluster_id is None:
+            raise TProtocolException(message="Required field cluster_id is unset!")
+        if self.ready is None:
+            raise TProtocolException(message="Required field ready is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ClusterLog(object):
+    """
+    Attributes:
+     - message
+     - cluster_id
+     - log
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        message=None,
+        cluster_id=None,
+        log=None,
+    ):
+        self.message = message
+        self.cluster_id = cluster_id
+        self.log = log
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.message = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.cluster_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.log = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterLog")
+        if self.message is not None:
+            oprot.writeFieldBegin("message", TType.STRING, 1)
+            oprot.writeString(
+                self.message.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.message
+            )
+            oprot.writeFieldEnd()
+        if self.cluster_id is not None:
+            oprot.writeFieldBegin("cluster_id", TType.STRING, 2)
+            oprot.writeString(
+                self.cluster_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.cluster_id
+            )
+            oprot.writeFieldEnd()
+        if self.log is not None:
+            oprot.writeFieldBegin("log", TType.STRING, 3)
+            oprot.writeString(
+                self.log.encode("utf-8") if sys.version_info[0] == 2 else self.log
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.message is None:
+            raise TProtocolException(message="Required field message is unset!")
+        if self.cluster_id is None:
+            raise TProtocolException(message="Required field cluster_id is unset!")
+        if self.log is None:
+            raise TProtocolException(message="Required field log is unset!")
         return
 
     def __repr__(self):
@@ -4774,73 +4989,6 @@ CondaPackage.thrift_spec = (
         None,
     ),  # 5
 )
-all_structs.append(ClusterInfo)
-ClusterInfo.thrift_spec = (
-    None,  # 0
-    (
-        1,
-        TType.STRING,
-        "launch_date",
-        "UTF8",
-        None,
-    ),  # 1
-    (
-        2,
-        TType.STRING,
-        "group_id",
-        "UTF8",
-        None,
-    ),  # 2
-    (
-        3,
-        TType.STRING,
-        "network_id",
-        "UTF8",
-        None,
-    ),  # 3
-    (
-        4,
-        TType.STRING,
-        "public_ip",
-        "UTF8",
-        None,
-    ),  # 4
-    (
-        5,
-        TType.STRING,
-        "subnet_id",
-        "UTF8",
-        None,
-    ),  # 5
-    (
-        6,
-        TType.STRING,
-        "user",
-        "UTF8",
-        None,
-    ),  # 6
-    (
-        7,
-        TType.I32,
-        "inst_counter",
-        None,
-        None,
-    ),  # 7
-    (
-        8,
-        TType.STRING,
-        "cluster_id",
-        "UTF8",
-        None,
-    ),  # 8
-    (
-        9,
-        TType.STRING,
-        "key_name",
-        "UTF8",
-        None,
-    ),  # 9
-)
 all_structs.append(Volume)
 Volume.thrift_spec = (
     None,  # 0
@@ -5207,11 +5355,104 @@ ClusterInstance.thrift_spec = (
         "UTF8",
         None,
     ),  # 2
+)
+all_structs.append(ClusterWorker)
+ClusterWorker.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "type",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "image",
+        "UTF8",
+        None,
+    ),  # 2
     (
         3,
         TType.I32,
         "count",
         None,
+        None,
+    ),  # 3
+    (
+        4,
+        TType.BOOL,
+        "onDemand",
+        None,
+        False,
+    ),  # 4
+)
+all_structs.append(ClusterMessage)
+ClusterMessage.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "message",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "cluster_id",
+        "UTF8",
+        None,
+    ),  # 2
+)
+all_structs.append(ClusterInfo)
+ClusterInfo.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "message",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "cluster_id",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.BOOL,
+        "ready",
+        None,
+        None,
+    ),  # 3
+)
+all_structs.append(ClusterLog)
+ClusterLog.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "message",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "cluster_id",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRING,
+        "log",
+        "UTF8",
         None,
     ),  # 3
 )
