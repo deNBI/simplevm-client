@@ -27,7 +27,15 @@ SECURITYGROUP_SSH = "securitygroup_ssh"
 DIRECTION = "direction"
 PROTOCOL = "protocol"
 INFORMATION_FOR_DISPLAY = "information_for_display"
-NO_TEMPLATE_NAMES = ["packer", "optional", ".github", "cluster", "conda", "generic"]
+NO_TEMPLATE_NAMES = [
+    "packer",
+    "optional",
+    ".github",
+    "cluster",
+    "conda",
+    "generic",
+    "base",
+]
 NEEDS_FORC_SUPPORT = "needs_forc_support"
 MIN_RAM = "min_ram"
 MIN_CORES = "min_cores"
