@@ -17,10 +17,15 @@ struct UserData {
   2: required map<string, User> data = {},
 }
 
+struct VmData {
+  2: required string id
+}
+
 struct VirtualMachineServerMetadata {
   1: required string ip,
   2: required string hashed_auth_token,
   3: optional UserData userdata,
+  4: optional VmData vmdata
 }
 
 

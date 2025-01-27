@@ -227,12 +227,88 @@ class UserData(object):
         return not (self == other)
 
 
+class VmData(object):
+    """
+    Attributes:
+     - id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        id=None,
+    ):
+        self.id = id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 2:
+                if ftype == TType.STRING:
+                    self.id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("VmData")
+        if self.id is not None:
+            oprot.writeFieldBegin("id", TType.STRING, 2)
+            oprot.writeString(
+                self.id.encode("utf-8") if sys.version_info[0] == 2 else self.id
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.id is None:
+            raise TProtocolException(message="Required field id is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class VirtualMachineServerMetadata(object):
     """
     Attributes:
      - ip
      - hashed_auth_token
      - userdata
+     - vmdata
 
     """
 
@@ -243,10 +319,12 @@ class VirtualMachineServerMetadata(object):
         ip=None,
         hashed_auth_token=None,
         userdata=None,
+        vmdata=None,
     ):
         self.ip = ip
         self.hashed_auth_token = hashed_auth_token
         self.userdata = userdata
+        self.vmdata = vmdata
 
     def read(self, iprot):
         if (
@@ -285,6 +363,12 @@ class VirtualMachineServerMetadata(object):
                     self.userdata.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.vmdata = VmData()
+                    self.vmdata.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -315,6 +399,10 @@ class VirtualMachineServerMetadata(object):
         if self.userdata is not None:
             oprot.writeFieldBegin("userdata", TType.STRUCT, 3)
             self.userdata.write(oprot)
+            oprot.writeFieldEnd()
+        if self.vmdata is not None:
+            oprot.writeFieldBegin("vmdata", TType.STRUCT, 4)
+            self.vmdata.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -4583,6 +4671,18 @@ UserData.thrift_spec = (
         {},
     ),  # 2
 )
+all_structs.append(VmData)
+VmData.thrift_spec = (
+    None,  # 0
+    None,  # 1
+    (
+        2,
+        TType.STRING,
+        "id",
+        "UTF8",
+        None,
+    ),  # 2
+)
 all_structs.append(VirtualMachineServerMetadata)
 VirtualMachineServerMetadata.thrift_spec = (
     None,  # 0
@@ -4607,6 +4707,13 @@ VirtualMachineServerMetadata.thrift_spec = (
         [UserData, None],
         None,
     ),  # 3
+    (
+        4,
+        TType.STRUCT,
+        "vmdata",
+        [VmData, None],
+        None,
+    ),  # 4
 )
 all_structs.append(Backend)
 Backend.thrift_spec = (
