@@ -42,7 +42,7 @@ class VirtualMachineHandler(Iface):
         self.metadata_connetor = MetadataConnector(config_file=config_file)
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
-        for k, v in self.forc_connector._active_playbooks.items():
+        for k, v in self.forc_connector.active_playbooks.items():
             logger.info(f"Clearing traces of Playbook-VM for (openstack_id): {k}")
             self.openstack_connector.delete_keypair(
                 key_name=self.forc_connector.redis_connection.hget(k, "name").decode(
@@ -181,6 +181,10 @@ class VirtualMachineHandler(Iface):
         server = self.forc_connector.get_playbook_status(server=server)
         server = thrift_converter.os_to_thrift_server(openstack_server=server)
         return server
+
+    def get_server_console(self, openstack_id: str) -> str:
+        logs = self.openstack_connector.get_server_console(openstack_id=openstack_id)
+        return logs
 
     def get_servers(self) -> list[VM]:
         servers = self.openstack_connector.get_servers()

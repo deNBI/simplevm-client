@@ -1264,6 +1264,21 @@ class OpenStackConnector:
                 message=f"Error when getting server {unique_name}! - multiple entries"
             )
 
+    def get_server_console(self, openstack_id: str):
+        logger.info(f"Get Server console log by id: {openstack_id}")
+        server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
+        if server is None:
+            logger.exception(f"Instance {openstack_id} not found")
+            raise ServerNotFoundException(
+                message=f"Instance {openstack_id} not found",
+                name_or_id=openstack_id,
+            )
+        logs: str = self.openstack_connection.get_server_console(
+            server=server, length=50
+        )
+        logger.info(f"retrieves log: {logs}")
+        return logs
+
     def get_server(self, openstack_id: str, no_connection: bool = False) -> Server:
         try:
             logger.info(f"Get Server by id: {openstack_id}")
