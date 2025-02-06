@@ -391,6 +391,15 @@ service VirtualMachineService {
     throws (1:DefaultException r,2:ServerNotFoundException s
 
     )
+
+    void add_project_security_group_to_server(
+    /** OpenStack id of the server*/
+    1:string server_id,2:string project_name, 3:string project_id)
+
+    throws (1:DefaultException r,2:ServerNotFoundException s
+
+    )
+
     /**
 	 * Add metadata to a server.
 	 */
@@ -449,6 +458,8 @@ service VirtualMachineService {
 
 	void delete_security_group_rule(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:DefaultException f)
 
+    void remove_security_groups_from_server(1:string openstack_id) throws (1:SecurityGroupRuleNotFoundException e,2:OpenStackConflictException f)
+
 
 	 /**
 	  * Delete server.
@@ -496,12 +507,13 @@ service VirtualMachineService {
 
      7:list<map<string,string>> volume_ids_path_new,
      8:list<map<string,string>> volume_ids_path_attach,
-     9:list <string> additional_keys,
-     10:optional string research_environment
-     11:optional list<string> additional_security_group_ids,
-     12:optional string slurm_version,
-     13:optional string metadata_token,
-     14:optional string metadata_endpoint
+     9:list <string> additional_owner_keys,
+     10:list <string> additional_user_keys,
+     11:optional string research_environment
+     12:optional list<string> additional_security_group_ids,
+     13:optional string slurm_version,
+     14:optional string metadata_token,
+     15:optional string metadata_endpoint
 
     )
 
@@ -535,9 +547,10 @@ service VirtualMachineService {
     7:list<map<string,string>> volume_ids_path_new,
     8:list<map<string,string>> volume_ids_path_attach,
     9:optional list<string> additional_security_group_ids,
-    10:optional list<string> additional_keys,
-    11:optional string metadata_token,
-    12:optional string metadata_endpoint,
+    10:list <string> additional_owner_keys,
+    11:list <string> additional_user_keys,
+    12:optional string metadata_token,
+    13:optional string metadata_endpoint,
 
 
 
@@ -599,8 +612,8 @@ service VirtualMachineService {
 
 
     void set_metadata_server_data(1:string ip,3:VirtualMachineServerMetadata metadata) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
-        void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
-        void is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+    void remove_metadata_server_data(1:string ip) throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
+    bool is_metadata_server_available() throws (1:MetadataServerNotAvailableException m,2:MetadataServerNotAllowedException b)
 
     /** Delete a backend*/
     void delete_backend(
@@ -662,6 +675,7 @@ service VirtualMachineService {
 	void delete_keypair(1:string key_name)
     void add_default_security_groups_to_server(1:string openstack_id) throws  (1:ServerNotFoundException e)
 
+    string get_server_console(1:string openstack_id)  throws  (1:ServerNotFoundException e)
 	/**
 	 * Get a Server.
 	 * Returns: A server instance.
@@ -669,14 +683,16 @@ service VirtualMachineService {
 	VM get_server(
 
 	/** Id of the server.*/
-	1:string openstack_id)
+	1:string openstack_id,
+    2:optional bool no_connection)
 
 	 throws (1:ServerNotFoundException e),
 
 	VM get_server_by_unique_name(
 
 	/** Id of the server.*/
-	1:string unique_name)
+	1:string unique_name,
+    2:optional bool no_connection)
 
 	 throws (1:ServerNotFoundException e),
 

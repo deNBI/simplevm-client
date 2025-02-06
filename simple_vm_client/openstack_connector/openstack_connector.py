@@ -512,18 +512,31 @@ class OpenStackConnector:
         if key_pair:
             self.openstack_connection.delete_keypair(name=key_name)
 
-    def create_add_keys_script(self, keys: list[str]) -> str:
+    def create_add_keys_script(
+        self, additional_owner_keys: list[str], addtional_user_keys: list[str]
+    ) -> str:
         logger.info("create add key script")
         file_dir = os.path.dirname(os.path.abspath(__file__))
         key_script = os.path.join(file_dir, "scripts/bash/add_keys_to_authorized.sh")
-        bash_keys_array = "("
-        for key in keys:
-            bash_keys_array += f'"{key}" '
-        bash_keys_array += ")"
+        if not additional_owner_keys:
+            additional_owner_keys = []
+        if not addtional_user_keys:
+            addtional_user_keys = []
 
+        bash_addtional_user_keys_array = "("
+        for key in addtional_user_keys:
+            bash_addtional_user_keys_array += f'"{key}" '
+        bash_addtional_user_keys_array += ")"
+        bash_addtional_owner_keys_array = "("
+        for key in additional_owner_keys:
+            bash_addtional_owner_keys_array += f'"{key}" '
+        bash_addtional_owner_keys_array += ")"
         with open(key_script, "r") as file:
             text = file.read()
-            text = text.replace("KEYS_TO_ADD", bash_keys_array)
+            text = text.replace(
+                "ADDITIONAL_USER_KEYS_TO_ADD", bash_addtional_user_keys_array
+            )
+            text = text.replace("OWNER_KEYS_TO_ADD", bash_addtional_owner_keys_array)
             text = encodeutils.safe_encode(text.encode("utf-8"))
         key_script = text
         return key_script
@@ -1212,7 +1225,9 @@ class OpenStackConnector:
                 message=f"Error when setting server {openstack_id} metadata --> {metadata}! - {e}"
             )
 
-    def get_server_by_unique_name(self, unique_name: str) -> Server:
+    def get_server_by_unique_name(
+        self, unique_name: str, no_connection: bool = False
+    ) -> Server:
         logger.info(f"Get Server by unique_name: {unique_name}")
 
         filters = {"name": unique_name}
@@ -1222,7 +1237,7 @@ class OpenStackConnector:
         if len(servers) == 1:
             server = list(servers)[0]
             logger.info(server)
-            if server.vm_state == VmStates.ACTIVE.value:
+            if server.vm_state == VmStates.ACTIVE.value and not no_connection:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
                 if not self.netcat(port=ssh_port):
@@ -1249,7 +1264,22 @@ class OpenStackConnector:
                 message=f"Error when getting server {unique_name}! - multiple entries"
             )
 
-    def get_server(self, openstack_id: str) -> Server:
+    def get_server_console(self, openstack_id: str):
+        logger.info(f"Get Server console log by id: {openstack_id}")
+        server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
+        if server is None:
+            logger.exception(f"Instance {openstack_id} not found")
+            raise ServerNotFoundException(
+                message=f"Instance {openstack_id} not found",
+                name_or_id=openstack_id,
+            )
+        logs: str = self.openstack_connection.get_server_console(
+            server=server, length=50
+        )
+        logger.info(f"retrieves log: {logs}")
+        return logs
+
+    def get_server(self, openstack_id: str, no_connection: bool = False) -> Server:
         try:
             logger.info(f"Get Server by id: {openstack_id}")
             server: Server = self.openstack_connection.get_server_by_id(id=openstack_id)
@@ -1259,7 +1289,7 @@ class OpenStackConnector:
                     message=f"Instance {openstack_id} not found",
                     name_or_id=openstack_id,
                 )
-            if server.vm_state == VmStates.ACTIVE.value:
+            if server.vm_state == VmStates.ACTIVE.value and not no_connection:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
                 if not self.netcat(port=ssh_port):
@@ -1316,6 +1346,23 @@ class OpenStackConnector:
             logger.exception(f"Stop Server {openstack_id} failed!")
             raise OpenStackConflictException(message=e.message)
 
+    def _delete_security_groups_if_not_used(self, security_groups: list[SecurityGroup]):
+        if security_groups is not None:
+            for sg in security_groups:
+                sec = self.openstack_connection.get_security_group(
+                    name_or_id=sg["name"]
+                )
+                if sg[
+                    "name"
+                ] != self.DEFAULT_SECURITY_GROUP_NAME and not self.is_security_group_in_use(
+                    security_group_id=sec.id
+                ):
+                    logger.info(f"Delete security group {sec}")
+                    try:
+                        self.openstack_connection.delete_security_group(sec)
+                    except ResourceNotFound:
+                        logger.info(f"Could not delete security group {sec.id}")
+
     def _remove_security_groups_from_server(self, server: Server) -> None:
         security_groups = server.security_groups
 
@@ -1342,6 +1389,15 @@ class OpenStackConnector:
                             f"Could not remoeve security group {sec.id} from server"
                         )
 
+    def remove_security_groups_from_server(self, openstack_id):
+        logger.info(f"Delete Security Groups for {openstack_id}")
+        try:
+            server: Server = self.get_server(openstack_id=openstack_id)
+            self._remove_security_groups_from_server(server)
+        except ConflictException as e:
+            logger.error(f"Delete Security Groups for {openstack_id} failed!")
+            raise OpenStackConflictException(message=e.message)
+
     def _validate_server_for_deletion(self, server: Server) -> None:
         task_state = server.task_state
         if task_state in [
@@ -1363,11 +1419,15 @@ class OpenStackConnector:
                 )
 
             self._validate_server_for_deletion(server=server)
-            self._remove_security_groups_from_server(server=server)
+
+            logger.info(f"Start deleting Server {openstack_id}")
             self.openstack_connection.compute.delete_server(server.id, force=True)
 
+            security_groups = server.security_groups
+            self._delete_security_groups_if_not_used(security_groups)
+
         except ConflictException as e:
-            logger.error(f"Delete Server {openstack_id} failed!")
+            logger.exception(f"Delete Server {openstack_id} failed!")
 
             raise OpenStackConflictException(message=e.message)
 
@@ -1404,9 +1464,7 @@ class OpenStackConnector:
                     name_or_id=openstack_id,
                 )
 
-            self.openstack_connection.compute.unrescue_server(
-                server
-            )
+            self.openstack_connection.compute.unrescue_server(server)
 
         except ConflictException as e:
             logger.exception(f"Unrescue Server {openstack_id} failed!")
@@ -1443,7 +1501,8 @@ class OpenStackConnector:
         self,
         volume_ids_path_new: list[dict[str, str]],
         volume_ids_path_attach: list[dict[str, str]],
-        additional_keys: list[str],
+        additional_owner_keys: list[str],
+        additional_user_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
     ) -> str:
@@ -1455,8 +1514,11 @@ class OpenStackConnector:
         logger.info(
             f"Metadata token {metadata_token} | Metadata Endpoint {metadata_endpoint}"
         )
-        if additional_keys:
-            add_key_script = self.create_add_keys_script(keys=additional_keys)
+        if additional_owner_keys or additional_user_keys:
+            add_key_script = self.create_add_keys_script(
+                additional_owner_keys=additional_owner_keys,
+                addtional_user_keys=additional_user_keys,
+            )
             init_script = (
                 add_key_script
                 + encodeutils.safe_encode("\n".encode("utf-8"))
@@ -1494,7 +1556,8 @@ class OpenStackConnector:
         research_environment_metadata: Union[ResearchEnvironmentMetadata, None] = None,
         volume_ids_path_new: Union[list[dict[str, str]], None] = None,
         volume_ids_path_attach: Union[list[dict[str, str]], None] = None,
-        additional_keys: Union[list[str], None] = None,
+        additional_owner_keys: Union[list[str], None] = None,
+        additional_user_keys: Union[list[str], None] = None,
         additional_security_group_ids: Union[list[str], None] = None,
         slurm_version: str = None,
         metadata_token: str = None,
@@ -1540,7 +1603,8 @@ class OpenStackConnector:
             init_script = self.create_userdata(
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
-                additional_keys=additional_keys,
+                additional_owner_keys=additional_owner_keys,
+                additional_user_keys=additional_user_keys,
                 metadata_token=metadata_token,
                 metadata_endpoint=metadata_endpoint,
             )
@@ -1624,7 +1688,8 @@ class OpenStackConnector:
         research_environment_metadata: ResearchEnvironmentMetadata,
         volume_ids_path_new: list[dict[str, str]] = None,  # type: ignore
         volume_ids_path_attach: list[dict[str, str]] = None,  # type: ignore
-        additional_keys: Union[list[str], None] = None,
+        additional_owner_keys: Union[list[str], None] = None,
+        additional_user_keys: Union[list[str], None] = None,
         additional_security_group_ids=None,  # type: ignore
         metadata_token: str = None,
         metadata_endpoint: str = None,
@@ -1660,7 +1725,8 @@ class OpenStackConnector:
             init_script = self.create_userdata(
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
-                additional_keys=additional_keys,
+                additional_owner_keys=additional_owner_keys,
+                additional_user_keys=additional_user_keys,
                 metadata_token=metadata_token,
                 metadata_endpoint=metadata_endpoint,
             )
@@ -1706,6 +1772,25 @@ class OpenStackConnector:
         server: Server = self.get_server(openstack_id=server_id)
         security_group: SecurityGroup = self.get_research_environment_security_group(
             security_group_name=security_group_name
+        )
+        if self._is_security_group_already_added_to_server(
+            server=server, security_group_name=security_group.name
+        ):
+            return
+        self.openstack_connection.compute.add_security_group_to_server(
+            server=server, security_group=security_group
+        )
+
+    def add_project_security_group_to_server(
+        self, server_id: str, project_name: str, project_id: str
+    ):
+        logger.info(f"Setting up {project_name} security group for {server_id}")
+        server: Server = self.get_server(openstack_id=server_id)
+        security_group_id = self.get_or_create_project_security_group(
+            project_name=project_name, project_id=project_id
+        )
+        security_group = self.openstack_connection.get_security_group(
+            name_or_id=security_group_id
         )
         if self._is_security_group_already_added_to_server(
             server=server, security_group_name=security_group.name

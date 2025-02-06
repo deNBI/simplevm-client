@@ -1,10 +1,12 @@
 import json
 import os
+import time
 import urllib
 
 import redis
 import requests
 import yaml
+from apscheduler.schedulers.background import BackgroundScheduler
 from openstack.compute.v2.server import Server
 
 from simple_vm_client.ttypes import (
@@ -27,6 +29,8 @@ BIOCONDA = "bioconda"
 
 
 class ForcConnector:
+    active_playbooks: dict[str, Playbook] = {}
+
     def __init__(self, config_file: str):
         logger.info("Initializing Forc Connector")
 
@@ -38,7 +42,6 @@ class ForcConnector:
         self.FORC_API_KEY: str = ""
         self.redis_pool: redis.ConnectionPool = None  # type: ignore
         self.redis_connection: redis.Redis.connection_pool = None
-        self._active_playbooks: dict[str, Playbook] = {}
         self.load_config(config_file=config_file)
         self.connect_to_redis()
         self.template = Template(
@@ -46,6 +49,7 @@ class ForcConnector:
             forc_backend_url=self.FORC_BACKEND_URL,
             forc_api_key=self.FORC_API_KEY,
         )
+        self.start_template_update_scheduler()
 
     def load_config(self, config_file: str) -> None:
         logger.info("Load config file: FORC")
@@ -64,8 +68,47 @@ class ForcConnector:
             self.FORC_BACKEND_URL = cfg["forc"]["forc_backend_url"]
             self.FORC_ACCESS_URL = cfg["forc"]["forc_access_url"]
             self.GITHUB_PLAYBOOKS_REPO = cfg["forc"]["github_playbooks_repo"]
+            self.UPDATE_TEMPLATES_SCHEDULE = cfg["forc"].get(
+                "update_templates_schedule", 12
+            )
 
         self.load_env()
+
+    def update_templates(self):
+        max_retries = 5
+        retry_interval = 900  # 15 minutes in seconds
+
+        for _ in range(max_retries):
+            if self.is_any_playbook_active():
+                logger.info(
+                    "Currently an active playbook is running, delaying update template"
+                )
+                time.sleep(retry_interval)
+            else:
+                break
+
+        if not self.is_any_playbook_active():
+            logger.info("No active playbook --start update \n\n\n\n")
+            self.template.update_playbooks()
+        else:
+            logger.error(
+                "Failed to update templates after {} retries".format(max_retries)
+            )
+
+    def start_template_update_scheduler(self):
+        logger.info(
+            f"Setting Update Playbook Schedule to: every {self.UPDATE_TEMPLATES_SCHEDULE} hours"
+        )
+        schedule_in_seconds = self.UPDATE_TEMPLATES_SCHEDULE * 60 * 60
+
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.add_job(
+            self.update_templates,
+            "interval",
+            seconds=int(schedule_in_seconds),
+            coalesce=True,
+        )
+        self.scheduler.start()
 
     def connect_to_redis(self) -> None:
         logger.info("Connect to redis")
@@ -357,22 +400,31 @@ class ForcConnector:
         logger.info("Load env: FORC")
         self.FORC_API_KEY = os.environ.get("FORC_API_KEY", None)
 
+    def is_any_playbook_active(self) -> bool:
+        for openstack_id in ForcConnector.active_playbooks:
+            if (
+                self.redis_connection.exists(openstack_id) == 1
+                and openstack_id in ForcConnector.active_playbooks
+            ):
+                return True
+        return False
+
     def is_playbook_active(self, openstack_id: str) -> bool:
         return (
             self.redis_connection.exists(openstack_id) == 1
-            and openstack_id in self._active_playbooks
+            and openstack_id in ForcConnector.active_playbooks
         )
 
     def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
         logger.warning(f"Get Playbook logs {openstack_id}")
 
         if self.is_playbook_active(openstack_id):
-            playbook = self._active_playbooks[openstack_id]
+            playbook = ForcConnector.active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
 
             playbook.cleanup(openstack_id)
-            self._active_playbooks.pop(openstack_id)
+            ForcConnector.active_playbooks.pop(openstack_id)
 
             return PlaybookResult(status=status, stdout=stdout, stderr=stderr)
         else:
@@ -402,9 +454,9 @@ class ForcConnector:
         if self.redis_connection.exists(openstack_id) == 1:
             logger.info(f"Get VM {openstack_id} Playbook status")
 
-            if openstack_id in self._active_playbooks:
-                logger.info(self._active_playbooks)
-                playbook = self._active_playbooks[openstack_id]
+            if openstack_id in ForcConnector.active_playbooks:
+                logger.info(ForcConnector.active_playbooks)
+                playbook = ForcConnector.active_playbooks[openstack_id]
                 playbook.check_status(openstack_id)
             status = self.redis_connection.hget(openstack_id, "status").decode("utf-8")
             logger.info(f"VM {openstack_id} Playbook status -> {status}")
@@ -473,10 +525,30 @@ class ForcConnector:
             base_url=base_url,
         )
         logger.info(playbook)
+        max_wait_time = 5 * 60  # 5 minutes in seconds
+        interval = 60  # Check every minute
+
+        start_time = time.time()
+        while self.template.is_update_locked():
+            elapsed_time = time.time() - start_time
+            if elapsed_time > max_wait_time:
+                logger.error(
+                    "Template update is taking too long, cancelling playbook creation."
+                )
+                self.redis_connection.hset(
+                    openstack_id, "status", VmTaskStates.PLAYBOOK_FAILED.value
+                )
+                return -1
+            logger.info(
+                f"Template is currently updating...Wait for {max_wait_time / 60 - int(elapsed_time / 60)} minutes..."
+            )
+            time.sleep(interval)
+
         self.redis_connection.hset(
             openstack_id, "status", VmTaskStates.BUILD_PLAYBOOK.value
         )
         playbook.run_it()
-        self._active_playbooks[openstack_id] = playbook
+
+        ForcConnector.active_playbooks[openstack_id] = playbook
         logger.info(f"Playbook for (openstack_id): {openstack_id} started!")
         return 0

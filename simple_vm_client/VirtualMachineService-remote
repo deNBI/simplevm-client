@@ -38,6 +38,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print(
         "  void add_research_environment_security_group(string server_id, string security_group_name)"
     )
+    print(
+        "  void add_project_security_group_to_server(string server_id, string project_name, string project_id)"
+    )
     print("  void add_metadata_to_server(string openstack_id,  metadata)")
     print("   get_flavors()")
     print("   get_images()")
@@ -51,18 +54,19 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  string open_port_range_for_vm_in_project(int range_start, int range_stop, string openstack_id, string ethertype, string protocol)"
     )
     print("  void delete_security_group_rule(string openstack_id)")
+    print("  void remove_security_groups_from_server(string openstack_id)")
     print("  void delete_server(string openstack_id)")
     print(
         "  void rescue_server(string openstack_id, string admin_pass, string image_ref)"
     )
     print("  void unrescue_server(string openstack_id)")
     print(
-        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint)"
+        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  additional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint)"
     )
     print("  bool is_bibigrid_available()")
     print("  void detach_ip_from_server(string server_id, string floating_ip)")
     print(
-        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_keys, string metadata_token, string metadata_endpoint)"
+        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  additional_user_keys, string metadata_token, string metadata_endpoint)"
     )
     print("  bool exist_server(string name)")
     print(
@@ -82,7 +86,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  void set_metadata_server_data(string ip, VirtualMachineServerMetadata metadata)"
     )
     print("  void remove_metadata_server_data(string ip)")
-    print("  void is_metadata_server_available()")
+    print("  bool is_metadata_server_available()")
     print("  void delete_backend(i64 id)")
     print("   add_user_to_backend(i64 backend_id, string user_id)")
     print("   get_users_from_backend(i64 backend_id)")
@@ -103,8 +107,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("  string get_keypair_public_key_by_name(string key_name)")
     print("  void delete_keypair(string key_name)")
     print("  void add_default_security_groups_to_server(string openstack_id)")
-    print("  VM get_server(string openstack_id)")
-    print("  VM get_server_by_unique_name(string unique_name)")
+    print("  string get_server_console(string openstack_id)")
+    print("  VM get_server(string openstack_id, bool no_connection)")
+    print("  VM get_server_by_unique_name(string unique_name, bool no_connection)")
     print("  void stop_server(string openstack_id)")
     print(
         "  string create_snapshot(string openstack_id, string name, string username,  base_tags, string description)"
@@ -289,6 +294,18 @@ elif cmd == "add_research_environment_security_group":
         )
     )
 
+elif cmd == "add_project_security_group_to_server":
+    if len(args) != 3:
+        print("add_project_security_group_to_server requires 3 args")
+        sys.exit(1)
+    pp.pprint(
+        client.add_project_security_group_to_server(
+            args[0],
+            args[1],
+            args[2],
+        )
+    )
+
 elif cmd == "add_metadata_to_server":
     if len(args) != 2:
         print("add_metadata_to_server requires 2 args")
@@ -390,6 +407,16 @@ elif cmd == "delete_security_group_rule":
         )
     )
 
+elif cmd == "remove_security_groups_from_server":
+    if len(args) != 1:
+        print("remove_security_groups_from_server requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.remove_security_groups_from_server(
+            args[0],
+        )
+    )
+
 elif cmd == "delete_server":
     if len(args) != 1:
         print("delete_server requires 1 args")
@@ -423,8 +450,8 @@ elif cmd == "unrescue_server":
     )
 
 elif cmd == "start_server":
-    if len(args) != 13:
-        print("start_server requires 13 args")
+    if len(args) != 14:
+        print("start_server requires 14 args")
         sys.exit(1)
     pp.pprint(
         client.start_server(
@@ -436,11 +463,12 @@ elif cmd == "start_server":
             eval(args[5]),
             eval(args[6]),
             eval(args[7]),
-            args[8],
-            eval(args[9]),
-            args[10],
+            eval(args[8]),
+            args[9],
+            eval(args[10]),
             args[11],
             args[12],
+            args[13],
         )
     )
 
@@ -462,8 +490,8 @@ elif cmd == "detach_ip_from_server":
     )
 
 elif cmd == "start_server_with_custom_key":
-    if len(args) != 11:
-        print("start_server_with_custom_key requires 11 args")
+    if len(args) != 12:
+        print("start_server_with_custom_key requires 12 args")
         sys.exit(1)
     pp.pprint(
         client.start_server_with_custom_key(
@@ -476,8 +504,9 @@ elif cmd == "start_server_with_custom_key":
             eval(args[6]),
             eval(args[7]),
             eval(args[8]),
-            args[9],
+            eval(args[9]),
             args[10],
+            args[11],
         )
     )
 
@@ -773,23 +802,35 @@ elif cmd == "add_default_security_groups_to_server":
         )
     )
 
-elif cmd == "get_server":
+elif cmd == "get_server_console":
     if len(args) != 1:
-        print("get_server requires 1 args")
+        print("get_server_console requires 1 args")
         sys.exit(1)
     pp.pprint(
-        client.get_server(
+        client.get_server_console(
             args[0],
         )
     )
 
+elif cmd == "get_server":
+    if len(args) != 2:
+        print("get_server requires 2 args")
+        sys.exit(1)
+    pp.pprint(
+        client.get_server(
+            args[0],
+            eval(args[1]),
+        )
+    )
+
 elif cmd == "get_server_by_unique_name":
-    if len(args) != 1:
-        print("get_server_by_unique_name requires 1 args")
+    if len(args) != 2:
+        print("get_server_by_unique_name requires 2 args")
         sys.exit(1)
     pp.pprint(
         client.get_server_by_unique_name(
             args[0],
+            eval(args[1]),
         )
     )
 

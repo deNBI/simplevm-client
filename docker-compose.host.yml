@@ -21,7 +21,7 @@ services:
   simplevm_client_redis:
     container_name: simplevm_client_redis
     network_mode: host  # Use the host network namespace
-    image: redis:7.4.1
+    image: redis:7.4.2
     expose:
       - "6379"
     networks:
@@ -29,7 +29,7 @@ services:
 
   simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
-    image: docker.elastic.co/beats/filebeat:8.16.1
+    image: docker.elastic.co/beats/filebeat:8.17.1
     env_file:
       - .env
     volumes:
