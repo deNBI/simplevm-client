@@ -568,6 +568,13 @@ class Iface(object):
 
         """
 
+    def get_server_console(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id
+
+        """
+
     def get_server(self, openstack_id, no_connection):
         """
         Get a Server.
@@ -3177,6 +3184,45 @@ class Client(Iface):
             raise result.e
         return
 
+    def get_server_console(self, openstack_id):
+        """
+        Parameters:
+         - openstack_id
+
+        """
+        self.send_get_server_console(openstack_id)
+        return self.recv_get_server_console()
+
+    def send_get_server_console(self, openstack_id):
+        self._oprot.writeMessageBegin(
+            "get_server_console", TMessageType.CALL, self._seqid
+        )
+        args = get_server_console_args()
+        args.openstack_id = openstack_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_server_console(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_server_console_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "get_server_console failed: unknown result",
+        )
+
     def get_server(self, openstack_id, no_connection):
         """
         Get a Server.
@@ -4105,6 +4151,7 @@ class Processor(Iface, TProcessor):
         self._processMap["add_default_security_groups_to_server"] = (
             Processor.process_add_default_security_groups_to_server
         )
+        self._processMap["get_server_console"] = Processor.process_get_server_console
         self._processMap["get_server"] = Processor.process_get_server
         self._processMap["get_server_by_unique_name"] = (
             Processor.process_get_server_by_unique_name
@@ -5837,6 +5884,34 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageBegin(
             "add_default_security_groups_to_server", msg_type, seqid
         )
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_get_server_console(self, seqid, iprot, oprot):
+        args = get_server_console_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_server_console_result()
+        try:
+            result.success = self._handler.get_server_console(args.openstack_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ServerNotFoundException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("get_server_console", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -18394,6 +18469,200 @@ class add_default_security_groups_to_server_result(object):
 all_structs.append(add_default_security_groups_to_server_result)
 add_default_security_groups_to_server_result.thrift_spec = (
     None,  # 0
+    (
+        1,
+        TType.STRUCT,
+        "e",
+        [ServerNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
+class get_server_console_args(object):
+    """
+    Attributes:
+     - openstack_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        openstack_id=None,
+    ):
+        self.openstack_id = openstack_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.openstack_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_server_console_args")
+        if self.openstack_id is not None:
+            oprot.writeFieldBegin("openstack_id", TType.STRING, 1)
+            oprot.writeString(
+                self.openstack_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.openstack_id
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_server_console_args)
+get_server_console_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "openstack_id",
+        "UTF8",
+        None,
+    ),  # 1
+)
+
+
+class get_server_console_result(object):
+    """
+    Attributes:
+     - success
+     - e
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+        e=None,
+    ):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = ServerNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_server_console_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRING, 0)
+            oprot.writeString(
+                self.success.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.success
+            )
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin("e", TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_server_console_result)
+get_server_console_result.thrift_spec = (
+    (
+        0,
+        TType.STRING,
+        "success",
+        "UTF8",
+        None,
+    ),  # 0
     (
         1,
         TType.STRUCT,

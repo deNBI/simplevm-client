@@ -107,6 +107,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("  string get_keypair_public_key_by_name(string key_name)")
     print("  void delete_keypair(string key_name)")
     print("  void add_default_security_groups_to_server(string openstack_id)")
+    print("  string get_server_console(string openstack_id)")
     print("  VM get_server(string openstack_id, bool no_connection)")
     print("  VM get_server_by_unique_name(string unique_name, bool no_connection)")
     print("  void stop_server(string openstack_id)")
@@ -797,6 +798,16 @@ elif cmd == "add_default_security_groups_to_server":
         sys.exit(1)
     pp.pprint(
         client.add_default_security_groups_to_server(
+            args[0],
+        )
+    )
+
+elif cmd == "get_server_console":
+    if len(args) != 1:
+        print("get_server_console requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.get_server_console(
             args[0],
         )
     )

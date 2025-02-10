@@ -688,6 +688,7 @@ service VirtualMachineService {
 	void delete_keypair(1:string key_name)
     void add_default_security_groups_to_server(1:string openstack_id) throws  (1:ServerNotFoundException e)
 
+    string get_server_console(1:string openstack_id)  throws  (1:ServerNotFoundException e)
 	/**
 	 * Get a Server.
 	 * Returns: A server instance.
