@@ -20,6 +20,7 @@ from .ttypes import (
     ClusterInstance,
     ClusterLog,
     ClusterMessage,
+    ClusterState,
     ClusterWorker,
     CondaPackage,
     Flavor,
@@ -535,6 +536,9 @@ class VirtualMachineHandler(Iface):
     def get_cluster_log(self, cluster_id: str) -> ClusterLog:
         return self.bibigrid_connector.get_cluster_log(cluster_id=cluster_id)
 
+    def get_cluster_state(self, cluster_id: str) -> ClusterState:
+        return self.bibigrid_connector.get_cluster_state(cluster_id=cluster_id)
+    
     def start_cluster(
         self,
         public_keys: list[str],

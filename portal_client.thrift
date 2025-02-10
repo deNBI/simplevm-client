@@ -1,7 +1,5 @@
 namespace	py VirtualMachineService
 
-
-
 typedef i32 int
 /** The Version of the Portal-Client*/
 const string VERSION= '1.0.0'
@@ -223,6 +221,14 @@ struct ClusterInfo {
     1: required string message
     2: required string cluster_id
     3: required bool ready
+}
+
+struct ClusterState {
+    1: required string cluster_id
+    2: required string message
+    3: required string state
+    4: optional string ssh_user
+    5: optional string floating_ip
 }
 
 struct ClusterLog {
@@ -682,6 +688,8 @@ service VirtualMachineService {
 	ClusterInfo get_cluster_info(1:string cluster_id) throws(1:ClusterNotFoundException c)
 
 	ClusterLog get_cluster_log(1:string cluster_id) throws(1:ClusterNotFoundException c)
+
+    ClusterState get_cluster_state(1:string cluster_id) throws(1:ClusterNotFoundException c)
 
 	string get_keypair_public_key_by_name(1:string key_name)
 

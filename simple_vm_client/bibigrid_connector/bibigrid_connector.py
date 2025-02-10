@@ -9,6 +9,7 @@ from simple_vm_client.ttypes import (
     ClusterLog,
     ClusterMessage,
     ClusterNotFoundException,
+    ClusterState,
 )
 from simple_vm_client.util.logger import setup_custom_logger
 
@@ -70,13 +71,12 @@ class BibigridConnector:
         logger.info(f"Get Cluster {cluster_id} logs...")
 
         headers = {"content-Type": "application/json"}
-        body = {"cluster_id": "cluster_id"}
         request_url = f"{self._BIBIGRID_EP}/bibigrid/log/"
 
         try:
             response = requests.get(
                 url=request_url,
-                json=body,
+                params={"cluster_id": cluster_id},
                 headers=headers,
                 verify=self._PRODUCTION,
             )
@@ -93,16 +93,30 @@ class BibigridConnector:
             logger.exception("Error while getting Cluster status")
             return {"error": str(e)}
 
-    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
-        logger.info(f"Get Cluster info from {cluster_id}")
-        request_url = self._BIBIGRID_URL + "bibigrid/ready/"
+    def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
+        logger.info(f"Get Cluster state from {cluster_id}")
+        request_url = self._BIBIGRID_EP + f"/bibigrid/state/"
         headers = {"content-Type": "application/json"}
-
-        body = {"cluster_id": cluster_id}
-
         response = requests.get(
             url=request_url,
-            json=body,
+            params={"cluster_id": cluster_id},
+            headers=headers,
+            verify=self._PRODUCTION,
+        )
+
+        if response.status_code == 200:
+            response_content = response.json()
+            return ClusterState(**response_content)
+        else:
+            raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
+        
+    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
+        logger.info(f"Get Cluster info from {cluster_id}")
+        request_url = self._BIBIGRID_EP + "/bibigrid/ready/"
+        headers = {"content-Type": "application/json"}
+        response = requests.get(
+            url=request_url,
+            params={"cluster_id": cluster_id},
             headers=headers,
             verify=self._PRODUCTION,
         )
@@ -147,18 +161,13 @@ class BibigridConnector:
         headers = {"content-Type": "application/json"}
         body = {"mode": "openstack"}
         response: dict[str, str] = requests.delete(
-            url=f"{self._BIBIGRID_URL}terminate/{cluster_id}",
+            url=f"{self._BIBIGRID_EP}/bibigrid/terminate/{cluster_id}",
             json=body,
             headers=headers,
             verify=self._PRODUCTION,
         ).json()
         logger.info(response)
         return response
-
-    import tempfile
-
-    import requests
-    import yaml
 
     def start_cluster(
         self,
@@ -205,22 +214,14 @@ class BibigridConnector:
                 "sshUser": "ubuntu",
                 "subnet": self._SUB_NETWORK,
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
+               # "sshPublicKeys": public_keys
             }
         ]
-
-        # Create a temporary YAML file
-        with tempfile.NamedTemporaryFile(
-            suffix=".yaml", delete=False, mode="w"
-        ) as tmp_file:
-            # Write the body to the temporary YAML file
-            yaml.dump(body, tmp_file, default_flow_style=False)
-            tmp_file.flush()
-
-            # Send the request with the temporary file as config_file
-            files = {"config_file": open(tmp_file.name, "rb")}
-            response: dict[str, str] = requests.post(
+        full_body = {"configurations": body}
+        logger.info(full_body)
+        response: dict[str, str] = requests.post(
                 url=self._BIBIGRID_EP + "/bibigrid/create",
-                files=files,
+                json=full_body,
                 verify=self._PRODUCTION,
             ).json()
 
