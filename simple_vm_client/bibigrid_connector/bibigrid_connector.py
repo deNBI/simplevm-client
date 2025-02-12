@@ -197,7 +197,7 @@ class BibigridConnector:
             {
                 "infrastructure": "openstack",
                 "cloud": "openstack",
-                "sshTimeout": 10,
+                "sshTimeout": 30,
                 "useMasterAsCompute": False,
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 # "nfsShares": ["/vol/permanent"],
@@ -214,7 +214,7 @@ class BibigridConnector:
                 "sshUser": "ubuntu",
                 "subnet": self._SUB_NETWORK,
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
-               # "sshPublicKeys": public_keys
+                "sshPublicKeys": public_keys
             }
         ]
         full_body = {"configurations": body}
