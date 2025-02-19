@@ -85,7 +85,7 @@ forc:
   update_templates_schedule: 1.01
 
 metadata_server:
-  activated: False
+  activated: True
   use_https: False
   host: simplevm_metadata_server
   port: 8000
