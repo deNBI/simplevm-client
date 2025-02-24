@@ -166,11 +166,9 @@ class TestVirtualMachineHandler(unittest.TestCase):
     def test_rescue_server(self) -> None:
         self.handler.rescue_server(openstack_id=OPENSTACK_ID)
         self.handler.openstack_connector.rescue_server.assert_called_once_with(
-            openstack_id=OPENSTACK_ID,
-            admin_pass=None,
-            image_ref=None
+            openstack_id=OPENSTACK_ID, admin_pass=None, image_ref=None
         )
-    
+
     def test_unrescue_server(self) -> None:
         self.handler.unrescue_server(openstack_id=OPENSTACK_ID)
         self.handler.openstack_connector.unrescue_server.assert_called_once_with(
@@ -190,10 +188,10 @@ class TestVirtualMachineHandler(unittest.TestCase):
 
         self.handler.get_server(openstack_id=OPENSTACK_ID)
         self.handler.openstack_connector.get_server.assert_called_once_with(
-            openstack_id=OPENSTACK_ID
+            openstack_id=OPENSTACK_ID, no_connection=False
         )
         self.handler.forc_connector.get_playbook_status.assert_called_once_with(
-            server=SERVER
+            server=SERVER,
         )
         converter.os_to_thrift_server.assert_called_once_with(openstack_server=SERVER)
 
@@ -425,7 +423,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
         self.handler.remove_security_groups_from_server(openstack_id=OPENSTACK_ID)
         self.handler.openstack_connector.remove_security_groups_from_server.assert_called_once_with(
             openstack_id=OPENSTACK_ID
-        )    
+        )
 
     def test_open_port_range_for_vm_in_project(self):
         self.handler.open_port_range_for_vm_in_project(
@@ -458,7 +456,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             metadata=METADATA,
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             research_environment="de",
             additional_security_group_ids=[],
             metadata_token="test",
@@ -472,7 +471,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             metadata=METADATA,
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             research_environment_metadata="res_metadata",
             additional_security_group_ids=[],
             slurm_version=None,
@@ -489,7 +489,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             metadata=METADATA,
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             research_environment="",
             additional_security_group_ids=[],
             metadata_token="test",
@@ -503,7 +504,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             metadata=METADATA,
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             research_environment_metadata=None,
             additional_security_group_ids=[],
             slurm_version=None,
@@ -525,7 +527,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="",
             additional_security_group_ids=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
         )
@@ -537,7 +540,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_new=[],
             volume_ids_path_attach=[],
             additional_security_group_ids=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             research_environment_metadata=None,
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
@@ -563,7 +567,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             volume_ids_path_attach=[],
             research_environment="de",
             additional_security_group_ids=[],
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
         )
@@ -577,7 +582,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_security_group_ids=[],
             research_environment_metadata="res_metadata",
             metadata_token="test",
-            additional_keys=[],
+            additional_owner_keys=[],
+            additional_user_keys=[],
             metadata_endpoint="http://metadata.endpoint",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
@@ -688,7 +694,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
         mock_stop_b = MagicMock()
         mock_stop_c = MagicMock()
 
-        self.handler.forc_connector._active_playbooks = {
+        self.handler.forc_connector.active_playbooks = {
             "a": mock_stop_a,
             "b": mock_stop_b,
             "c": mock_stop_c,
@@ -700,7 +706,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
         ]
         with self.assertRaises(SystemExit):
             self.handler.keyboard_interrupt_handler_playbooks()
-        for key in self.handler.forc_connector._active_playbooks.keys():
+        for key in self.handler.forc_connector.active_playbooks.keys():
             self.handler.openstack_connector.delete_keypair.assert_any_call(
                 key_name=key
             )
