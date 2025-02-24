@@ -1,5 +1,3 @@
-import tempfile
-
 import requests
 import yaml
 
@@ -27,6 +25,8 @@ class BibigridConnector:
         self._BIBIGRID_LOCAL_DNS_LOOKUP = False
         self._BIBIGRID_EP = ""
         self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP: bool = False
+        self._GATEWAY_IP = ""
+        self._PORT_FUNCTION = ""
         self._PRODUCTION_bool = True
         self.load_config_yml(config_file=config_file)
 
@@ -57,6 +57,8 @@ class BibigridConnector:
 
             openstack_cfg = cfg["openstack"]
             self._NETWORK = openstack_cfg["network"]
+            self._GATEWAY_IP = openstack_cfg["gateway_ip"]
+            self._PORT_FUNCTION = openstack_cfg["ssh_port_calculation"]
             self._PRODUCTION = cfg["production"]
 
             protocol = "https" if self._BIBIGRID_USE_HTTPS else "http"
@@ -95,7 +97,7 @@ class BibigridConnector:
 
     def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster state from {cluster_id}")
-        request_url = self._BIBIGRID_EP + f"/bibigrid/state/"
+        request_url = self._BIBIGRID_EP + "/bibigrid/state/"
         headers = {"content-Type": "application/json"}
         response = requests.get(
             url=request_url,
@@ -109,7 +111,7 @@ class BibigridConnector:
             return ClusterState(**response_content)
         else:
             raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
-        
+
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         request_url = self._BIBIGRID_EP + "/bibigrid/ready/"
@@ -214,16 +216,16 @@ class BibigridConnector:
                 "sshUser": "ubuntu",
                 "subnet": self._SUB_NETWORK,
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
-                "sshPublicKeys": public_keys
+                "sshPublicKeys": public_keys,
             }
         ]
         full_body = {"configurations": body}
         logger.info(full_body)
         response: dict[str, str] = requests.post(
-                url=self._BIBIGRID_EP + "/bibigrid/create",
-                json=full_body,
-                verify=self._PRODUCTION,
-            ).json()
+            url=self._BIBIGRID_EP + "/bibigrid/create",
+            json=full_body,
+            verify=self._PRODUCTION,
+        ).json()
 
         logger.info(response)
         return ClusterMessage(
