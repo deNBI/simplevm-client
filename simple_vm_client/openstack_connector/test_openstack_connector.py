@@ -22,10 +22,8 @@ from openstack.test import fakes
 from simple_vm_client.forc_connector.template.template import (
     ResearchEnvironmentMetadata,
 )
-from simple_vm_client.util.state_enums import VmStates, VmTaskStates
-
-from openstack_connector.openstack_connector import OpenStackConnector
-from ttypes import (
+from simple_vm_client.openstack_connector.openstack_connector import OpenStackConnector
+from simple_vm_client.ttypes import (
     DefaultException,
     FlavorNotFoundException,
     ImageNotFoundException,
@@ -35,6 +33,7 @@ from ttypes import (
     SnapshotNotFoundException,
     VolumeNotFoundException,
 )
+from simple_vm_client.util.state_enums import VmStates, VmTaskStates
 
 METADATA_EXAMPLE_NO_FORC = ResearchEnvironmentMetadata(
     template_name="example_template",
@@ -1100,15 +1099,20 @@ class TestOpenStackConnector(unittest.TestCase):
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
     def test_create_add_keys_script(self, mock_logger_info):
         # Prepare test data
-        keys = ["key1", "key2", "key3"]
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
 
         # Call the create_add_keys_script method
-        result_script = self.openstack_connector.create_add_keys_script(keys)
+        result_script = self.openstack_connector.create_add_keys_script(
+            additional_owner_keys=additional_owner_keys,
+            addtional_user_keys=additional_user_keys,
+        )
 
         # Assertions
-        for key in keys:
+        for key in additional_owner_keys:
             self.assertIn(key.encode("utf-8"), result_script)  # Encode the key to bytes
-
+        for key in additional_user_keys:
+            self.assertIn(key.encode("utf-8"), result_script)  # Encode the key to bytes
         # Additional assertions
         mock_logger_info.assert_called_once_with("create add key script")
 
@@ -1523,7 +1527,11 @@ class TestOpenStackConnector(unittest.TestCase):
         self.openstack_connector.openstack_connection.create_keypair.return_value = (
             server_keypair
         )
-        mock_get_security_groups_starting_machine.return_value = ["sg1", "sg2"]
+        additional_security_group_ids = ["sg3", "sg4"]
+        default_security_group_ids = ["sg1", "sg2"]
+        mock_get_security_groups_starting_machine.return_value = (
+            default_security_group_ids + additional_security_group_ids
+        )
         self.openstack_connector.openstack_connection.get_image.return_value = (
             fake_image
         )
@@ -1547,8 +1555,8 @@ class TestOpenStackConnector(unittest.TestCase):
             {"openstack_id": "volume_id2"},
         ]
         volume_ids_path_attach = [{"openstack_id": "volume_id3"}]
-        additional_keys = ["key1", "key2"]
-        additional_security_group_ids = ["sg3", "sg4"]
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
 
         # Call the method
         result = self.openstack_connector.start_server_with_playbook(
@@ -1559,8 +1567,9 @@ class TestOpenStackConnector(unittest.TestCase):
             research_environment_metadata,
             volume_ids_path_new,
             volume_ids_path_attach,
-            additional_keys,
-            additional_security_group_ids,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
+            additional_security_group_ids=additional_security_group_ids,
             metadata_token="test",
         )
 
@@ -1574,14 +1583,15 @@ class TestOpenStackConnector(unittest.TestCase):
             meta=metadata,
             volumes=["volume1", "volume2"],
             userdata="userdata",
-            security_groups=["sg1", "sg2"],
+            security_groups=default_security_group_ids + additional_security_group_ids,
             boot_from_volume=False,
         )
 
         mock_create_userdata.assert_called_once_with(
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
-            additional_keys=additional_keys,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
             metadata_token="test",
             metadata_endpoint=None,
         )
@@ -1655,7 +1665,8 @@ class TestOpenStackConnector(unittest.TestCase):
             {"openstack_id": "volume_id2"},
         ]
         volume_ids_path_attach = [{"openstack_id": "volume_id3"}]
-        additional_keys = ["key1", "key2"]
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
         additional_security_group_ids = ["sg3", "sg4"]
 
         with self.assertRaises(DefaultException):
@@ -1667,8 +1678,9 @@ class TestOpenStackConnector(unittest.TestCase):
                 research_environment_metadata,
                 volume_ids_path_new,
                 volume_ids_path_attach,
-                additional_keys,
-                additional_security_group_ids,
+                additional_owner_keys=additional_owner_keys,
+                additional_user_keys=additional_user_keys,
+                additional_security_group_ids=additional_security_group_ids,
             )
         mock_delete_keypair.assert_called_once_with(key_name=server_keypair.name)
         mock_logger_exception.assert_called_once_with(
@@ -1836,7 +1848,8 @@ class TestOpenStackConnector(unittest.TestCase):
             {"openstack_id": "volume_id2"},
         ]
         volume_ids_path_attach = [{"openstack_id": "volume_id3"}]
-        additional_keys = ["key1", "key2"]
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
         additional_security_group_ids = ["sg3", "sg4"]
         public_key = "public_key"
 
@@ -1849,7 +1862,8 @@ class TestOpenStackConnector(unittest.TestCase):
             research_environment_metadata=research_environment_metadata,
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
-            additional_keys=additional_keys,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
             additional_security_group_ids=additional_security_group_ids,
             public_key=public_key,
             metadata_token="test",
@@ -1873,7 +1887,8 @@ class TestOpenStackConnector(unittest.TestCase):
         mock_create_userdata.assert_called_once_with(
             volume_ids_path_new=volume_ids_path_new,
             volume_ids_path_attach=volume_ids_path_attach,
-            additional_keys=additional_keys,
+            additional_user_keys=additional_user_keys,
+            additional_owner_keys=additional_owner_keys,
             metadata_token="test",
             metadata_endpoint=None,
         )
@@ -1951,7 +1966,8 @@ class TestOpenStackConnector(unittest.TestCase):
             {"openstack_id": "volume_id2"},
         ]
         volume_ids_path_attach = [{"openstack_id": "volume_id3"}]
-        additional_keys = ["key1", "key2"]
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
         additional_security_group_ids = ["sg3", "sg4"]
 
         with self.assertRaises(DefaultException):
@@ -1963,7 +1979,8 @@ class TestOpenStackConnector(unittest.TestCase):
                 research_environment_metadata=research_environment_metadata,
                 volume_ids_path_new=volume_ids_path_new,
                 volume_ids_path_attach=volume_ids_path_attach,
-                additional_keys=additional_keys,
+                additional_owner_keys=additional_owner_keys,
+                additional_user_keys=additional_user_keys,
                 additional_security_group_ids=additional_security_group_ids,
                 public_key=public_key,
             )
@@ -1981,15 +1998,21 @@ class TestOpenStackConnector(unittest.TestCase):
         # Set necessary input parameters
         volume_ids_path_new = [{"openstack_id": "volume_id_new"}]
         volume_ids_path_attach = [{"openstack_id": "volume_id_attach"}]
-        additional_keys = ["key1", "key2"]
-
+        additional_owner_keys = ["key1", "key2", "key3"]
+        additional_user_keys = ["key4"]
         # Call the method
         result = self.openstack_connector.create_userdata(
-            volume_ids_path_new, volume_ids_path_attach, additional_keys
+            volume_ids_path_new=volume_ids_path_new,
+            volume_ids_path_attach=volume_ids_path_attach,
+            additional_owner_keys=additional_owner_keys,
+            additional_user_keys=additional_user_keys,
         )
 
         # Assertions
-        mock_create_add_keys_script.assert_called_once_with(keys=additional_keys)
+        mock_create_add_keys_script.assert_called_once_with(
+            additional_owner_keys=additional_owner_keys,
+            addtional_user_keys=additional_user_keys,
+        )
         mock_create_mount_init_script.assert_called_once_with(
             new_volumes=volume_ids_path_new, attach_volumes=volume_ids_path_attach
         )
@@ -2036,12 +2059,16 @@ class TestOpenStackConnector(unittest.TestCase):
 
     @patch.object(OpenStackConnector, "get_server")
     @patch.object(OpenStackConnector, "_validate_server_for_deletion")
-    @patch.object(OpenStackConnector, "_remove_security_groups_from_server")
+    @patch.object(OpenStackConnector, "_delete_security_groups_if_not_used")
     def test_delete_server_successful(
         self, mock_remove_security_groups, mock_validate_server, mock_get_server
     ):
         # Arrange
         mock_server = fakes.generate_fake_resource(server.Server)
+        mock_security_groups = fakes.generate_fake_resources(
+            security_group.SecurityGroup, 3
+        )
+        mock_server.security_groups = mock_security_groups
 
         mock_get_server.return_value = mock_server
         # Act
@@ -2050,7 +2077,7 @@ class TestOpenStackConnector(unittest.TestCase):
         # Assert
         mock_get_server.assert_called_once_with(openstack_id=mock_server.id)
         mock_validate_server.assert_called_once_with(server=mock_server)
-        mock_remove_security_groups.assert_called_once_with(server=mock_server)
+        mock_remove_security_groups.assert_called_once_with(mock_server.security_groups)
         self.openstack_connector.openstack_connection.compute.delete_server.assert_called_once_with(
             mock_server.id, force=True
         )
@@ -2908,30 +2935,6 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.delete_security_group_rule("rule_id")
             self.openstack_connector.openstack_connection.delete_security_group_rule.assert_called_once_with(
                 rule_id="rule_id"
-            )
-
-    @patch.object(OpenStackConnector, "get_server")
-    def test_remove_security_groups_from_server_sucess(self, mock_get_server):
-        server_mock = fakes.generate_fake_resource(server.Server)
-        mock_get_server.return_value = server_mock
-
-        self.openstack_connector.remove_security_groups_from_server(server_mock.id)
-        self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
-            server_mock, server_mock.security_groups
-        )
-
-    @patch.object(OpenStackConnector, "get_server")
-    def test_remove_security_groups_from_server_failure(self, mock_get_server):
-        server_mock = fakes.generate_fake_resource(server.Server)
-        mock_get_server.return_value = server_mock
-
-        self.openstack_connector.openstack_connection.remove_server_security_groups.return_value = (
-            False
-        )
-        with self.assertRaises(DefaultException):
-            self.openstack_connector.remove_security_groups_from_server(server_mock.id)
-            self.openstack_connector.openstack_connection.remove_server_security_groups.assert_called_once_with(
-                server_mock, server_mock.security_groups
             )
 
     def test_get_gateway_ip(self):

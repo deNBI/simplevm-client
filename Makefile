@@ -14,6 +14,16 @@ docs: ## Build documentation
 	cp -a gen-html/. docs
 	rm -rf gen-html
 
+
+tests:
+	virtualenv test-env
+	. ./test-env/bin/activate
+	pip install -r requirements.txt
+	pip install -r requirements-test.yml
+	coverage run -m pytest .
+	coverage report -m
+
+
 thrift_py: ## Builds python code from thrift file
 	thrift --gen py portal_client.thrift
 	cp -a gen-py/VirtualMachineService/. simple_vm_client
