@@ -15,15 +15,9 @@ docs: ## Build documentation
 	rm -rf gen-html
 
 
-tests: ## Run unit tests
-	virtualenv test-env
-	. ./test-env/bin/activate
-	pip install -r requirements.txt
-	pip install -r requirements-test.yml
-	coverage run -m pytest .
-	coverage report -m
-
-
+run-pytest: ## run django pytest
+	docker build -f Dockerfile-tests . -t simplevm-client-tests
+	docker run --rm simplevm-client-tests
 thrift_py: ## Builds python code from thrift file
 	thrift --gen py portal_client.thrift
 	cp -a gen-py/VirtualMachineService/. simple_vm_client
