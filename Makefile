@@ -15,7 +15,7 @@ docs: ## Build documentation
 	rm -rf gen-html
 
 
-tests:
+tests: ## Run unit tests
 	virtualenv test-env
 	. ./test-env/bin/activate
 	pip install -r requirements.txt
