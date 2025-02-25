@@ -15,7 +15,6 @@ docs: ## Build documentation
 	rm -rf gen-html
 
 
-
 run-pytest: ## run django pytest
 	docker build -f Dockerfile-tests . -t simplevm-client-tests
 	docker run --rm simplevm-client-tests
