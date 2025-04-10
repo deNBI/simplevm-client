@@ -5,20 +5,19 @@ typedef i32 int
 const string VERSION= '1.0.0'
 
 
-struct User {
-  1: optional string username,
-  2: required string user_id,
-  3: optional list<string> public_keys,
+struct MetadataUser {
+  1: required string user_id,
+  2: optional list<string> public_keys,
 }
 
-struct UserData {
-  2: required map<string, User> data = {},
+struct MetadataUserData {
+  2: required map<string, MetadataUser> data = {},
 }
 
 struct VirtualMachineServerMetadata {
   1: required string ip,
   2: required string hashed_auth_token,
-  3: optional UserData userdata,
+  3: optional MetadataUserData userdata,
 }
 
 
