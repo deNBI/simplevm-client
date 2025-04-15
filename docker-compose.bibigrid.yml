@@ -43,7 +43,7 @@ services:
 
   # filebeat
   simplevm_filebeat:
-    image: docker.elastic.co/beats/filebeat:8.17.4
+    image: docker.elastic.co/beats/filebeat:8.18.0
     env_file:
       - .env
     volumes:
