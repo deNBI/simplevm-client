@@ -2065,6 +2065,127 @@ class VM(object):
         return not (self == other)
 
 
+class ClusterInstanceMetadata(object):
+    """
+    Attributes:
+     - user_id
+     - project_id
+     - project_name
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        user_id=None,
+        project_id=None,
+        project_name=None,
+    ):
+        self.user_id = user_id
+        self.project_id = project_id
+        self.project_name = project_name
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.user_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.project_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.project_name = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterInstanceMetadata")
+        if self.user_id is not None:
+            oprot.writeFieldBegin("user_id", TType.STRING, 1)
+            oprot.writeString(
+                self.user_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.user_id
+            )
+            oprot.writeFieldEnd()
+        if self.project_id is not None:
+            oprot.writeFieldBegin("project_id", TType.STRING, 2)
+            oprot.writeString(
+                self.project_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.project_id
+            )
+            oprot.writeFieldEnd()
+        if self.project_name is not None:
+            oprot.writeFieldBegin("project_name", TType.STRING, 3)
+            oprot.writeString(
+                self.project_name.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.project_name
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.user_id is None:
+            raise TProtocolException(message="Required field user_id is unset!")
+        if self.project_id is None:
+            raise TProtocolException(message="Required field project_id is unset!")
+        if self.project_name is None:
+            raise TProtocolException(message="Required field project_name is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class ClusterInstance(object):
     """
     Attributes:
@@ -5469,6 +5590,31 @@ VM.thrift_spec = (
         "UTF8",
         None,
     ),  # 12
+)
+all_structs.append(ClusterInstanceMetadata)
+ClusterInstanceMetadata.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "user_id",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "project_id",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRING,
+        "project_name",
+        "UTF8",
+        None,
+    ),  # 3
 )
 all_structs.append(ClusterInstance)
 ClusterInstance.thrift_spec = (

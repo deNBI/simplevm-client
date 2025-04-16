@@ -198,6 +198,13 @@ struct VM {
 	12:required string vm_state
 }
 
+
+struct ClusterInstanceMetadata{
+    1: required string user_id
+    2: required string project_id
+    3: required string project_name
+
+}
 struct ClusterInstance{
     1: required string type
     2: required string image
@@ -759,7 +766,7 @@ service VirtualMachineService {
      */
     map<string,string> get_limits()
 
-     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterWorker> worker_instances)
+     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterWorker> worker_instances,4:ClusterInstanceMetadata metadata)
 
      void terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c) /*TODO throe error*/
 

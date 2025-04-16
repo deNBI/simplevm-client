@@ -4,6 +4,7 @@ import yaml
 from simple_vm_client.ttypes import (
     ClusterInfo,
     ClusterInstance,
+    ClusterInstanceMetadata,
     ClusterLog,
     ClusterMessage,
     ClusterNotFoundException,
@@ -28,6 +29,8 @@ class BibigridConnector:
         self._GATEWAY_IP = ""
         self._PORT_FUNCTION = ""
         self._PRODUCTION_bool = True
+        self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
+
         self.load_config_yml(config_file=config_file)
 
     def load_config_yml(self, config_file: str) -> None:
@@ -176,24 +179,20 @@ class BibigridConnector:
         public_keys: list[str],
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
+        metadata: ClusterInstanceMetadata = None,
     ) -> ClusterMessage:
         logger.info(
             f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n"
         )
-
         # Prepare worker instances in the required format
         worker_config = []
         for wk in worker_instances:
             logger.info(wk)
-            worker_config.append(
-                {
-                    "type": wk.type,  # Ensure `ClusterInstance` has these attributes
-                    "image": wk.image,  # and modify as needed to reflect actual structure
-                    "count": wk.count,  # Example attributes
-                    "onDemand": False,
-                }
-            )
-
+            config = vars(
+                wk
+            ).copy()  # create a copy to avoid modifying the original object
+            config["onDemand"] = False
+            worker_config.append(config)
         # Create configuration matching the required YAML structure
         body = [
             {
@@ -216,6 +215,8 @@ class BibigridConnector:
                 "subnet": self._SUB_NETWORK,
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
                 "sshPublicKeys": public_keys,
+                "securityGroups": [self._DEFAULT_SECURITY_GROUP_NAME],
+                "meta": vars(metadata),
             }
         ]
         full_body = {"configurations": body}

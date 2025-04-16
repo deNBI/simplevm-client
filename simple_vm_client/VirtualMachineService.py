@@ -635,12 +635,13 @@ class Iface(object):
 
         """
 
-    def start_cluster(self, public_keys, master_instance, worker_instances):
+    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
+         - metadata
 
         """
 
@@ -3476,23 +3477,29 @@ class Client(Iface):
             TApplicationException.MISSING_RESULT, "get_limits failed: unknown result"
         )
 
-    def start_cluster(self, public_keys, master_instance, worker_instances):
+    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
+         - metadata
 
         """
-        self.send_start_cluster(public_keys, master_instance, worker_instances)
+        self.send_start_cluster(
+            public_keys, master_instance, worker_instances, metadata
+        )
         return self.recv_start_cluster()
 
-    def send_start_cluster(self, public_keys, master_instance, worker_instances):
+    def send_start_cluster(
+        self, public_keys, master_instance, worker_instances, metadata
+    ):
         self._oprot.writeMessageBegin("start_cluster", TMessageType.CALL, self._seqid)
         args = start_cluster_args()
         args.public_keys = public_keys
         args.master_instance = master_instance
         args.worker_instances = worker_instances
+        args.metadata = metadata
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -6151,7 +6158,10 @@ class Processor(Iface, TProcessor):
         result = start_cluster_result()
         try:
             result.success = self._handler.start_cluster(
-                args.public_keys, args.master_instance, args.worker_instances
+                args.public_keys,
+                args.master_instance,
+                args.worker_instances,
+                args.metadata,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -20016,6 +20026,7 @@ class start_cluster_args(object):
      - public_keys
      - master_instance
      - worker_instances
+     - metadata
 
     """
 
@@ -20026,10 +20037,12 @@ class start_cluster_args(object):
         public_keys=None,
         master_instance=None,
         worker_instances=None,
+        metadata=None,
     ):
         self.public_keys = public_keys
         self.master_instance = master_instance
         self.worker_instances = worker_instances
+        self.metadata = metadata
 
     def read(self, iprot):
         if (
@@ -20075,6 +20088,12 @@ class start_cluster_args(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.metadata = ClusterInstanceMetadata()
+                    self.metadata.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -20107,6 +20126,10 @@ class start_cluster_args(object):
             for iter397 in self.worker_instances:
                 iter397.write(oprot)
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.metadata is not None:
+            oprot.writeFieldBegin("metadata", TType.STRUCT, 4)
+            self.metadata.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -20149,6 +20172,13 @@ start_cluster_args.thrift_spec = (
         (TType.STRUCT, [ClusterWorker, None], False),
         None,
     ),  # 3
+    (
+        4,
+        TType.STRUCT,
+        "metadata",
+        [ClusterInstanceMetadata, None],
+        None,
+    ),  # 4
 )
 
 
