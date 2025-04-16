@@ -202,15 +202,14 @@ class BibigridConnector:
                 "sshTimeout": 30,
                 "useMasterAsCompute": False,
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
-                # "nfsShares": ["/vol/permanent"],
                 "dontUploadCredentials": True,
                 "gateway": {
-                    "ip": "129.70.51.75",
-                    "portFunction": "30000 + 256 * oct3 + oct4",  # Example formula
+                    "ip": self._GATEWAY_IP,
+                    "portFunction": self._PORT_FUNCTION,
                 },
                 "masterInstance": {
-                    "type": master_instance.type,  # Example attribute
-                    "image": master_instance.image,  # Example attribute
+                    "type": master_instance.type,
+                    "image": master_instance.image,
                 },
                 "workerInstances": worker_config,
                 "sshUser": "ubuntu",
