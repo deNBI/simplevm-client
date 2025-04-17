@@ -2,7 +2,7 @@ name: build-image
 on: pull_request
 jobs:
     build-test:
-        runs-on: [self-hosted,build]
+        runs-on: ubuntu-latest
         steps:
             - name: Workflow run cleanup action
               uses: rokroskar/workflow-run-cleanup-action@v0.3.3
