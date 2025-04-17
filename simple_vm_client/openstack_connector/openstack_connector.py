@@ -1476,16 +1476,16 @@ class OpenStackConnector:
         base_port = int(fixed_ip.split(".")[-1])  # noqa F841
         subnet_port = int(fixed_ip.split(".")[-2])  # noqa F841
 
-        x = sympy.symbols("x")
-        y = sympy.symbols("y")
+        oct4 = sympy.symbols("oct4")
+        oct3 = sympy.symbols("oct3")
         ssh_port = int(
             sympy.sympify(self.SSH_PORT_CALCULATION).evalf(
-                subs={x: base_port, y: subnet_port}
+                subs={oct4: base_port, oct3: subnet_port}
             )
         )
         udp_port = int(
             sympy.sympify(self.UDP_PORT_CALCULATION).evalf(
-                subs={x: base_port, y: subnet_port}
+                subs={oct4: base_port, oct3: subnet_port}
             )
         )
         return ssh_port, udp_port

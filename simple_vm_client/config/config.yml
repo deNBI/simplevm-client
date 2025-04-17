@@ -43,9 +43,9 @@ openstack:
   # Security group ID for FORC
   cloud_site: bielefeld
   # Name or identifier of the OpenStack cloud site.
-  ssh_port_calculation: 30000 + x + y * 256
+  ssh_port_calculation: 30000 + 256 * oct3 + oct4
   # Calculation for determining the SSH port. Schema -> 192.168.y.x
-  udp_port_calculation: 30000 + x + y * 256
+  udp_port_calculation: 30000 + 256 * oct3 + oct4
   # Calculation for determining the UDP port. Schema -> 192.168.y.x
   gateway_ip: 129.70.51.75
   # Can be provided if the external Gateway is not reachable for the Client (Berlin) OPTIONAL
@@ -67,6 +67,7 @@ bibigrid:
   localDnsLookup: False
   # Set to True if Bibigrid should perform local DNS lookup, otherwise False.
   sub_network: portalexternalsubnetwork
+  port_function: 30000 + 256 * oct3 + oct4"
   # Name or identifier of the openstack subnetwork.
   modes:
     - slurm
