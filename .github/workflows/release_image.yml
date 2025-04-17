@@ -5,7 +5,7 @@ on:
       - '*'
 jobs:
   build_release:
-    runs-on: [self-hosted,build]
+    runs-on: ubuntu-latest
 
     steps:
      - name: Get the version
