@@ -18,6 +18,7 @@ from .ttypes import (
     Backend,
     ClusterInfo,
     ClusterInstance,
+    ClusterInstanceMetadata,
     ClusterLog,
     ClusterMessage,
     ClusterState,
@@ -538,17 +539,19 @@ class VirtualMachineHandler(Iface):
 
     def get_cluster_state(self, cluster_id: str) -> ClusterState:
         return self.bibigrid_connector.get_cluster_state(cluster_id=cluster_id)
-    
+
     def start_cluster(
         self,
         public_keys: list[str],
         master_instance: ClusterInstance,
         worker_instances: list[ClusterWorker],
+        metadata: ClusterInstanceMetadata,
     ) -> ClusterMessage:
         return self.bibigrid_connector.start_cluster(
             public_keys=public_keys,
             master_instance=master_instance,
             worker_instances=worker_instances,
+            metadata=metadata,
         )
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:

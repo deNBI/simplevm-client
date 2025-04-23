@@ -226,7 +226,7 @@ class ForcConnector:
         )
 
         template_version = self.template.get_template_version_for(template=template)
-        if template_version is None:
+        if not template_version:
             logger.warning(
                 f"No suitable template version found for {template}. Aborting backend creation!"
             )
