@@ -76,12 +76,11 @@ class BibigridConnector:
         logger.info(f"Get Cluster {cluster_id} logs...")
 
         headers = {"content-Type": "application/json"}
-        request_url = f"{self._BIBIGRID_EP}/bibigrid/log/"
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/log/{cluster_id}"
 
         try:
             response = requests.get(
                 url=request_url,
-                params={"cluster_id": cluster_id},
                 headers=headers,
                 verify=self._PRODUCTION,
             )
@@ -100,11 +99,10 @@ class BibigridConnector:
 
     def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster state from {cluster_id}")
-        request_url = self._BIBIGRID_EP + "/bibigrid/state/"
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/state/{cluster_id}"
         headers = {"content-Type": "application/json"}
         response = requests.get(
             url=request_url,
-            params={"cluster_id": cluster_id},
             headers=headers,
             verify=self._PRODUCTION,
         )
@@ -117,11 +115,10 @@ class BibigridConnector:
 
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
-        request_url = self._BIBIGRID_EP + "/bibigrid/ready/"
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
         headers = {"content-Type": "application/json"}
         response = requests.get(
             url=request_url,
-            params={"cluster_id": cluster_id},
             headers=headers,
             verify=self._PRODUCTION,
         )
@@ -138,27 +135,6 @@ class BibigridConnector:
 
     def is_bibigrid_available(self) -> bool:
         return True
-
-    # logger.info("Checking if Bibigrid is available")
-
-    # if not self._BIBIGRID_EP:
-    #   logger.info("Bibigrid Url is not set")
-    #  return False
-
-    # try:
-    #   response = requests.get(self._BIBIGRID_EP + "/server/health")
-    #  response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
-
-    # if response.status_code == 200:
-    #    logger.info("Bibigrid Server is available")
-    #   return True
-    # else:
-    #   logger.error(f"Bibigrid returned status code {response.status_code}")
-    #  return False
-
-    # except requests.RequestException:
-    #   logger.exception("Error while checking Bibigrid availability")
-    #  return False
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
         # TODO only needs specific config keywoards
