@@ -235,6 +235,7 @@ struct ClusterState {
     3: required string state
     4: optional string ssh_user
     5: optional string floating_ip
+    6: optional string last_changed
 }
 
 struct ClusterLog {

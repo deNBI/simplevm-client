@@ -2622,6 +2622,7 @@ class ClusterState(object):
      - state
      - ssh_user
      - floating_ip
+     - last_changed
 
     """
 
@@ -2634,12 +2635,14 @@ class ClusterState(object):
         state=None,
         ssh_user=None,
         floating_ip=None,
+        last_changed=None,
     ):
         self.cluster_id = cluster_id
         self.message = message
         self.state = state
         self.ssh_user = ssh_user
         self.floating_ip = floating_ip
+        self.last_changed = last_changed
 
     def read(self, iprot):
         if (
@@ -2699,6 +2702,15 @@ class ClusterState(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.last_changed = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2748,6 +2760,14 @@ class ClusterState(object):
                 self.floating_ip.encode("utf-8")
                 if sys.version_info[0] == 2
                 else self.floating_ip
+            )
+            oprot.writeFieldEnd()
+        if self.last_changed is not None:
+            oprot.writeFieldBegin("last_changed", TType.STRING, 6)
+            oprot.writeString(
+                self.last_changed.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.last_changed
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -5747,6 +5767,13 @@ ClusterState.thrift_spec = (
         "UTF8",
         None,
     ),  # 5
+    (
+        6,
+        TType.STRING,
+        "last_changed",
+        "UTF8",
+        None,
+    ),  # 6
 )
 all_structs.append(ClusterLog)
 ClusterLog.thrift_spec = (
