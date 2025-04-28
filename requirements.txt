@@ -1,4 +1,4 @@
-setuptools==79.0.1
+setuptools==80.0.0
 thrift==0.21.0
 openstacksdk==4.3.0
 deprecated==1.2.18
@@ -13,7 +13,7 @@ requests==2.32.3
 pyyaml==6.0.2
 pre-commit==4.2.0
 types-PyYAML==6.0.12.20250402
-sympy==1.13.3
+sympy==1.14.0
 colorama==0.4.6
 gevent==25.4.2
 types-redis==4.6.0.20241004
