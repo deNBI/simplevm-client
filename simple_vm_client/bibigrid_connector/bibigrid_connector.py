@@ -178,6 +178,7 @@ class BibigridConnector:
                 "useMasterAsCompute": False,
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 "dontUploadCredentials": True,
+                "noAllPartition": True,
                 "gateway": {
                     "ip": self._GATEWAY_IP,
                     "portFunction": self._PORT_FUNCTION,
