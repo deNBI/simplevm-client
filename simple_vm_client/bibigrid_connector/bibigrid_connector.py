@@ -168,7 +168,6 @@ class BibigridConnector:
                 wk
             ).copy()  # create a copy to avoid modifying the original object
             config["onDemand"] = False
-            config["noAllPartition"] = True
             worker_config.append(config)
         # Create configuration matching the required YAML structure
         body = [
