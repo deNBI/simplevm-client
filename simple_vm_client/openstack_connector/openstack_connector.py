@@ -500,7 +500,7 @@ class OpenStackConnector:
     def get_keypair_public_key_by_name(self, key_name: str):
         logger.info(f"Get keypair: {key_name}")
 
-        key_pair: Keypair = self.openstack_connection.compute.find_keypair(key_name)
+        key_pair: Keypair = self.openstack_connection.get_keypair(name_or_id=key_name)
         if key_pair:
             return key_pair.public_key
         return ""
@@ -508,7 +508,7 @@ class OpenStackConnector:
     def delete_keypair(self, key_name: str) -> None:
         logger.info(f"Delete keypair: {key_name}")
 
-        key_pair = self.openstack_connection.compute.find_keypair(key_name)
+        key_pair = self.openstack_connection.compute.get_keypair(name_or_id=key_name)
         if key_pair:
             self.openstack_connection.delete_keypair(name=key_name)
 
@@ -1476,16 +1476,16 @@ class OpenStackConnector:
         base_port = int(fixed_ip.split(".")[-1])  # noqa F841
         subnet_port = int(fixed_ip.split(".")[-2])  # noqa F841
 
-        x = sympy.symbols("x")
-        y = sympy.symbols("y")
+        oct4 = sympy.symbols("oct4")
+        oct3 = sympy.symbols("oct3")
         ssh_port = int(
             sympy.sympify(self.SSH_PORT_CALCULATION).evalf(
-                subs={x: base_port, y: subnet_port}
+                subs={oct4: base_port, oct3: subnet_port}
             )
         )
         udp_port = int(
             sympy.sympify(self.UDP_PORT_CALCULATION).evalf(
-                subs={x: base_port, y: subnet_port}
+                subs={oct4: base_port, oct3: subnet_port}
             )
         )
         return ssh_port, udp_port

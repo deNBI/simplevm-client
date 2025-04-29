@@ -18,6 +18,11 @@ from .ttypes import (
     Backend,
     ClusterInfo,
     ClusterInstance,
+    ClusterInstanceMetadata,
+    ClusterLog,
+    ClusterMessage,
+    ClusterState,
+    ClusterWorker,
     CondaPackage,
     Flavor,
     Image,
@@ -527,23 +532,26 @@ class VirtualMachineHandler(Iface):
         )
 
     def get_cluster_info(self, cluster_id) -> ClusterInfo:
-        return self.openstack_connector.get_cluster_info(cluster_id=cluster_id)
+        return self.bibigrid_connector.get_cluster_info(cluster_id=cluster_id)
 
-    def get_cluster_status(self, cluster_id: str) -> dict[str, str]:
-        return self.bibigrid_connector.get_cluster_status(cluster_id=cluster_id)
+    def get_cluster_log(self, cluster_id: str) -> ClusterLog:
+        return self.bibigrid_connector.get_cluster_log(cluster_id=cluster_id)
+
+    def get_cluster_state(self, cluster_id: str) -> ClusterState:
+        return self.bibigrid_connector.get_cluster_state(cluster_id=cluster_id)
 
     def start_cluster(
         self,
         public_keys: list[str],
         master_instance: ClusterInstance,
-        worker_instances: list[ClusterInstance],
-        user: str,
-    ) -> dict[str, str]:
+        worker_instances: list[ClusterWorker],
+        metadata: ClusterInstanceMetadata,
+    ) -> ClusterMessage:
         return self.bibigrid_connector.start_cluster(
             public_keys=public_keys,
             master_instance=master_instance,
             worker_instances=worker_instances,
-            user=user,
+            metadata=metadata,
         )
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:

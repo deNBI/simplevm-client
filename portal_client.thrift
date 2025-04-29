@@ -1,7 +1,5 @@
 namespace	py VirtualMachineService
 
-
-
 typedef i32 int
 /** The Version of the Portal-Client*/
 const string VERSION= '1.0.0'
@@ -55,17 +53,7 @@ struct CondaPackage{
 5:optional string home
 }
 
-struct ClusterInfo {
-1:optional string launch_date,
-2:optional string group_id,
-3:optional string network_id,
-4:optional string public_ip,
-5:optional string subnet_id,
-6:optional string user,
-7:optional int inst_counter,
-8:optional string cluster_id,
-9:optional string key_name,
-}
+
 
 struct Volume{
 1:optional string id,
@@ -210,11 +198,50 @@ struct VM {
 	12:required string vm_state
 }
 
-struct ClusterInstance{
 
-1: required string type
-2: required string image
-3: optional int count
+struct ClusterInstanceMetadata{
+    1: required string user_id
+    2: required string project_id
+    3: required string project_name
+
+}
+struct ClusterInstance{
+    1: required string type
+    2: required string image
+}
+
+struct ClusterWorker{
+
+    1: required string type
+    2: required string image
+    3:  required int count
+    4: optional bool onDemand = false
+}
+
+struct ClusterMessage{
+    1: required string message
+    2: required string cluster_id
+}
+
+struct ClusterInfo {
+    1: required string message
+    2: required string cluster_id
+    3: required bool ready
+}
+
+struct ClusterState {
+    1: required string cluster_id
+    2: required string message
+    3: required string state
+    4: optional string ssh_user
+    5: optional string floating_ip
+    6: optional string last_changed
+}
+
+struct ClusterLog {
+    1: required string message
+    2: required string cluster_id
+    3: required string log
 }
 
 /**
@@ -667,7 +694,9 @@ service VirtualMachineService {
 
 	ClusterInfo get_cluster_info(1:string cluster_id) throws(1:ClusterNotFoundException c)
 
-	map<string,string>get_cluster_status(1:string cluster_id) throws(1:ClusterNotFoundException c)
+	ClusterLog get_cluster_log(1:string cluster_id) throws(1:ClusterNotFoundException c)
+
+    ClusterState get_cluster_state(1:string cluster_id) throws(1:ClusterNotFoundException c)
 
 	string get_keypair_public_key_by_name(1:string key_name)
 
@@ -738,9 +767,9 @@ service VirtualMachineService {
      */
     map<string,string> get_limits()
 
-     map<string,string> start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:string user)
+     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterWorker> worker_instances,4:ClusterInstanceMetadata metadata)
 
-     map<string,string> terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c)
+     void terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c) /*TODO throe error*/
 
     /**
      * Delete Image.

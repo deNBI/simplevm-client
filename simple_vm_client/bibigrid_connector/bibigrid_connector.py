@@ -4,7 +4,11 @@ import yaml
 from simple_vm_client.ttypes import (
     ClusterInfo,
     ClusterInstance,
+    ClusterInstanceMetadata,
+    ClusterLog,
+    ClusterMessage,
     ClusterNotFoundException,
+    ClusterState,
 )
 from simple_vm_client.util.logger import setup_custom_logger
 
@@ -15,7 +19,6 @@ class BibigridConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Bibigrid Connector")
 
-        self._BIBIGRID_URL: str = ""
         self._BIBIGRID_MODES: str = ""
         self._BIBIGRID_HOST: str = ""
         self._BIBIGRID_PORT: str = ""
@@ -23,7 +26,11 @@ class BibigridConnector:
         self._BIBIGRID_LOCAL_DNS_LOOKUP = False
         self._BIBIGRID_EP = ""
         self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP: bool = False
+        self._GATEWAY_IP = ""
+        self._PORT_FUNCTION = ""
         self._PRODUCTION_bool = True
+        self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
+
         self.load_config_yml(config_file=config_file)
 
     def load_config_yml(self, config_file: str) -> None:
@@ -53,12 +60,11 @@ class BibigridConnector:
 
             openstack_cfg = cfg["openstack"]
             self._NETWORK = openstack_cfg["network"]
+            self._GATEWAY_IP = openstack_cfg["gateway_ip"]
+            self._PORT_FUNCTION = openstack_cfg["ssh_port_calculation"]
             self._PRODUCTION = cfg["production"]
 
             protocol = "https" if self._BIBIGRID_USE_HTTPS else "http"
-            self._BIBIGRID_URL = (
-                f"{protocol}://{self._BIBIGRID_HOST}:{self._BIBIGRID_PORT}/bibigrid/"
-            )
             self._BIBIGRID_EP = (
                 f"{protocol}://{self._BIBIGRID_HOST}:{self._BIBIGRID_PORT}"
             )
@@ -66,99 +72,77 @@ class BibigridConnector:
             logger.info("Config loaded: Bibigrid")
             self.is_bibigrid_available()
 
-    def get_cluster_status(self, cluster_id: str) -> dict[str, str]:
-        logger.info(f"Get Cluster {cluster_id} status")
+    def get_cluster_log(self, cluster_id: str) -> ClusterLog:
+        logger.info(f"Get Cluster {cluster_id} logs...")
 
         headers = {"content-Type": "application/json"}
-        body = {"mode": "openstack"}
-        request_url = f"{self._BIBIGRID_URL}info/{cluster_id}"
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/log/{cluster_id}"
 
         try:
             response = requests.get(
                 url=request_url,
-                json=body,
                 headers=headers,
                 verify=self._PRODUCTION,
             )
             response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
             json_resp = response.json(strict=False)
 
-            # Convert log and msg keys to strings, handling the case where they might not exist
-            json_resp["log"] = str(json_resp.get("log", ""))
-            json_resp["msg"] = str(json_resp.get("msg", ""))
-
-            logger.info(f"Cluster {cluster_id} status: {json_resp}")
-
-            return json_resp
+            return ClusterLog(
+                cluster_id=cluster_id,
+                message=json_resp["message"],
+                log=json_resp["log"],
+            )
 
         except requests.RequestException as e:
             logger.exception("Error while getting Cluster status")
             return {"error": str(e)}
 
-    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
-        logger.info(f"Get Cluster info from {cluster_id}")
-        infos: list[dict[str, str]] = self.get_clusters_info()
-        if infos == "No BiBiGrid cluster found!":
-            raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
-        for info in infos:
-            if info.get("cluster-id", "") == cluster_id:
-                cluster_info = ClusterInfo(
-                    group_id=info["group-id"],
-                    network_id=info["network-id"],
-                    public_ip=info["public-ip"],
-                    subnet_id=info["subnet-id"],
-                    user=info["user"],
-                    inst_counter=info["# inst"],
-                    cluster_id=info["cluster-id"],
-                    key_name=info["key name"],
-                )
-                logger.info(f"Cluster {cluster_id} info: {cluster_info} ")
-
-                return cluster_info
-        raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
-
-    def get_clusters_info(self) -> list[dict[str, str]]:
-        logger.info("Get clusters info")
+    def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
+        logger.info(f"Get Cluster state from {cluster_id}")
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/state/{cluster_id}"
         headers = {"content-Type": "application/json"}
-        body = {"mode": "openstack"}
-        request_url = self._BIBIGRID_URL + "list"
         response = requests.get(
             url=request_url,
-            json=body,
             headers=headers,
             verify=self._PRODUCTION,
         )
-        infos: list[dict[str, str]] = response.json()["info"]
-        return infos
+
+        if response.status_code == 200:
+            response_content = response.json()
+            return ClusterState(**response_content)
+        else:
+            raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
+
+    def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
+        logger.info(f"Get Cluster info from {cluster_id}")
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
+        headers = {"content-Type": "application/json"}
+        response = requests.get(
+            url=request_url,
+            headers=headers,
+            verify=self._PRODUCTION,
+        )
+
+        if response.status_code == 200:
+            response_content = response.json()
+            return ClusterInfo(
+                message=response_content["message"],
+                cluster_id=cluster_id,
+                ready=response_content["ready"],
+            )
+        else:
+            raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
 
     def is_bibigrid_available(self) -> bool:
-        logger.info("Checking if Bibigrid is available")
-
-        if not self._BIBIGRID_EP:
-            logger.info("Bibigrid Url is not set")
-            return False
-
-        try:
-            response = requests.get(self._BIBIGRID_EP + "/server/health")
-            response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
-
-            if response.status_code == 200:
-                logger.info("Bibigrid Server is available")
-                return True
-            else:
-                logger.error(f"Bibigrid returned status code {response.status_code}")
-                return False
-
-        except requests.RequestException:
-            logger.exception("Error while checking Bibigrid availability")
-            return False
+        return True
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
+        # TODO only needs specific config keywoards
         logger.info(f"Terminate cluster: {cluster_id}")
         headers = {"content-Type": "application/json"}
         body = {"mode": "openstack"}
         response: dict[str, str] = requests.delete(
-            url=f"{self._BIBIGRID_URL}terminate/{cluster_id}",
+            url=f"{self._BIBIGRID_EP}/bibigrid/terminate/{cluster_id}",
             json=body,
             headers=headers,
             verify=self._PRODUCTION,
@@ -171,38 +155,56 @@ class BibigridConnector:
         public_keys: list[str],
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
-        user: str,
-    ) -> dict[str, str]:
+        metadata: ClusterInstanceMetadata = None,
+    ) -> ClusterMessage:
         logger.info(
-            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n\tuser:{user}"
+            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n"
         )
-        master_instance = master_instance.__dict__
-        del master_instance["count"]
-        wI = []
+        # Prepare worker instances in the required format
+        worker_config = []
         for wk in worker_instances:
             logger.info(wk)
-            wI.append(wk.__dict__)
-        headers = {"content-Type": "application/json"}
-        body = {
-            "mode": "openstack",
-            "subnet": self._SUB_NETWORK,
-            "sshPublicKeys": public_keys,
-            "user": user,
-            "sshUser": "ubuntu",
-            "masterInstance": master_instance,
-            "workerInstances": wI,
-            "useMasterWithPublicIp": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
-            "ansibleGalaxyRoles": self._BIBIGRID_ANSIBLE_ROLES,
-            "localDNSLookup": self._BIBIGRID_LOCAL_DNS_LOOKUP,
-        }
-        for mode in self._BIBIGRID_MODES:
-            body.update({mode: True})
-        request_url = self._BIBIGRID_URL + "create"
+            config = vars(
+                wk
+            ).copy()  # create a copy to avoid modifying the original object
+            config["onDemand"] = False
+            worker_config.append(config)
+        # Create configuration matching the required YAML structure
+        body = [
+            {
+                "infrastructure": "openstack",
+                "cloud": "openstack",
+                "sshTimeout": 30,
+                "useMasterAsCompute": False,
+                "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
+                "dontUploadCredentials": True,
+                "noAllPartition": True,
+                "gateway": {
+                    "ip": self._GATEWAY_IP,
+                    "portFunction": self._PORT_FUNCTION,
+                },
+                "masterInstance": {
+                    "type": master_instance.type,
+                    "image": master_instance.image,
+                },
+                "workerInstances": worker_config,
+                "sshUser": "ubuntu",
+                "subnet": self._SUB_NETWORK,
+                "waitForServices": ["de.NBI_Bielefeld_environment.service"],
+                "sshPublicKeys": public_keys,
+                "securityGroups": [self._DEFAULT_SECURITY_GROUP_NAME],
+                "meta": vars(metadata),
+            }
+        ]
+        full_body = {"configurations": body}
+        logger.info(full_body)
         response: dict[str, str] = requests.post(
-            url=request_url,
-            json=body,
-            headers=headers,
+            url=self._BIBIGRID_EP + "/bibigrid/create",
+            json=full_body,
             verify=self._PRODUCTION,
         ).json()
+
         logger.info(response)
-        return response
+        return ClusterMessage(
+            cluster_id=response["cluster_id"], message=response["message"]
+        )
