@@ -508,7 +508,7 @@ class OpenStackConnector:
     def delete_keypair(self, key_name: str) -> None:
         logger.info(f"Delete keypair: {key_name}")
 
-        key_pair = self.openstack_connection.compute.get_keypair(name_or_id=key_name)
+        key_pair = self.openstack_connection.get_keypair(name_or_id=key_name)
         if key_pair:
             self.openstack_connection.delete_keypair(name=key_name)
 
