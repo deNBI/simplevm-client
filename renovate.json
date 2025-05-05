@@ -1,35 +1,59 @@
 {
   "extends": [
-    "config:base",
-     ":automergePatch"
+    "config:recommended",
+    ":automergePatch"
   ],
   "packageRules": [
     {
-      "updateTypes": ["major"],
-      "addLabels": ["major"]
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "major"
+      ]
     },
     {
-      "updateTypes": ["minor"],
-      "addLabels": ["minor"]
-    },
-     {
-      "updateTypes": ["patch"],
-      "addLabels": ["patch"]
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "addLabels": [
+        "minor"
+      ]
     },
     {
-      "updateTypes": ["pin"],
-      "addLabels": ["pin"]
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "addLabels": [
+        "patch"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "pin"
+      ],
+      "addLabels": [
+        "pin"
+      ]
     }
-   ],
+  ],
   "pre-commit": {
-      "enabled":true
-    },
-  "baseBranches": ["dev"],
-  "reviewers": ["team:portal-dev"],
-  "labels": ["dependencies"],
-  "assignees": ["team:portal-dev"],
+    "enabled": true
+  },
+  "baseBranches": [
+    "dev"
+  ],
+  "reviewers": [
+    "team:portal-dev"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "assignees": [
+    "team:portal-dev"
+  ],
   "branchPrefix": "deps/",
   "bumpVersion": "minor",
-  "commitBodyTable": "true",
+  "commitBodyTable": true,
   "commitMessagePrefix": "feat(Dependencies):"
 }
