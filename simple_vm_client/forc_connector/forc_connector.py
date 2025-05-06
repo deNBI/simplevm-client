@@ -115,7 +115,10 @@ class ForcConnector:
         self.redis_pool = redis.ConnectionPool(
             host=self.REDIS_HOST, port=self.REDIS_PORT
         )
-        self.redis_connection = redis.Redis(connection_pool=self.redis_pool)
+
+        self.redis_connection = redis.Redis(
+            connection_pool=self.redis_pool,
+        )
         if self.redis_connection.ping():
             logger.info("Redis connection created!")
         else:
