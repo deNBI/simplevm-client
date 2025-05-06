@@ -60,7 +60,9 @@ class BibigridConnector:
 
             openstack_cfg = cfg["openstack"]
             self._NETWORK = openstack_cfg["network"]
-            self._GATEWAY_IP = openstack_cfg["gateway_ip"]
+            self._GATEWAY_IP = (
+                openstack_cfg.get("internal_gateway_ip") or openstack_cfg["gateway_ip"]
+            )
             self._PORT_FUNCTION = openstack_cfg["ssh_port_calculation"]
             self._PRODUCTION = cfg["production"]
 
@@ -179,6 +181,7 @@ class BibigridConnector:
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
+                # todo use internal gateway if provided
                 "gateway": {
                     "ip": self._GATEWAY_IP,
                     "portFunction": self._PORT_FUNCTION,
