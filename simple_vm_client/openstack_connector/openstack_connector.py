@@ -1472,22 +1472,13 @@ class OpenStackConnector:
             raise OpenStackConflictException(message=e.message)
 
     def _calculate_vm_ports(self, server: Server):
-        fixed_ip = server.private_v4
-        base_port = int(fixed_ip.split(".")[-1])  # noqa F841
-        subnet_port = int(fixed_ip.split(".")[-2])  # noqa F841
+        octets = {
+            f"oct{enum + 1}": int(elem)
+            for enum, elem in enumerate(server.private_v4.split("."))
+        }
+        ssh_port = int(sympy.sympify(self.SSH_PORT_CALCULATION).subs(dict(octets)))
+        udp_port = int(sympy.sympify(self.UDP_PORT_CALCULATION).subs(dict(octets)))
 
-        oct4 = sympy.symbols("oct4")
-        oct3 = sympy.symbols("oct3")
-        ssh_port = int(
-            sympy.sympify(self.SSH_PORT_CALCULATION).evalf(
-                subs={oct4: base_port, oct3: subnet_port}
-            )
-        )
-        udp_port = int(
-            sympy.sympify(self.UDP_PORT_CALCULATION).evalf(
-                subs={oct4: base_port, oct3: subnet_port}
-            )
-        )
         return ssh_port, udp_port
 
     def get_vm_ports(self, openstack_id: str) -> dict[str, str]:
