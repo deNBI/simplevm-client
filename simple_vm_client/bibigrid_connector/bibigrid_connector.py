@@ -99,6 +99,39 @@ class BibigridConnector:
             logger.exception("Error while getting Cluster status")
             return {"error": str(e)}
 
+    def get_cluster_supported_ubuntu_os_versions(self) -> list[str]:
+        """
+        Retrieves the supported Ubuntu OS versions for cluster nodes.
+
+        Returns:
+            list[str]: A list of supported Ubuntu OS versions.
+        """
+
+        logger.info("Get Cluster Node requirements")
+
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
+        headers = {"Content-Type": "application/json"}
+
+        try:
+            response = requests.get(
+                url=request_url, headers=headers, verify=self._PRODUCTION
+            )
+            response.raise_for_status()  # Raise an exception for bad status codes
+        except requests.RequestException as e:
+            logger.error(f"Failed to retrieve node requirements: {e}")
+            return []
+
+        response_content = response.json()
+        os_versions = (
+            response_content.get("cloud_node_requirements", {})
+            .get("os_distro", {})
+            .get("ubuntu", {})
+            .get("os_versions", [])
+        )
+
+        logger.info(f"Supported Ubuntu OS versions: {os_versions}")
+        return os_versions
+
     def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster state from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/state/{cluster_id}"
@@ -136,6 +169,16 @@ class BibigridConnector:
             raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
 
     def is_bibigrid_available(self) -> bool:
+        request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
+        headers = {"Content-Type": "application/json"}
+
+        try:
+            response = requests.get(
+                url=request_url, headers=headers, verify=self._PRODUCTION
+            )
+            response.raise_for_status()  # Raise an exception for bad status codes
+        except requests.RequestException:
+            return False
         return True
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
