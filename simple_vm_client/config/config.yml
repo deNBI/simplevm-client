@@ -58,7 +58,7 @@ openstack:
 bibigrid:
   activated: False
   # If Bibigrid ist activated  -- defaults to True
-  port: 8080
+  port: 9123
   # Port number for Bibigrid API.
   host: simplevm_bibigrid
   # Hostname or IP address of the Bibigrid server.

@@ -9,7 +9,10 @@
 import sys
 
 from thrift.protocol.TProtocol import TProtocolException
-from thrift.Thrift import TException, TType
+from thrift.Thrift import (
+    TException,
+    TType,
+)
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
 

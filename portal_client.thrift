@@ -678,6 +678,9 @@ service VirtualMachineService {
     **/
 	list<VM> get_servers_by_ids(1:list<string> server_ids)
 
+
+    list<string> get_cluster_supported_ubuntu_os_versions()
+
 	/**
 	* Get servers by bibigrid cluster id.
     **/
