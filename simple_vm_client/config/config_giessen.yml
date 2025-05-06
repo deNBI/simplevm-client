@@ -38,8 +38,8 @@ openstack:
   # subnetwork for starting Clusters
   sub_network: SimpleVMGieTest-Subnetz
 
-  ssh_port_calculation: 30000 + x + y * 256
-  udp_port_calculation: 30000 + x + y * 256
+  ssh_port_calculation: 30000 + 256 * oct3 + oct4
+  udp_port_calculation: 30000 + 256 * oct3 + oct4
 
 cloud_site: giessen
 
