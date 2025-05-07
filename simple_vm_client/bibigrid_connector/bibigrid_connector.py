@@ -233,6 +233,7 @@ class BibigridConnector:
                     "type": master_instance.type,
                     "image": master_instance.image,
                 },
+                "nfs": True,
                 "workerInstances": worker_config,
                 "sshUser": "ubuntu",
                 "subnet": self._SUB_NETWORK,
