@@ -69,9 +69,7 @@ class TestForcConnector(unittest.TestCase):
             forc_api_key=FORC_API_KEY,
         )
         mock_connection_pool.assert_called_with(host=REDIS_HOST, port=REDIS_PORT)
-        mock_redis.assert_called_with(
-            connection_pool=mock_connection_pool.return_value, charset="utf-8"
-        )
+        mock_redis.assert_called_with(connection_pool=mock_connection_pool.return_value)
 
     def test_load_config(self):
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
@@ -97,7 +95,7 @@ class TestForcConnector(unittest.TestCase):
             host=self.forc_connector.REDIS_HOST, port=self.forc_connector.REDIS_PORT
         )
         mock_redis.asser_called_once_with(
-            connection_pool=self.forc_connector.redis_pool, charset="utf-8"
+            connection_pool=self.forc_connector.redis_pool
         )
         self.forc_connector.redis_connection.ping.return_value = True
         self.forc_connector.redis_connection.ping.assert_any_call()

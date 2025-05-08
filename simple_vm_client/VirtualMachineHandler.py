@@ -531,6 +531,9 @@ class VirtualMachineHandler(Iface):
             security_group_name=security_group_name
         )
 
+    def get_cluster_supported_ubuntu_os_versions(self) -> list[str]:
+        return self.bibigrid_connector.get_cluster_supported_ubuntu_os_versions()
+
     def get_cluster_info(self, cluster_id) -> ClusterInfo:
         return self.bibigrid_connector.get_cluster_info(cluster_id=cluster_id)
 
