@@ -237,7 +237,7 @@ class BibigridConnector:
                         {
                             "volumes": [
                                 {
-                                    "name": shared_volume.openstack_id,
+                                    "id": shared_volume.openstack_id,
                                     "size": shared_volume.size,
                                     "mountPoint": "/vol/spool",
                                     "exists": shared_volume.exists,
