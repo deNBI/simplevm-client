@@ -210,6 +210,14 @@ struct ClusterInstance{
     2: required string image
 }
 
+struct ClusterVolume{
+    1: required string openstack_id
+    2: required bool permanent
+    3: required bool exists
+    4: required int size
+    5: optional string type  = "ext4"
+}
+
 struct ClusterWorker{
 
     1: required string type
@@ -770,7 +778,7 @@ service VirtualMachineService {
      */
     map<string,string> get_limits()
 
-     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterWorker> worker_instances,4:ClusterInstanceMetadata metadata)
+     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterWorker> worker_instances,4:ClusterInstanceMetadata metadata,5:optional ClusterVolume shared_volume)
 
      void terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c) /*TODO throe error*/
 

@@ -9,6 +9,7 @@ from simple_vm_client.ttypes import (
     ClusterMessage,
     ClusterNotFoundException,
     ClusterState,
+    ClusterVolume,
 )
 from simple_vm_client.util.logger import setup_custom_logger
 
@@ -201,9 +202,10 @@ class BibigridConnector:
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata = None,
+        shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
         logger.info(
-            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\n"
+            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\nshared_volume:{shared_volume}"
         )
         # Prepare worker instances in the required format
         worker_config = []
@@ -224,7 +226,6 @@ class BibigridConnector:
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
-                # todo use internal gateway if provided
                 "gateway": {
                     "ip": self._GATEWAY_IP,
                     "portFunction": self._PORT_FUNCTION,
@@ -232,6 +233,21 @@ class BibigridConnector:
                 "masterInstance": {
                     "type": master_instance.type,
                     "image": master_instance.image,
+                    **(
+                        {
+                            "volumes": [
+                                {
+                                    "name": shared_volume.openstack_id,
+                                    "size": shared_volume.size,
+                                    "mountPoint": "/vol/spool",
+                                    "exists": shared_volume.exists,
+                                    "permanent": shared_volume.permanent,
+                                }
+                            ]
+                        }
+                        if shared_volume is not None
+                        else {}
+                    ),
                 },
                 "nfs": True,
                 "workerInstances": worker_config,

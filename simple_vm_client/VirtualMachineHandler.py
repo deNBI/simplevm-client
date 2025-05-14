@@ -22,6 +22,7 @@ from .ttypes import (
     ClusterLog,
     ClusterMessage,
     ClusterState,
+    ClusterVolume,
     ClusterWorker,
     CondaPackage,
     Flavor,
@@ -549,12 +550,14 @@ class VirtualMachineHandler(Iface):
         master_instance: ClusterInstance,
         worker_instances: list[ClusterWorker],
         metadata: ClusterInstanceMetadata,
+        shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
         return self.bibigrid_connector.start_cluster(
             public_keys=public_keys,
             master_instance=master_instance,
             worker_instances=worker_instances,
             metadata=metadata,
+            shared_volume=shared_volume,
         )
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
