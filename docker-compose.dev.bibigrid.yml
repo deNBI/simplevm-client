@@ -29,15 +29,10 @@ services:
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
     image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
-    env_file:
-      - .env
     volumes:
-      - ./scripts/bibigrid/clear_keys_cron:/etc/crontabs/root
-    environment:
-      - server.enableHttps=false
-      - server.enableHttp=true
+      - ./clouds.yaml:/root/.config/bibigrid/clouds.yaml
     expose:
-      - "8080"
+      - "9123"
     networks:
       - portal
 
