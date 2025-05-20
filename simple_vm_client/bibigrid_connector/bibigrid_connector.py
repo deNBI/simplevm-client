@@ -14,6 +14,7 @@ from simple_vm_client.ttypes import (
 from simple_vm_client.util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
+HEADERS = {"Content-Type": "application/json"}
 
 
 class BibigridConnector:
@@ -78,13 +79,12 @@ class BibigridConnector:
     def get_cluster_log(self, cluster_id: str) -> ClusterLog:
         logger.info(f"Get Cluster {cluster_id} logs...")
 
-        headers = {"content-Type": "application/json"}
         request_url = f"{self._BIBIGRID_EP}/bibigrid/log/{cluster_id}"
 
         try:
             response = requests.get(
                 url=request_url,
-                headers=headers,
+                headers=HEADERS,
                 verify=self._PRODUCTION,
             )
             response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
@@ -111,11 +111,10 @@ class BibigridConnector:
         logger.info("Get Cluster Node requirements")
 
         request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
-        headers = {"Content-Type": "application/json"}
 
         try:
             response = requests.get(
-                url=request_url, headers=headers, verify=self._PRODUCTION
+                url=request_url, headers=HEADERS, verify=self._PRODUCTION
             )
             response.raise_for_status()  # Raise an exception for bad status codes
         except requests.RequestException as e:
@@ -136,12 +135,12 @@ class BibigridConnector:
     def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster state from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/state/{cluster_id}"
-        headers = {"content-Type": "application/json"}
         response = requests.get(
             url=request_url,
-            headers=headers,
+            headers=HEADERS,
             verify=self._PRODUCTION,
         )
+        response.raise_for_status()
 
         if response.status_code == 200:
             response_content = response.json()
@@ -152,10 +151,9 @@ class BibigridConnector:
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
-        headers = {"content-Type": "application/json"}
         response = requests.get(
             url=request_url,
-            headers=headers,
+            headers=HEADERS,
             verify=self._PRODUCTION,
         )
 
@@ -170,27 +168,27 @@ class BibigridConnector:
             raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
 
     def is_bibigrid_available(self) -> bool:
+        if not self._BIBIGRID_EP:
+            return False
         request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
-        headers = {"Content-Type": "application/json"}
 
         try:
             response = requests.get(
-                url=request_url, headers=headers, verify=self._PRODUCTION
+                url=request_url, headers=HEADERS, verify=self._PRODUCTION
             )
-            response.raise_for_status()  # Raise an exception for bad status codes
-        except requests.RequestException:
+            response.raise_for_status()
+            if response.status_code == 200:
+                return True
+        except Exception:
             return False
-        return True
+        return False
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
         # TODO only needs specific config keywoards
         logger.info(f"Terminate cluster: {cluster_id}")
-        headers = {"content-Type": "application/json"}
-        body = {"mode": "openstack"}
         response: dict[str, str] = requests.delete(
             url=f"{self._BIBIGRID_EP}/bibigrid/terminate/{cluster_id}",
-            json=body,
-            headers=headers,
+            headers=HEADERS,
             verify=self._PRODUCTION,
         ).json()
         logger.info(response)
@@ -263,6 +261,7 @@ class BibigridConnector:
         logger.info(full_body)
         response: dict[str, str] = requests.post(
             url=self._BIBIGRID_EP + "/bibigrid/create",
+            headers=HEADERS,
             json=full_body,
             verify=self._PRODUCTION,
         ).json()
