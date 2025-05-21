@@ -9,10 +9,7 @@
 import sys
 
 from thrift.protocol.TProtocol import TProtocolException
-from thrift.Thrift import (
-    TException,
-    TType,
-)
+from thrift.Thrift import TException, TType
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
 
@@ -2271,6 +2268,143 @@ class ClusterInstance(object):
             raise TProtocolException(message="Required field type is unset!")
         if self.image is None:
             raise TProtocolException(message="Required field image is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ClusterVolume(object):
+    """
+    Attributes:
+     - openstack_id
+     - permanent
+     - exists
+     - size
+     - type
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        openstack_id=None,
+        permanent=None,
+        exists=None,
+        size=None,
+        type="ext4",
+    ):
+        self.openstack_id = openstack_id
+        self.permanent = permanent
+        self.exists = exists
+        self.size = size
+        self.type = type
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.openstack_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.permanent = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.exists = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.size = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.type = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("ClusterVolume")
+        if self.openstack_id is not None:
+            oprot.writeFieldBegin("openstack_id", TType.STRING, 1)
+            oprot.writeString(
+                self.openstack_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.openstack_id
+            )
+            oprot.writeFieldEnd()
+        if self.permanent is not None:
+            oprot.writeFieldBegin("permanent", TType.BOOL, 2)
+            oprot.writeBool(self.permanent)
+            oprot.writeFieldEnd()
+        if self.exists is not None:
+            oprot.writeFieldBegin("exists", TType.BOOL, 3)
+            oprot.writeBool(self.exists)
+            oprot.writeFieldEnd()
+        if self.size is not None:
+            oprot.writeFieldBegin("size", TType.I32, 4)
+            oprot.writeI32(self.size)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin("type", TType.STRING, 5)
+            oprot.writeString(
+                self.type.encode("utf-8") if sys.version_info[0] == 2 else self.type
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.openstack_id is None:
+            raise TProtocolException(message="Required field openstack_id is unset!")
+        if self.permanent is None:
+            raise TProtocolException(message="Required field permanent is unset!")
+        if self.exists is None:
+            raise TProtocolException(message="Required field exists is unset!")
+        if self.size is None:
+            raise TProtocolException(message="Required field size is unset!")
         return
 
     def __repr__(self):
@@ -5656,6 +5790,45 @@ ClusterInstance.thrift_spec = (
         "UTF8",
         None,
     ),  # 2
+)
+all_structs.append(ClusterVolume)
+ClusterVolume.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "openstack_id",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.BOOL,
+        "permanent",
+        None,
+        None,
+    ),  # 2
+    (
+        3,
+        TType.BOOL,
+        "exists",
+        None,
+        None,
+    ),  # 3
+    (
+        4,
+        TType.I32,
+        "size",
+        None,
+        None,
+    ),  # 4
+    (
+        5,
+        TType.STRING,
+        "type",
+        "UTF8",
+        "ext4",
+    ),  # 5
 )
 all_structs.append(ClusterWorker)
 ClusterWorker.thrift_spec = (

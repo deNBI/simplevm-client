@@ -121,7 +121,7 @@ IMAGES = [
     ),
     INACTIVE_IMAGE,
 ]
-PORT_CALCULATION = "30000 + x + y * 256"
+PORT_CALCULATION = "30000 + oct4 + oct3 * 256"
 DEFAULT_SECURITY_GROUPS = ["defaultSimpleVM"]
 CONFIG_DATA = f"""
             openstack:
@@ -2026,29 +2026,18 @@ class TestOpenStackConnector(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.sympy.symbols")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.sympy.sympify")
-    def test_get_vm_ports(self, mock_sympify, mock_symbols, mock_get_server):
+    def test_get_vm_ports(self, mock_get_server):
         # Set up mocks
         mock_server = fakes.generate_fake_resource(server.Server)
         mock_server["private_v4"] = "192.168.1.2"
 
         mock_get_server.return_value = mock_server
-        mock_sympify.return_value.evalf.return_value = (
-            30258  # Replace with expected values
-        )
-        mock_symbols.side_effect = ["x", "y"]
 
         # Call the method
         result = self.openstack_connector.get_vm_ports(mock_server.id)
 
         # Assertions
         mock_get_server.assert_called_once_with(openstack_id=mock_server.id)
-        mock_symbols.assert_any_call("x")
-        mock_symbols.assert_any_call("y")
-
-        mock_sympify.assert_called_with(self.openstack_connector.SSH_PORT_CALCULATION)
-        mock_sympify.return_value.evalf.assert_called_with(subs={"x": 2, "y": 1})
 
         # Check the result
         expected_result = {

@@ -7,6 +7,7 @@ from openstack.compute.v2 import flavor, server
 from openstack.image.v2 import image
 from openstack.test import fakes
 
+from simple_vm_client.ttypes import ClusterInstanceMetadata, ClusterVolume
 from simple_vm_client.VirtualMachineHandler import VirtualMachineHandler
 
 IMAGES_LIST = list(fakes.generate_fake_resources(image.Image, 3))
@@ -25,6 +26,12 @@ NAME = "UnitTest"
 USERNAME = "username"
 DESCRIPTION = "desc"
 STORAGE = 5
+CLUSTTER_METADATA = ClusterInstanceMetadata(
+    user_id="123", project_id="345", project_name="TEST"
+)
+CLUS_TER_SHARED_VOLUME = ClusterVolume(
+    openstack_id="abcd", permanent=True, exists=True, size=50
+)
 
 
 class TestVirtualMachineHandler(unittest.TestCase):
@@ -637,9 +644,9 @@ class TestVirtualMachineHandler(unittest.TestCase):
     #       cluster_id=OPENSTACK_ID
     #  )
 
-    def test_get_cluster_status(self):
-        self.handler.get_cluster_status(cluster_id=OPENSTACK_ID)
-        self.handler.bibigrid_connector.get_cluster_status.assert_called_once_with(
+    def test_get_cluster_state(self):
+        self.handler.get_cluster_state(cluster_id=OPENSTACK_ID)
+        self.handler.bibigrid_connector.get_cluster_state.assert_called_once_with(
             cluster_id=OPENSTACK_ID
         )
 
@@ -650,13 +657,15 @@ class TestVirtualMachineHandler(unittest.TestCase):
             public_keys=["pub"],
             master_instance=master,
             worker_instances=worker_instances,
-            user=USERNAME,
+            metadata=CLUSTTER_METADATA,
+            shared_volume=CLUS_TER_SHARED_VOLUME,
         )
         self.handler.bibigrid_connector.start_cluster.assert_called_once_with(
             public_keys=["pub"],
             master_instance=master,
             worker_instances=worker_instances,
-            user=USERNAME,
+            metadata=CLUSTTER_METADATA,
+            shared_volume=CLUS_TER_SHARED_VOLUME,
         )
 
     def test_terminate_cluster(self):
