@@ -9,7 +9,10 @@ from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConne
 from simple_vm_client.ttypes import (
     ClusterInfo,
     ClusterInstance,
-    ClusterNotFoundException,
+    ClusterInstanceMetadata,
+    ClusterMessage,
+    ClusterState,
+    ClusterVolume,
 )
 
 HOST = "example.com"
@@ -22,19 +25,21 @@ NETWORK = "my_network"
 SUB_NETWORK = "my_sub_network"
 PRODUCTION = True
 DEFAULT_CLUSTER_INFO = ClusterInfo(
-    group_id="fake_group_id",
-    network_id="fake_network_id",
-    public_ip="fake_public_ip",
-    subnet_id="fake_subnet_id",
-    user="fake_user",
-    inst_counter=42,
+    message="fake_message",
     cluster_id="fake_cluster_id",
-    key_name="fake_key_name",
+    ready=False,
 )
 DEFAULT_MASTER_INSTANCE = ClusterInstance(image="master_image", type="master_flavor")
 DEFAULT_WORKER_INSTANCES = [
-    ClusterInstance(image="worker_flavor", count=3, type="worker_flavor")
+    ClusterInstance(image="worker_flavor", type="worker_flavor")
 ]
+GATEWAY_IP = "192.168.0.1"
+INTERNAL_GATEWAY_IP = "192.168.0.2"
+METADATA = ClusterInstanceMetadata(user_id="123", project_id="345", project_name="TEST")
+SHARED_VOLUME = ClusterVolume(openstack_id="abcd", permanent=True, exists=True, size=50)
+PORT_FUNCTION = "30000 + 256 * oct3 + oct4"
+
+HEADERS = {"Content-Type": "application/json"}
 
 
 class TestBibigridConnector(unittest.TestCase):
@@ -58,6 +63,10 @@ class TestBibigridConnector(unittest.TestCase):
 
          openstack:
            network: {NETWORK}
+           gateway_ip: {GATEWAY_IP}
+           internal_gateway_ip: {INTERNAL_GATEWAY_IP}
+           ssh_port_calculation: {PORT_FUNCTION}
+           udp_port_calculation: {PORT_FUNCTION}
 
          production: {PRODUCTION}
          """
@@ -83,6 +92,8 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertEqual(self.connector._BIBIGRID_PORT, PORT)
         self.assertEqual(self.connector._BIBIGRID_USE_HTTPS, HTTPS)
         self.assertEqual(self.connector._BIBIGRID_MODES, MODES)
+        self.assertEqual(self.connector._GATEWAY_IP, INTERNAL_GATEWAY_IP),
+        self.assertEqual(self.connector._PORT_FUNCTION, PORT_FUNCTION)
         self.assertEqual(
             self.connector._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP, MASTER_WITH_PUBLIC_IP
         )
@@ -93,9 +104,7 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertEqual(self.connector._PRODUCTION, PRODUCTION)
 
         # Check the generated URLs
-        self.assertEqual(
-            self.connector._BIBIGRID_URL, "https://example.com:8080/bibigrid/"
-        )
+
         self.assertEqual(self.connector._BIBIGRID_EP, "https://example.com:8080")
 
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
@@ -106,63 +115,57 @@ class TestBibigridConnector(unittest.TestCase):
         # Act
         result = self.connector.is_bibigrid_available()
 
-        # Assert
-        mock_logger_info.assert_any_call("Checking if Bibigrid is available")
-        mock_logger_info.assert_any_call("Bibigrid Url is not set")
         self.assertFalse(result)
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
-    def test_is_bibigrid_available_when_request_succeeds(
-        self, mock_get, mock_logger_info
-    ):
+    def test_is_bibigrid_available_when_request_succeeds(self, mock_get):
         # Arrange
         mock_get.return_value = Mock(status_code=200)
 
         # Act
         result = self.connector.is_bibigrid_available()
-        mock_logger_info.assert_any_call("Checking if Bibigrid is available")
 
         # Assert
         self.assertTrue(result)
-        mock_get.assert_called_once_with(f"{self.connector._BIBIGRID_EP}/server/health")
+        mock_get.assert_called_once_with(
+            url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
+            headers=HEADERS,
+            verify=self.connector._PRODUCTION,
+        )
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.error")
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
     def test_is_bibigrid_available_when_request_wrong_status_code(
-        self, mock_get, mock_logger_error, mock_logger_info
+        self,
+        mock_get,
     ):
         # Arrange
         mock_get.return_value = Mock(status_code=500)
 
         # Act
         result = self.connector.is_bibigrid_available()
-        mock_logger_info.assert_any_call("Checking if Bibigrid is available")
 
         # Assert
         self.assertFalse(result)
-        mock_get.assert_called_once_with(f"{self.connector._BIBIGRID_EP}/server/health")
-        mock_logger_error.assert_called_once_with("Bibigrid returned status code 500")
+        mock_get.assert_called_once_with(
+            url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
+            headers=HEADERS,
+            verify=self.connector._PRODUCTION,
+        )
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.error")
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
-    def test_is_bibigrid_available_when_request_exception(
-        self, mock_get, mock_logger_error, mock_logger_info
-    ):
+    def test_is_bibigrid_available_when_request_exception(self, mock_get):
         # Arrange
         mock_get.side_effect = requests.RequestException("Could not connect")
 
         # Act
         result = self.connector.is_bibigrid_available()
-        mock_logger_info.assert_any_call("Checking if Bibigrid is available")
 
         # Assert
         self.assertFalse(result)
-        mock_get.assert_called_once_with(f"{self.connector._BIBIGRID_EP}/server/health")
-        mock_logger_error.assert_called_once_with(
-            "Error while checking Bibigrid availability", exc_info=True
+        mock_get.assert_called_once_with(
+            url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
+            headers=HEADERS,
+            verify=self.connector._PRODUCTION,
         )
 
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.delete")
@@ -171,9 +174,7 @@ class TestBibigridConnector(unittest.TestCase):
         # Arrange
         cluster_id = "fake_cluster_id"
 
-        expected_url = f"{self.connector._BIBIGRID_URL}terminate/{cluster_id}"
-        expected_headers = {"content-Type": "application/json"}
-        expected_body = {"mode": "openstack"}
+        expected_url = f"{self.connector._BIBIGRID_EP}/bibigrid/terminate/{cluster_id}"
         expected_response = {"fake_key": "fake_value"}
 
         mock_delete.return_value = MagicMock(json=lambda: expected_response)
@@ -184,8 +185,7 @@ class TestBibigridConnector(unittest.TestCase):
         # Assert
         mock_delete.assert_called_once_with(
             url=expected_url,
-            json=expected_body,
-            headers=expected_headers,
+            headers=HEADERS,
             verify=self.connector._PRODUCTION,
         )
         mock_logger_info.assert_any_call(f"Terminate cluster: {cluster_id}")
@@ -197,176 +197,106 @@ class TestBibigridConnector(unittest.TestCase):
     def test_start_cluster(self, mock_logger_info, mock_post):
         public_key = "fake_public_key"
 
-        user = "fake_user"
-
         # Mock the response from the requests.post call
-        mock_post.return_value.json.return_value = {"fake": "response"}
+        mock_post.return_value.json.return_value = {
+            "cluster_id": "123",
+            "message": "started",
+        }
 
         # Call the method to test
         result = self.connector.start_cluster(
             public_keys=[public_key],
             master_instance=DEFAULT_MASTER_INSTANCE,
             worker_instances=DEFAULT_WORKER_INSTANCES,
-            user=user,
+            metadata=METADATA,
+            shared_volume=SHARED_VOLUME,
         )
         wI = []
         for wk in DEFAULT_WORKER_INSTANCES:
-            wI.append(wk.__dict__)
-        body = {
-            "mode": "openstack",
-            "subnet": self.connector._SUB_NETWORK,
-            "sshPublicKeys": [public_key],
-            "user": user,
-            "sshUser": "ubuntu",
-            "masterInstance": DEFAULT_MASTER_INSTANCE.__dict__,
-            "workerInstances": wI,
-            "useMasterWithPublicIp": self.connector._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
-            "ansibleGalaxyRoles": self.connector._BIBIGRID_ANSIBLE_ROLES,
-            "localDNSLookup": self.connector._BIBIGRID_LOCAL_DNS_LOOKUP,
-        }
-        for mode in self.connector._BIBIGRID_MODES:
-            body.update({mode: True})
+            wkvars = vars(wk)
+            wkvars.update({"onDemand": False})
+
+            wI.append(wkvars)
+
+        master_instance = vars(DEFAULT_MASTER_INSTANCE)
+        master_instance.update(
+            {
+                "volumes": [
+                    {
+                        "id": SHARED_VOLUME.openstack_id,
+                        "size": SHARED_VOLUME.size,
+                        "mountPoint": "/vol/spool",
+                        "exists": SHARED_VOLUME.exists,
+                        "permanent": SHARED_VOLUME.permanent,
+                    }
+                ]
+            }
+        )
+
+        body = [
+            {
+                "infrastructure": "openstack",
+                "cloud": "openstack",
+                "sshTimeout": 30,
+                "useMasterAsCompute": False,
+                "useMasterWithPublicIP": False,
+                "dontUploadCredentials": True,
+                "noAllPartition": True,
+                "gateway": {"ip": INTERNAL_GATEWAY_IP, "portFunction": PORT_FUNCTION},
+                "masterInstance": master_instance,
+                "nfs": True,
+                "workerInstances": wI,
+                "sshUser": "ubuntu",
+                "subnet": self.connector._SUB_NETWORK,
+                "waitForServices": ["de.NBI_Bielefeld_environment.service"],
+                "sshPublicKeys": [public_key],
+                "securityGroups": ["defaultSimpleVM"],
+                "meta": vars(METADATA),
+            }
+        ]
+        full_body = {"configurations": body}
 
         # Assertions
         mock_post.assert_called_once_with(
-            url=self.connector._BIBIGRID_URL + "create",
-            json=body,
-            headers={"content-Type": "application/json"},
-            verify=self.connector._PRODUCTION,
-        )
-        args, kwargs = mock_post.call_args
-        self.assertEqual(kwargs["json"]["sshPublicKeys"], [public_key])
-        self.assertEqual(kwargs["json"]["user"], user)
-        self.assertIn("masterInstance", kwargs["json"])
-        self.assertIn("workerInstances", kwargs["json"])
-        self.assertIn("useMasterWithPublicIp", kwargs["json"])
-        self.assertIn("ansibleGalaxyRoles", kwargs["json"])
-        self.assertIn("localDNSLookup", kwargs["json"])
-        self.assertIn("openstack", kwargs["json"]["mode"])
-
-        self.assertEqual(result, {"fake": "response"})
-
-        for wk in DEFAULT_WORKER_INSTANCES:
-            mock_logger_info.assert_any_call(wk)
-        mock_logger_info.assert_any_call({"fake": "response"})
-
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    def test_get_clusters_info(self, mock_logger_info, mock_get):
-        # Mock the response from the requests.get call
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"info": [{"cluster-id": "fake_cluster_id"}]}
-        mock_get.return_value = mock_response
-
-        # Call the method to test
-        result = self.connector.get_clusters_info()
-        headers = {"content-Type": "application/json"}
-        body = {"mode": "openstack"}
-
-        mock_get.assert_called_once_with(
-            url=self.connector._BIBIGRID_URL + "list",
-            json=body,
-            headers=headers,
+            url=self.connector._BIBIGRID_EP + "/bibigrid/create",
+            headers=HEADERS,
+            json=full_body,
             verify=self.connector._PRODUCTION,
         )
 
-        # Assertions
-
-        self.assertEqual(result, [{"cluster-id": "fake_cluster_id"}])
-        mock_logger_info.assert_called_once_with("Get clusters info")
-
-    @patch(
-        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.get_clusters_info"
-    )
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    def test_get_cluster_info_none(self, mock_logger_info, mock_get_clusters_info):
-        mock_get_clusters_info.return_value = []
-        with self.assertRaises(ClusterNotFoundException):
-            self.connector.get_cluster_info("fake_cluster_id")
-
-        mock_logger_info.assert_any_call("Get Cluster info from fake_cluster_id")
-
-    @patch.object(BibigridConnector, "get_clusters_info")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    def test_get_cluster_info(self, mock_logger_info, mock_get_clusters_info):
-        # Mock the response from get_clusters_info
-        mock_get_clusters_info.return_value = [
-            {
-                "cluster-id": "fake_cluster_id",
-                "group-id": "fake_group_id",
-                "network-id": "fake_network_id",
-                "public-ip": "fake_public_ip",
-                "subnet-id": "fake_subnet_id",
-                "user": "fake_user",
-                "# inst": 1,
-                "key name": "fake_key_name",
-            }
-        ]
-
-        # Call the method to test
-        result = self.connector.get_cluster_info("fake_cluster_id")
-
-        # Assertions
-        mock_get_clusters_info.assert_called_once()
-        self.assertEqual(
-            result,
-            ClusterInfo(
-                group_id="fake_group_id",
-                network_id="fake_network_id",
-                public_ip="fake_public_ip",
-                subnet_id="fake_subnet_id",
-                user="fake_user",
-                inst_counter=1,
-                cluster_id="fake_cluster_id",
-                key_name="fake_key_name",
-            ),
-        )
-        mock_logger_info.assert_any_call("Get Cluster info from fake_cluster_id")
-        mock_logger_info.assert_any_call(f"Cluster fake_cluster_id info: {result} ")
+        self.assertEqual(result, ClusterMessage(cluster_id="123", message="started"))
 
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    def test_get_cluster_status(self, mock_logger_info, mock_requests_get):
+    def test_get_cluster_state(self, mock_requests_get):
         # Arrange
         cluster_id = "123"
 
         # Mock the response from requests.get
-        response_data = {"log": "Some log", "msg": "Some message"}
+        response_data = vars(
+            ClusterState(
+                cluster_id=cluster_id,
+                message="test",
+                state="tmp",
+                ssh_user="ubuntu",
+                floating_ip=None,
+                last_changed=None,
+            )
+        )
         mock_response = MagicMock()
         mock_response.json.return_value = response_data
         mock_response.raise_for_status.return_value = None
         mock_requests_get.return_value = mock_response
+        mock_requests_get.return_value.status_code = 200
 
         # Act
-        result = self.connector.get_cluster_status(cluster_id)
+        result = self.connector.get_cluster_state(cluster_id)
 
         # Assert
         mock_requests_get.assert_called_once_with(
-            url=f"{self.connector._BIBIGRID_URL}info/{cluster_id}",
-            json={"mode": "openstack"},
-            headers={"content-Type": "application/json"},
+            url=f"{self.connector._BIBIGRID_EP}/bibigrid/state/{cluster_id}",
+            headers=HEADERS,
             verify=self.connector._PRODUCTION,
         )
         mock_response.json.assert_called_once()
         mock_response.raise_for_status.assert_called_once()
-        mock_logger_info.assert_called_with(
-            f"Cluster {cluster_id} status: {response_data}"
-        )
-        self.assertEqual(result, response_data)
-
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.exception")
-    def test_get_cluster_status_with_exception(
-        self, mock_logger_exception, mock_logger_info, mock_requests_get
-    ):
-        # Arrange
-        cluster_id = "123"
-        mock_requests_get.side_effect = requests.RequestException("Could not connect")
-        # Act
-        result = self.connector.get_cluster_status(cluster_id)
-
-        self.assertEqual(result, {"error": "Could not connect"})
-        mock_logger_exception.assert_called_once_with(
-            "Error while getting Cluster status"
-        )
+        self.assertEqual(result, ClusterState(**response_data))

@@ -9,12 +9,7 @@
 import logging
 import sys
 
-from thrift.Thrift import (
-    TApplicationException,
-    TMessageType,
-    TProcessor,
-    TType,
-)
+from thrift.Thrift import TApplicationException, TMessageType, TProcessor, TType
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
 
@@ -643,13 +638,16 @@ class Iface(object):
 
         """
 
-    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
+    def start_cluster(
+        self, public_keys, master_instance, worker_instances, metadata, shared_volume
+    ):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
          - metadata
+         - shared_volume
 
         """
 
@@ -3516,22 +3514,25 @@ class Client(Iface):
             TApplicationException.MISSING_RESULT, "get_limits failed: unknown result"
         )
 
-    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
+    def start_cluster(
+        self, public_keys, master_instance, worker_instances, metadata, shared_volume
+    ):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
          - metadata
+         - shared_volume
 
         """
         self.send_start_cluster(
-            public_keys, master_instance, worker_instances, metadata
+            public_keys, master_instance, worker_instances, metadata, shared_volume
         )
         return self.recv_start_cluster()
 
     def send_start_cluster(
-        self, public_keys, master_instance, worker_instances, metadata
+        self, public_keys, master_instance, worker_instances, metadata, shared_volume
     ):
         self._oprot.writeMessageBegin("start_cluster", TMessageType.CALL, self._seqid)
         args = start_cluster_args()
@@ -3539,6 +3540,7 @@ class Client(Iface):
         args.master_instance = master_instance
         args.worker_instances = worker_instances
         args.metadata = metadata
+        args.shared_volume = shared_volume
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -6231,6 +6233,7 @@ class Processor(Iface, TProcessor):
                 args.master_instance,
                 args.worker_instances,
                 args.metadata,
+                args.shared_volume,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -20239,6 +20242,7 @@ class start_cluster_args(object):
      - master_instance
      - worker_instances
      - metadata
+     - shared_volume
 
     """
 
@@ -20250,11 +20254,13 @@ class start_cluster_args(object):
         master_instance=None,
         worker_instances=None,
         metadata=None,
+        shared_volume=None,
     ):
         self.public_keys = public_keys
         self.master_instance = master_instance
         self.worker_instances = worker_instances
         self.metadata = metadata
+        self.shared_volume = shared_volume
 
     def read(self, iprot):
         if (
@@ -20306,6 +20312,12 @@ class start_cluster_args(object):
                     self.metadata.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.shared_volume = ClusterVolume()
+                    self.shared_volume.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -20342,6 +20354,10 @@ class start_cluster_args(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.STRUCT, 4)
             self.metadata.write(oprot)
+            oprot.writeFieldEnd()
+        if self.shared_volume is not None:
+            oprot.writeFieldBegin("shared_volume", TType.STRUCT, 5)
+            self.shared_volume.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -20391,6 +20407,13 @@ start_cluster_args.thrift_spec = (
         [ClusterInstanceMetadata, None],
         None,
     ),  # 4
+    (
+        5,
+        TType.STRUCT,
+        "shared_volume",
+        [ClusterVolume, None],
+        None,
+    ),  # 5
 )
 
 
