@@ -261,7 +261,7 @@ class OpenStackConnector:
     def delete_volume(self, volume_id: str) -> None:
         try:
             logger.info(f"Delete Volume {volume_id}")
-            self.openstack_connection.delete_volume(name_or_id=volume_id)
+            self.openstack_connection.delete_volume(name_or_id=volume_id, wait=False)
         except ResourceNotFound as e:
             logger.exception(f"No Volume with id {volume_id}")
             raise VolumeNotFoundException(message=e.message, name_or_id=volume_id)
