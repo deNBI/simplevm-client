@@ -156,3 +156,4 @@ fabric.properties
 #*.sh
 .env_*
 VirtualMachineService/config/config_*
+clouds.yaml

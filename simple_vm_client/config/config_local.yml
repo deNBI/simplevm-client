@@ -60,7 +60,7 @@ bibigrid:
   # If Bibigrid ist activated  -- defaults to True
   port: 9123
   # Port number for Bibigrid API.
-  host: 172.18.0.1
+  host: simplevm_bibigrid
   # Hostname or IP address of the Bibigrid server.
   https: False
   # Set to True if Bibigrid should use HTTPS, otherwise False.
