@@ -25,14 +25,14 @@ for id in "${volumes_new[@]}"; do
   if [ $ABORT_COUNTER -gt 12 ]; then
     echo "Waited 120 seconds for ""$id"" "
     ABORT_COUNTER=0
-
+/
     continue
   fi
   cd /dev/disk/by-id || exit
   sudo mkfs.ext4 "$id"
-  sudo mkdir -p /vol//${paths_new[ITER]}
-  sudo chmod 777 /vol//${paths_new[ITER]}/
-  sudo mount "$id" /vol//${paths_new[ITER]}
+  sudo mkdir -p ${paths_new[ITER]}
+  sudo chmod 777 ${paths_new[ITER]}/
+  sudo mount "$id" ${paths_new[ITER]}
   ((ITER++))
 done
 ITER=0
@@ -60,8 +60,8 @@ for id in "${volumes_attach[@]}"; do
     continue
   fi
   cd /dev/disk/by-id || exit
-  sudo mkdir -p /vol//${paths_attach[ITER]}
-  sudo chmod 777 /vol//${paths_attach[ITER]}/
-  sudo mount "$id" /vol//${paths_attach[ITER]}
+  sudo mkdir -p ${paths_attach[ITER]}
+  sudo chmod 777 ${paths_attach[ITER]}/
+  sudo mount "$id" ${paths_attach[ITER]}
   ((ITER++))
 done
