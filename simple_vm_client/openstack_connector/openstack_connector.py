@@ -28,6 +28,7 @@ from openstack.exceptions import (
     OpenStackCloudException,
     ResourceFailure,
     ResourceNotFound,
+    NotFoundException,
 )
 from openstack.network.v2.network import Network
 from openstack.network.v2.security_group import SecurityGroup
@@ -432,6 +433,12 @@ class OpenStackConnector:
             volume = self.get_volume(name_or_id=volume_id)
             server = self.get_server(openstack_id=server_id)
             self.openstack_connection.detach_volume(volume=volume, server=server)
+        except NotFoundException as e:
+            logger.exception(
+                f"Delete volume attachment (server {server_id}, volume: {volume_id} failed - Not Found)"
+            )
+            raise ServerNotFoundException(message=e.message)
+
         except ConflictException as e:
             logger.exception(
                 f"Delete volume attachment (server: {server_id} volume: {volume_id}) failed!"
