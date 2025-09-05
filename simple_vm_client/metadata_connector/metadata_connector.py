@@ -15,116 +15,133 @@ logger = setup_custom_logger(__name__)
 class MetadataConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Metadata Connector")
+        self.session = requests.Session()
+        self.ACTIVATED = False
+        self.METADATA_WRITE_TOKEN = None
+        self.METADATA_BASE_URL = None
         self.load_config_yml(config_file)
         self.is_metadata_server_available()
 
     def load_config_yml(self, config_file: str) -> None:
-        logger.info(f"Load config file openstack config - {config_file}")
+        logger.info(f"Loading config file: {config_file}")
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
-            logger.info("Config file loaded")
+
             if "metadata_server" not in cfg:
-                logger.info("Metadata Server configuration not found. Skipping.")
-                self.ACTIVATED = False
+                logger.warning("Metadata server configuration not found. Skipping.")
                 return
-            if not cfg["metadata_server"].get("activated", False):
+
+            metadata_cfg = cfg["metadata_server"]
+            if not metadata_cfg.get("activated", False):
                 logger.info(
-                    "Metadata Server Config available but deactivated. Skipping.."
+                    "Metadata server config available but deactivated. Skipping."
                 )
-                self.ACTIVATED = False
                 return
+
+            self.METADATA_USE_HTTPS = metadata_cfg.get("use_https", False)
+            self.METADATA_SERVER_HOST = metadata_cfg.get("host")
+            self.METADATA_SERVER_PORT = metadata_cfg.get("port")
+
+            if not self.METADATA_SERVER_HOST or not self.METADATA_SERVER_PORT:
+                logger.error("Host or port missing in metadata server configuration!")
+                return
+
+            scheme = "https" if self.METADATA_USE_HTTPS else "http"
+            self.METADATA_BASE_URL = (
+                f"{scheme}://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
+            )
+
+            logger.info("Metadata configuration loaded")
             self.ACTIVATED = True
-            self.METADATA_USE_HTTPS = cfg["metadata_server"].get("use_https", False)
-            self.METADATA_SERVER_HOST = cfg["metadata_server"]["host"]
-            self.METADATA_SERVER_PORT = cfg["metadata_server"]["port"]
-            if self.METADATA_USE_HTTPS:
-                self.METADATA_BASE_URL = (
-                    f"https://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
-                )
-            else:
-                self.METADATA_BASE_URL = (
-                    f"http://{self.METADATA_SERVER_HOST}:{self.METADATA_SERVER_PORT}/"
-                )
-        logger.info("Metadata Config Loaded")
+
         self.load_env_config()
 
     def load_env_config(self):
-        required_keys = [
-            "METADATA_WRITE_TOKEN",
-        ]
-        missing_keys = [key for key in required_keys if key not in os.environ]
-        if missing_keys:
-            missing_keys_str = ", ".join(missing_keys)
-            logger.error(
-                f"MetadataServer missing keys {missing_keys_str} not provided in env!"
-            )
-        self.METADATA_WRITE_TOKEN = os.environ.get("METADATA_WRITE_TOKEN")
-        logger.info("Metadata Environment loaded")
-
-    def remove_metadata(self, ip: str):
-        if not self.ACTIVATED:
-            logger.info("Metadata Server not activated. Skipping.")
+        token = os.environ.get("METADATA_WRITE_TOKEN")
+        if not token:
+            logger.error("Environment variable METADATA_WRITE_TOKEN is missing!")
+            self.ACTIVATED = False
             return
 
-        logger.info(f"Removing Metadata for: {ip}")
+        self.METADATA_WRITE_TOKEN = token
+        self.session.headers.update({"X-Auth-Token": self.METADATA_WRITE_TOKEN})
+        logger.info("Metadata environment configuration loaded")
+
+    def remove_metadata(self, ip: str) -> bool:
+        if not self.ACTIVATED:
+            logger.info("Metadata server not activated. Skipping.")
+            return False
+
+        logger.info(f"Removing metadata for {ip}")
         remove_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
 
         try:
-            response = requests.delete(
-                remove_metadata_url,
-                timeout=(30, 30),
-                headers={
-                    "X-Auth-Token": self.METADATA_WRITE_TOKEN,
-                },
-            )
+            response = self.session.delete(remove_metadata_url, timeout=(30, 30))
             response.raise_for_status()
             logger.info(f"Metadata removed successfully for {ip}")
+            return True
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP error while removing metadata for {ip}: {e}")
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout while removing metadata for {ip}")
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to remove metadata for {ip}: {e}")
+        return False
 
     def _serialize_metadata(self, metadata: VirtualMachineServerMetadata) -> str:
-        metadata_dict = thrift_to_dict(metadata)
-        return json.dumps(metadata_dict)
-
-    def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata):
-        if not ip:
-            return
-        if not self.ACTIVATED:
-            logger.info("Metadata Server not activated. Skipping.")
-            return
-
-        logger.info(f"Setting Metadata for {ip}")
-        set_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
         try:
-            serialized_data = self._serialize_metadata(metadata=metadata)
-            response = requests.post(
+            metadata_dict = thrift_to_dict(metadata)
+            return json.dumps(metadata_dict)
+        except Exception as e:
+            logger.error(f"Failed to serialize metadata: {e}")
+            raise
+
+    def set_metadata(self, ip: str, metadata: VirtualMachineServerMetadata) -> bool:
+        if not ip:
+            logger.error("IP address not provided, cannot set metadata.")
+            return False
+        if not self.ACTIVATED:
+            logger.info("Metadata server not activated. Skipping.")
+            return False
+
+        logger.info(f"Setting metadata for {ip}")
+        set_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
+
+        try:
+            serialized_data = self._serialize_metadata(metadata)
+            response = self.session.post(
                 set_metadata_url,
                 data=serialized_data,
                 timeout=(30, 30),
-                headers={
-                    "X-Auth-Token": self.METADATA_WRITE_TOKEN,
-                    "Content-Type": "application/json",
-                },
+                headers={"Content-Type": "application/json"},
             )
             response.raise_for_status()
             logger.info(f"Metadata set successfully for {ip}")
+            return True
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP error while setting metadata for {ip}: {e}")
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout while setting metadata for {ip}")
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to set metadata for {ip}: {e}")
+        return False
 
-    def is_metadata_server_available(self):
-        logger.info("Metadata Server checking health...")
+    def is_metadata_server_available(self) -> bool:
+        logger.info("Checking metadata server health...")
 
         if not self.ACTIVATED:
-            logger.info("Metadata Server not activated. Skipping.")
+            logger.info("Metadata server not activated. Skipping health check.")
             return False
 
         health_url = urljoin(self.METADATA_BASE_URL, "health")
 
         try:
-            response = requests.get(health_url, timeout=(30, 30))
+            response = self.session.get(health_url, timeout=(30, 30))
             response.raise_for_status()
-            logger.info(f"Metadata Health Check --- {response.json()}")
+            logger.info(f"Metadata health check successful: {response.json()}")
             return True
+        except requests.exceptions.Timeout:
+            logger.error("Timeout during metadata server health check")
         except requests.exceptions.RequestException as e:
             logger.error(f"Health check failed: {e}")
-            return False
+        return False
