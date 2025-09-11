@@ -552,6 +552,8 @@ class VirtualMachineHandler(Iface):
         metadata: ClusterInstanceMetadata,
         shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
+        
+
         return self.bibigrid_connector.start_cluster(
             public_keys=public_keys,
             master_instance=master_instance,

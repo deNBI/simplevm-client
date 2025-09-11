@@ -21,6 +21,7 @@ class MetadataUser(object):
     Attributes:
      - user_id
      - public_keys
+     - unix_name
 
     """
 
@@ -30,9 +31,11 @@ class MetadataUser(object):
         self,
         user_id=None,
         public_keys=None,
+        unix_name=None,
     ):
         self.user_id = user_id
         self.public_keys = public_keys
+        self.unix_name = unix_name
 
     def read(self, iprot):
         if (
@@ -70,6 +73,15 @@ class MetadataUser(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.unix_name = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -99,6 +111,14 @@ class MetadataUser(object):
                     iter6.encode("utf-8") if sys.version_info[0] == 2 else iter6
                 )
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.unix_name is not None:
+            oprot.writeFieldBegin("unix_name", TType.STRING, 3)
+            oprot.writeString(
+                self.unix_name.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.unix_name
+            )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -5195,6 +5215,13 @@ MetadataUser.thrift_spec = (
         (TType.STRING, "UTF8", False),
         None,
     ),  # 2
+    (
+        3,
+        TType.STRING,
+        "unix_name",
+        "UTF8",
+        None,
+    ),  # 3
 )
 all_structs.append(MetadataUserData)
 MetadataUserData.thrift_spec = (

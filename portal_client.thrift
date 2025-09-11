@@ -8,6 +8,7 @@ const string VERSION= '1.0.0'
 struct MetadataUser {
   1: required string user_id,
   2: optional list<string> public_keys,
+  3: optional string unix_name
 }
 
 struct MetadataUserData {
