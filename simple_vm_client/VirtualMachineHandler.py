@@ -424,6 +424,7 @@ class VirtualMachineHandler(Iface):
         slurm_version: str = None,
         metadata_token: str = None,
         metadata_endpoint: str = None,
+        additional_script: str = "",
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -448,6 +449,7 @@ class VirtualMachineHandler(Iface):
             slurm_version=slurm_version,
             metadata_token=metadata_token,
             metadata_endpoint=metadata_endpoint,
+            additional_script=additional_script,
         )
 
     def start_server_with_custom_key(
@@ -464,6 +466,7 @@ class VirtualMachineHandler(Iface):
         additional_user_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
+        additional_script: str = "",
     ) -> str:
         if research_environment:
             research_environment_metadata = (
@@ -486,6 +489,7 @@ class VirtualMachineHandler(Iface):
             additional_security_group_ids=additional_security_group_ids,
             metadata_token=metadata_token,
             metadata_endpoint=metadata_endpoint,
+            additional_script=additional_script,
         )
         self.forc_connector.set_vm_wait_for_playbook(
             openstack_id=openstack_id, private_key=private_key, name=servername
@@ -552,7 +556,6 @@ class VirtualMachineHandler(Iface):
         metadata: ClusterInstanceMetadata,
         shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
-        
 
         return self.bibigrid_connector.start_cluster(
             public_keys=public_keys,

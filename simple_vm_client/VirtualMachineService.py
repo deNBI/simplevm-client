@@ -238,6 +238,7 @@ class Iface(object):
         slurm_version,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         """
         Parameters:
@@ -255,6 +256,7 @@ class Iface(object):
          - slurm_version
          - metadata_token
          - metadata_endpoint
+         - additional_script
 
         """
 
@@ -283,6 +285,7 @@ class Iface(object):
         additional_user_keys,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         """
         Start a new server with custom key for ansible.
@@ -300,6 +303,7 @@ class Iface(object):
          - additional_user_keys
          - metadata_token
          - metadata_endpoint
+         - additional_script
 
         """
 
@@ -1723,6 +1727,7 @@ class Client(Iface):
         slurm_version,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         """
         Parameters:
@@ -1740,6 +1745,7 @@ class Client(Iface):
          - slurm_version
          - metadata_token
          - metadata_endpoint
+         - additional_script
 
         """
         self.send_start_server(
@@ -1757,6 +1763,7 @@ class Client(Iface):
             slurm_version,
             metadata_token,
             metadata_endpoint,
+            additional_script,
         )
         return self.recv_start_server()
 
@@ -1776,6 +1783,7 @@ class Client(Iface):
         slurm_version,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         self._oprot.writeMessageBegin("start_server", TMessageType.CALL, self._seqid)
         args = start_server_args()
@@ -1793,6 +1801,7 @@ class Client(Iface):
         args.slurm_version = slurm_version
         args.metadata_token = metadata_token
         args.metadata_endpoint = metadata_endpoint
+        args.additional_script = additional_script
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -1905,6 +1914,7 @@ class Client(Iface):
         additional_user_keys,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         """
         Start a new server with custom key for ansible.
@@ -1922,6 +1932,7 @@ class Client(Iface):
          - additional_user_keys
          - metadata_token
          - metadata_endpoint
+         - additional_script
 
         """
         self.send_start_server_with_custom_key(
@@ -1937,6 +1948,7 @@ class Client(Iface):
             additional_user_keys,
             metadata_token,
             metadata_endpoint,
+            additional_script,
         )
         return self.recv_start_server_with_custom_key()
 
@@ -1954,6 +1966,7 @@ class Client(Iface):
         additional_user_keys,
         metadata_token,
         metadata_endpoint,
+        additional_script,
     ):
         self._oprot.writeMessageBegin(
             "start_server_with_custom_key", TMessageType.CALL, self._seqid
@@ -1971,6 +1984,7 @@ class Client(Iface):
         args.additional_user_keys = additional_user_keys
         args.metadata_token = metadata_token
         args.metadata_endpoint = metadata_endpoint
+        args.additional_script = additional_script
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -5018,6 +5032,7 @@ class Processor(Iface, TProcessor):
                 args.slurm_version,
                 args.metadata_token,
                 args.metadata_endpoint,
+                args.additional_script,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -5124,6 +5139,7 @@ class Processor(Iface, TProcessor):
                 args.additional_user_keys,
                 args.metadata_token,
                 args.metadata_endpoint,
+                args.additional_script,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -11217,6 +11233,7 @@ class start_server_args(object):
      - slurm_version
      - metadata_token
      - metadata_endpoint
+     - additional_script
 
     """
 
@@ -11238,6 +11255,7 @@ class start_server_args(object):
         slurm_version=None,
         metadata_token=None,
         metadata_endpoint=None,
+        additional_script=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -11253,6 +11271,7 @@ class start_server_args(object):
         self.slurm_version = slurm_version
         self.metadata_token = metadata_token
         self.metadata_endpoint = metadata_endpoint
+        self.additional_script = additional_script
 
     def read(self, iprot):
         if (
@@ -11448,6 +11467,15 @@ class start_server_args(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.STRING:
+                    self.additional_script = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -11602,6 +11630,14 @@ class start_server_args(object):
                 else self.metadata_endpoint
             )
             oprot.writeFieldEnd()
+        if self.additional_script is not None:
+            oprot.writeFieldBegin("additional_script", TType.STRING, 16)
+            oprot.writeString(
+                self.additional_script.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.additional_script
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -11721,6 +11757,13 @@ start_server_args.thrift_spec = (
         "UTF8",
         None,
     ),  # 15
+    (
+        16,
+        TType.STRING,
+        "additional_script",
+        "UTF8",
+        None,
+    ),  # 16
 )
 
 
@@ -12247,6 +12290,7 @@ class start_server_with_custom_key_args(object):
      - additional_user_keys
      - metadata_token
      - metadata_endpoint
+     - additional_script
 
     """
 
@@ -12266,6 +12310,7 @@ class start_server_with_custom_key_args(object):
         additional_user_keys=None,
         metadata_token=None,
         metadata_endpoint=None,
+        additional_script=None,
     ):
         self.flavor_name = flavor_name
         self.image_name = image_name
@@ -12279,6 +12324,7 @@ class start_server_with_custom_key_args(object):
         self.additional_user_keys = additional_user_keys
         self.metadata_token = metadata_token
         self.metadata_endpoint = metadata_endpoint
+        self.additional_script = additional_script
 
     def read(self, iprot):
         if (
@@ -12456,6 +12502,15 @@ class start_server_with_custom_key_args(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.additional_script = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -12594,6 +12649,14 @@ class start_server_with_custom_key_args(object):
                 else self.metadata_endpoint
             )
             oprot.writeFieldEnd()
+        if self.additional_script is not None:
+            oprot.writeFieldBegin("additional_script", TType.STRING, 14)
+            oprot.writeString(
+                self.additional_script.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.additional_script
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -12699,6 +12762,13 @@ start_server_with_custom_key_args.thrift_spec = (
         "UTF8",
         None,
     ),  # 13
+    (
+        14,
+        TType.STRING,
+        "additional_script",
+        "UTF8",
+        None,
+    ),  # 14
 )
 
 

@@ -1496,6 +1496,7 @@ class OpenStackConnector:
         additional_user_keys: list[str],
         metadata_token: str = None,
         metadata_endpoint: str = None,
+        additional_script: str = "",
     ) -> str:
         unlock_ubuntu_user_script = "#!/bin/bash\npasswd -u ubuntu\n"
         unlock_ubuntu_user_script_encoded = encodeutils.safe_encode(
@@ -1534,6 +1535,12 @@ class OpenStackConnector:
                 + encodeutils.safe_encode("\n".encode("utf-8"))
                 + save_metadata_token_script
             )
+        if additional_script:
+            init_script = (
+                init_script
+                + encodeutils.safe_encode("\n".encode("utf-8"))
+                + encodeutils.safe_encode(additional_script.encode("utf-8"))
+            )
 
         return init_script
 
@@ -1553,6 +1560,7 @@ class OpenStackConnector:
         slurm_version: str = None,
         metadata_token: str = None,
         metadata_endpoint: str = None,
+        additional_script: str = "",
     ) -> str:
         logger.info(f"Start Server {servername}")
 
@@ -1598,6 +1606,7 @@ class OpenStackConnector:
                 additional_user_keys=additional_user_keys,
                 metadata_token=metadata_token,
                 metadata_endpoint=metadata_endpoint,
+                additional_script=additional_script,
             )
             logger.info(f"Starting Server {servername}...")
             server = self.openstack_connection.create_server(
@@ -1684,6 +1693,7 @@ class OpenStackConnector:
         additional_security_group_ids=None,  # type: ignore
         metadata_token: str = None,
         metadata_endpoint: str = None,
+        additional_script: str = "",
     ) -> tuple[str, str]:
         logger.info(f"Start Server {servername}")
 
@@ -1720,6 +1730,7 @@ class OpenStackConnector:
                 additional_user_keys=additional_user_keys,
                 metadata_token=metadata_token,
                 metadata_endpoint=metadata_endpoint,
+                additional_script=additional_script,
             )
             server = self.openstack_connection.create_server(
                 name=servername,
@@ -1792,6 +1803,7 @@ class OpenStackConnector:
         )
 
     def add_metadata_to_server(self, server_id, metadata):
+        logger.info(f"Set metadata for server [{server_id}] -> {metadata}")
         server = self.get_server(openstack_id=server_id)
 
         self.openstack_connection.compute.set_server_metadata(server, **metadata)
