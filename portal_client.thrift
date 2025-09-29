@@ -548,7 +548,9 @@ service VirtualMachineService {
      12:optional list<string> additional_security_group_ids,
      13:optional string slurm_version,
      14:optional string metadata_token,
-     15:optional string metadata_endpoint
+     15:optional string metadata_endpoint,
+     16:optional string additional_script
+
 
     )
 
@@ -586,6 +588,8 @@ service VirtualMachineService {
     11:list <string> additional_user_keys,
     12:optional string metadata_token,
     13:optional string metadata_endpoint,
+    14:optional string additional_script
+
 
 
 
