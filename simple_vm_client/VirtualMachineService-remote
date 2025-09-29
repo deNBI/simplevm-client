@@ -61,12 +61,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     )
     print("  void unrescue_server(string openstack_id)")
     print(
-        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  additional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint)"
+        "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  additional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint, string additional_script)"
     )
     print("  bool is_bibigrid_available()")
     print("  void detach_ip_from_server(string server_id, string floating_ip)")
     print(
-        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  additional_user_keys, string metadata_token, string metadata_endpoint)"
+        "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  additional_user_keys, string metadata_token, string metadata_endpoint, string additional_script)"
     )
     print("  bool exist_server(string name)")
     print(
@@ -452,8 +452,8 @@ elif cmd == "unrescue_server":
     )
 
 elif cmd == "start_server":
-    if len(args) != 14:
-        print("start_server requires 14 args")
+    if len(args) != 15:
+        print("start_server requires 15 args")
         sys.exit(1)
     pp.pprint(
         client.start_server(
@@ -471,6 +471,7 @@ elif cmd == "start_server":
             args[11],
             args[12],
             args[13],
+            args[14],
         )
     )
 
@@ -492,8 +493,8 @@ elif cmd == "detach_ip_from_server":
     )
 
 elif cmd == "start_server_with_custom_key":
-    if len(args) != 12:
-        print("start_server_with_custom_key requires 12 args")
+    if len(args) != 13:
+        print("start_server_with_custom_key requires 13 args")
         sys.exit(1)
     pp.pprint(
         client.start_server_with_custom_key(
@@ -509,6 +510,7 @@ elif cmd == "start_server_with_custom_key":
             eval(args[9]),
             args[10],
             args[11],
+            args[12],
         )
     )
 
