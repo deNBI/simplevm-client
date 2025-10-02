@@ -55,13 +55,17 @@ class BibigridConnector:
             self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP = bibigrid_cfg.get(
                 "use_master_with_public_ip", False
             )
-            self._SUB_NETWORK = bibigrid_cfg["sub_network"]
+            self._SUB_NETWORK = bibigrid_cfg.get("sub_network")
 
             self._BIBIGRID_LOCAL_DNS_LOOKUP = bibigrid_cfg.get("localDnsLookup", False)
             self._BIBIGRID_ANSIBLE_ROLES = bibigrid_cfg.get("ansibleGalaxyRoles", [])
 
             openstack_cfg = cfg["openstack"]
-            self._NETWORK = openstack_cfg["network"]
+            self._NETWORK = openstack_cfg.get("network")
+
+            if not self._SUB_NETWORK and not self._NETWORK:
+                logger.info("No NETWORK or SUB_NETWORK provided for Bibigrid.")
+                return
             self._GATEWAY_IP = (
                 openstack_cfg.get("internal_gateway_ip") or openstack_cfg["gateway_ip"]
             )
@@ -250,7 +254,10 @@ class BibigridConnector:
                 "nfs": True,
                 "workerInstances": worker_config,
                 "sshUser": "ubuntu",
-                "subnet": self._SUB_NETWORK,
+                "subnet": self._SUB_NETWORK if self._SUB_NETWORK else "",
+                "network": (
+                    self._NETWORK if self._NETWORK and not self._SUB_NETWORK else ""
+                ),
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
                 "sshPublicKeys": public_keys,
                 "securityGroups": [self._DEFAULT_SECURITY_GROUP_NAME],
