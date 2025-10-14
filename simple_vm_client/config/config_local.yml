@@ -66,8 +66,8 @@ bibigrid:
   # Set to True if Bibigrid should use HTTPS, otherwise False.
   localDnsLookup: False
   # Set to True if Bibigrid should perform local DNS lookup, otherwise False.
-  sub_network: portalexternalsubnetwork
-  # Name or identifier of the openstack subnetwork.
+  #sub_network: portalexternalsubnetwork
+  # Name or identifier of the openstack subnetwork can be ommitted when the network provided from the openstack sectin should be used.
   modes:
     - slurm
 
@@ -80,7 +80,7 @@ forc:
   # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.
-  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
+  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/feat/conda_results.zip
   # GitHub repository URL for FORC playbooks.
   update_templates_schedule: 1.01
 
