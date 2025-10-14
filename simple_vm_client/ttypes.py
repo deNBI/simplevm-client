@@ -1795,6 +1795,7 @@ class VM(object):
      - fixed_ip: The fixed ips of the VM
      - task_state
      - vm_state
+     - attached_volume_ids
 
     """
 
@@ -1814,6 +1815,7 @@ class VM(object):
         fixed_ip=None,
         task_state=None,
         vm_state=None,
+        attached_volume_ids=None,
     ):
         self.flavor = flavor
         self.image = image
@@ -1827,6 +1829,7 @@ class VM(object):
         self.fixed_ip = fixed_ip
         self.task_state = task_state
         self.vm_state = vm_state
+        self.attached_volume_ids = attached_volume_ids
 
     def read(self, iprot):
         if (
@@ -1953,6 +1956,20 @@ class VM(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.LIST:
+                    self.attached_volume_ids = []
+                    (_etype49, _size46) = iprot.readListBegin()
+                    for _i50 in range(_size46):
+                        _elem51 = (
+                            iprot.readString().decode("utf-8", errors="replace")
+                            if sys.version_info[0] == 2
+                            else iprot.readString()
+                        )
+                        self.attached_volume_ids.append(_elem51)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1977,12 +1994,12 @@ class VM(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 3)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter46, viter47 in self.metadata.items():
+            for kiter52, viter53 in self.metadata.items():
                 oprot.writeString(
-                    kiter46.encode("utf-8") if sys.version_info[0] == 2 else kiter46
+                    kiter52.encode("utf-8") if sys.version_info[0] == 2 else kiter52
                 )
                 oprot.writeString(
-                    viter47.encode("utf-8") if sys.version_info[0] == 2 else viter47
+                    viter53.encode("utf-8") if sys.version_info[0] == 2 else viter53
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -2055,6 +2072,15 @@ class VM(object):
                 if sys.version_info[0] == 2
                 else self.vm_state
             )
+            oprot.writeFieldEnd()
+        if self.attached_volume_ids is not None:
+            oprot.writeFieldBegin("attached_volume_ids", TType.LIST, 13)
+            oprot.writeListBegin(TType.STRING, len(self.attached_volume_ids))
+            for iter54 in self.attached_volume_ids:
+                oprot.writeString(
+                    iter54.encode("utf-8") if sys.version_info[0] == 2 else iter54
+                )
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2269,11 +2295,11 @@ class ClusterInstance(object):
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.volumes = []
-                    (_etype51, _size48) = iprot.readListBegin()
-                    for _i52 in range(_size48):
-                        _elem53 = ClusterVolume()
-                        _elem53.read(iprot)
-                        self.volumes.append(_elem53)
+                    (_etype58, _size55) = iprot.readListBegin()
+                    for _i59 in range(_size55):
+                        _elem60 = ClusterVolume()
+                        _elem60.read(iprot)
+                        self.volumes.append(_elem60)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -2309,8 +2335,8 @@ class ClusterInstance(object):
         if self.volumes is not None:
             oprot.writeFieldBegin("volumes", TType.LIST, 4)
             oprot.writeListBegin(TType.STRUCT, len(self.volumes))
-            for iter54 in self.volumes:
-                iter54.write(oprot)
+            for iter61 in self.volumes:
+                iter61.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -5706,6 +5732,13 @@ VM.thrift_spec = (
         "UTF8",
         None,
     ),  # 12
+    (
+        13,
+        TType.LIST,
+        "attached_volume_ids",
+        (TType.STRING, "UTF8", False),
+        None,
+    ),  # 13
 )
 all_structs.append(ClusterInstanceMetadata)
 ClusterInstanceMetadata.thrift_spec = (

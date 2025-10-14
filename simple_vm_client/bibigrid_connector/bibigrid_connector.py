@@ -154,7 +154,7 @@ class BibigridConnector:
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
-        response = requests.get(
+        response = requests.post(
             url=request_url,
             headers=HEADERS,
             verify=self._PRODUCTION,
@@ -204,7 +204,7 @@ class BibigridConnector:
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata = None,
     ) -> ClusterMessage:
-        master_volumes = master_instance.volume
+        master_volumes = master_instance.volumes
         logger.info(
             f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}"
         )
