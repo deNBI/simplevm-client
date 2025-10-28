@@ -676,6 +676,16 @@ service VirtualMachineService {
     2:string user_id
     ) throws (1:BackendNotFoundException b)
 
+    /** Activate Authentification for backend*/
+    void activate_auth_for_backend(
+    1:i64 backend_id
+    ) throws (1:BackendNotFoundException b)
+
+    /** Deactivate Authentification for backend*/
+    void deactivate_auth_for_backend(
+    1:i64 backend_id
+    ) throws (1:BackendNotFoundException b)
+
 
     list<ResearchEnvironmentTemplate> get_allowed_templates()
 

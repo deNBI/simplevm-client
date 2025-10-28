@@ -351,6 +351,8 @@ class VirtualMachineHandler(Iface):
         return self.forc_connector.delete_user_from_backend(
             user_id=user_id, backend_id=backend_id
         )
+    
+    def 
 
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
