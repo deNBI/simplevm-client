@@ -80,7 +80,7 @@ forc:
   # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.
-  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/feat/conda_results.zip
+  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
   # GitHub repository URL for FORC playbooks.
   update_templates_schedule: 1.01
 
