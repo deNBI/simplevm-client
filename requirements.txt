@@ -19,4 +19,4 @@ gevent==25.9.1
 types-redis==4.6.0.20241004
 oslo.utils==9.1.0
 passlib==1.7.4
-apscheduler==3.11.0
+apscheduler==3.11.1
