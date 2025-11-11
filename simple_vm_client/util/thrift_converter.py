@@ -101,6 +101,7 @@ def os_to_thrift_volume_snapshot(openstack_snapshot: OpenStack_Snapshot) -> Snap
 
 
 def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
+    logger.info([vol.id for vol in openstack_server.attached_volumes])
     if not openstack_server:
         logger.info("Openstack server not found")
 
@@ -135,6 +136,7 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         vm_state=openstack_server.vm_state,
         fixed_ip=fixed_ip,
         floating_ip=floating_ip,
+        attached_volume_ids=[vol.id for vol in openstack_server.attached_volumes],
     )
 
     return server

@@ -20,7 +20,7 @@ services:
 
   simplevm_client_redis:
     container_name: simplevm_client_redis
-    image: redis:8.2.2
+    image: redis:8.2.3
     expose:
       - "6379"
     networks:
@@ -29,7 +29,7 @@ services:
   # filebeat
   simplevm_client_filebeat:
     container_name: simplevm_client_filebeat
-    image: docker.elastic.co/beats/filebeat:9.1.5
+    image: docker.elastic.co/beats/filebeat:9.2.0
     env_file:
       - .env
     volumes:

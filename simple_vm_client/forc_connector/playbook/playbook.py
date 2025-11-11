@@ -350,7 +350,6 @@ class Playbook(object):
     def get_logs(self) -> tuple[int, str, str]:
         self.log_file_stdout.seek(0, 0)
         lines_stdout = self.log_file_stdout.readlines()
-        logger.info(lines_stdout)
         for line in lines_stdout:
             self.stdout += line
         self.log_file_stderr.seek(0, 0)
