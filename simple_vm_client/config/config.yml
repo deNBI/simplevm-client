@@ -67,6 +67,8 @@ bibigrid:
   localDnsLookup: False
   # Set to True if Bibigrid should perform local DNS lookup, otherwise False.
   sub_network: portalexternalsubnetwork
+  # Name or identifier of the openstack subnetwork can be omitted when the network provided from the openstack sectin should be used.
+
   port_function: 30000 + 256 * oct3 + oct4"
   # Name or identifier of the openstack subnetwork.
   modes:
