@@ -28,7 +28,7 @@ struct Backend {
     3: string location_url,
     4: string template,
     5: string template_version,
-    6: optional bool auth_enabled = True
+    6: optional bool auth_enabled = true
 }
 
 
