@@ -3,25 +3,33 @@ fields:
   region: '${REGION}'
 
 output.elasticsearch:
-    hosts:
-      - 'https://${HOST}:443'
-    path: /elasticsearch/
-    username: '${ELASTIC_USER}'
-    password: '${ELASTIC_PASSWORD}'
-    ssl:
-      verification_mode: full
-    timeout: 60
-    bulk_max_size: 50
-    headers:
-      HOST: '${HOST}'
+  hosts:
+    - 'https://${HOST}:443'
+  path: /elasticsearch/
+  username: '${ELASTIC_USER}'
+  password: '${ELASTIC_PASSWORD}'
+  ssl:
+    verification_mode: full
+  timeout: 60
+  bulk_max_size: 50
+  headers:
+    HOST: '${HOST}'
 
 filebeat.inputs:
-  - type: log
+  - type: filestream
     enabled: true
-    exclude_files: ['\.swp$']
+    id: client-log-files        # unique identifier for this input
+    take_over:
+      enabled: true            # indicate takeover of the old log input state :contentReference[oaicite:3]{index=3}
     paths:
       - /usr/share/filebeat/log/client/*.log
-    multiline:
-      pattern: '^\d{4}-\d{2}-\d{2}'
-      negate: true
-      match: after
+    # scanner settings (mapping exclude_files etc from old to new)
+    prospector.scanner:
+      exclude_files:
+        - '\.swp$'
+    # multiline parsing
+    parsers:
+      - multiline:
+          pattern: '^\d{4}-\d{2}-\d{2}'
+          negate: true
+          match: after

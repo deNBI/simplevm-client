@@ -461,9 +461,16 @@ class ForcConnector:
             playbook = ForcConnector.active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
+            vm_status = self.redis_connection.hget(openstack_id, "status").decode(
+                "utf-8"
+            )
+            if vm_status in [
+                VmTaskStates.PLAYBOOK_FAILED.value,
+                VmTaskStates.PLAYBOOK_SUCCESSFUL.value,
+            ]:
 
-            playbook.cleanup(openstack_id)
-            ForcConnector.active_playbooks.pop(openstack_id)
+                playbook.cleanup(openstack_id)
+                ForcConnector.active_playbooks.pop(openstack_id)
 
             return PlaybookResult(status=status, stdout=stdout, stderr=stderr)
         else:

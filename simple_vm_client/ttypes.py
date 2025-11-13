@@ -1807,6 +1807,7 @@ class VM(object):
      - fixed_ip: The fixed ips of the VM
      - task_state
      - vm_state
+     - attached_volume_ids
 
     """
 
@@ -1826,6 +1827,7 @@ class VM(object):
         fixed_ip=None,
         task_state=None,
         vm_state=None,
+        attached_volume_ids=None,
     ):
         self.flavor = flavor
         self.image = image
@@ -1839,6 +1841,7 @@ class VM(object):
         self.fixed_ip = fixed_ip
         self.task_state = task_state
         self.vm_state = vm_state
+        self.attached_volume_ids = attached_volume_ids
 
     def read(self, iprot):
         if (
@@ -1965,6 +1968,20 @@ class VM(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.LIST:
+                    self.attached_volume_ids = []
+                    (_etype49, _size46) = iprot.readListBegin()
+                    for _i50 in range(_size46):
+                        _elem51 = (
+                            iprot.readString().decode("utf-8", errors="replace")
+                            if sys.version_info[0] == 2
+                            else iprot.readString()
+                        )
+                        self.attached_volume_ids.append(_elem51)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1989,12 +2006,12 @@ class VM(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 3)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter46, viter47 in self.metadata.items():
+            for kiter52, viter53 in self.metadata.items():
                 oprot.writeString(
-                    kiter46.encode("utf-8") if sys.version_info[0] == 2 else kiter46
+                    kiter52.encode("utf-8") if sys.version_info[0] == 2 else kiter52
                 )
                 oprot.writeString(
-                    viter47.encode("utf-8") if sys.version_info[0] == 2 else viter47
+                    viter53.encode("utf-8") if sys.version_info[0] == 2 else viter53
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -2067,6 +2084,15 @@ class VM(object):
                 if sys.version_info[0] == 2
                 else self.vm_state
             )
+            oprot.writeFieldEnd()
+        if self.attached_volume_ids is not None:
+            oprot.writeFieldBegin("attached_volume_ids", TType.LIST, 13)
+            oprot.writeListBegin(TType.STRING, len(self.attached_volume_ids))
+            for iter54 in self.attached_volume_ids:
+                oprot.writeString(
+                    iter54.encode("utf-8") if sys.version_info[0] == 2 else iter54
+                )
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2223,6 +2249,8 @@ class ClusterInstance(object):
     Attributes:
      - type
      - image
+     - onDemand
+     - volumes
 
     """
 
@@ -2232,9 +2260,13 @@ class ClusterInstance(object):
         self,
         type=None,
         image=None,
+        onDemand=False,
+        volumes=None,
     ):
         self.type = type
         self.image = image
+        self.onDemand = onDemand
+        self.volumes = volumes
 
     def read(self, iprot):
         if (
@@ -2267,6 +2299,22 @@ class ClusterInstance(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.onDemand = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.LIST:
+                    self.volumes = []
+                    (_etype58, _size55) = iprot.readListBegin()
+                    for _i59 in range(_size55):
+                        _elem60 = ClusterVolume()
+                        _elem60.read(iprot)
+                        self.volumes.append(_elem60)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2291,6 +2339,17 @@ class ClusterInstance(object):
             oprot.writeString(
                 self.image.encode("utf-8") if sys.version_info[0] == 2 else self.image
             )
+            oprot.writeFieldEnd()
+        if self.onDemand is not None:
+            oprot.writeFieldBegin("onDemand", TType.BOOL, 3)
+            oprot.writeBool(self.onDemand)
+            oprot.writeFieldEnd()
+        if self.volumes is not None:
+            oprot.writeFieldBegin("volumes", TType.LIST, 4)
+            oprot.writeListBegin(TType.STRUCT, len(self.volumes))
+            for iter61 in self.volumes:
+                iter61.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2321,6 +2380,7 @@ class ClusterVolume(object):
      - exists
      - size
      - type
+     - mount_path
 
     """
 
@@ -2333,12 +2393,14 @@ class ClusterVolume(object):
         exists=None,
         size=None,
         type="ext4",
+        mount_path=None,
     ):
         self.openstack_id = openstack_id
         self.permanent = permanent
         self.exists = exists
         self.size = size
         self.type = type
+        self.mount_path = mount_path
 
     def read(self, iprot):
         if (
@@ -2386,6 +2448,15 @@ class ClusterVolume(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.mount_path = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2425,139 +2496,26 @@ class ClusterVolume(object):
                 self.type.encode("utf-8") if sys.version_info[0] == 2 else self.type
             )
             oprot.writeFieldEnd()
+        if self.mount_path is not None:
+            oprot.writeFieldBegin("mount_path", TType.STRING, 6)
+            oprot.writeString(
+                self.mount_path.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mount_path
+            )
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.openstack_id is None:
-            raise TProtocolException(message="Required field openstack_id is unset!")
         if self.permanent is None:
             raise TProtocolException(message="Required field permanent is unset!")
         if self.exists is None:
             raise TProtocolException(message="Required field exists is unset!")
         if self.size is None:
             raise TProtocolException(message="Required field size is unset!")
-        return
-
-    def __repr__(self):
-        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
-        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class ClusterWorker(object):
-    """
-    Attributes:
-     - type
-     - image
-     - count
-     - onDemand
-
-    """
-
-    thrift_spec = None
-
-    def __init__(
-        self,
-        type=None,
-        image=None,
-        count=None,
-        onDemand=False,
-    ):
-        self.type = type
-        self.image = image
-        self.count = count
-        self.onDemand = onDemand
-
-    def read(self, iprot):
-        if (
-            iprot._fast_decode is not None
-            and isinstance(iprot.trans, TTransport.CReadableTransport)
-            and self.thrift_spec is not None
-        ):
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.type = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.image = (
-                        iprot.readString().decode("utf-8", errors="replace")
-                        if sys.version_info[0] == 2
-                        else iprot.readString()
-                    )
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.count = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.BOOL:
-                    self.onDemand = iprot.readBool()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        self.validate()
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(
-                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
-            )
-            return
-        oprot.writeStructBegin("ClusterWorker")
-        if self.type is not None:
-            oprot.writeFieldBegin("type", TType.STRING, 1)
-            oprot.writeString(
-                self.type.encode("utf-8") if sys.version_info[0] == 2 else self.type
-            )
-            oprot.writeFieldEnd()
-        if self.image is not None:
-            oprot.writeFieldBegin("image", TType.STRING, 2)
-            oprot.writeString(
-                self.image.encode("utf-8") if sys.version_info[0] == 2 else self.image
-            )
-            oprot.writeFieldEnd()
-        if self.count is not None:
-            oprot.writeFieldBegin("count", TType.I32, 3)
-            oprot.writeI32(self.count)
-            oprot.writeFieldEnd()
-        if self.onDemand is not None:
-            oprot.writeFieldBegin("onDemand", TType.BOOL, 4)
-            oprot.writeBool(self.onDemand)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        if self.type is None:
-            raise TProtocolException(message="Required field type is unset!")
-        if self.image is None:
-            raise TProtocolException(message="Required field image is unset!")
-        if self.count is None:
-            raise TProtocolException(message="Required field count is unset!")
+        if self.mount_path is None:
+            raise TProtocolException(message="Required field mount_path is unset!")
         return
 
     def __repr__(self):
@@ -5793,6 +5751,13 @@ VM.thrift_spec = (
         "UTF8",
         None,
     ),  # 12
+    (
+        13,
+        TType.LIST,
+        "attached_volume_ids",
+        (TType.STRING, "UTF8", False),
+        None,
+    ),  # 13
 )
 all_structs.append(ClusterInstanceMetadata)
 ClusterInstanceMetadata.thrift_spec = (
@@ -5836,6 +5801,20 @@ ClusterInstance.thrift_spec = (
         "UTF8",
         None,
     ),  # 2
+    (
+        3,
+        TType.BOOL,
+        "onDemand",
+        None,
+        False,
+    ),  # 3
+    (
+        4,
+        TType.LIST,
+        "volumes",
+        (TType.STRUCT, [ClusterVolume, None], False),
+        None,
+    ),  # 4
 )
 all_structs.append(ClusterVolume)
 ClusterVolume.thrift_spec = (
@@ -5875,38 +5854,13 @@ ClusterVolume.thrift_spec = (
         "UTF8",
         "ext4",
     ),  # 5
-)
-all_structs.append(ClusterWorker)
-ClusterWorker.thrift_spec = (
-    None,  # 0
     (
-        1,
+        6,
         TType.STRING,
-        "type",
+        "mount_path",
         "UTF8",
         None,
-    ),  # 1
-    (
-        2,
-        TType.STRING,
-        "image",
-        "UTF8",
-        None,
-    ),  # 2
-    (
-        3,
-        TType.I32,
-        "count",
-        None,
-        None,
-    ),  # 3
-    (
-        4,
-        TType.BOOL,
-        "onDemand",
-        None,
-        False,
-    ),  # 4
+    ),  # 6
 )
 all_structs.append(ClusterMessage)
 ClusterMessage.thrift_spec = (
