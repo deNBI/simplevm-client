@@ -29,7 +29,7 @@ class BibigridConnector:
         self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP: bool = False
         self._GATEWAY_IP = ""
         self._PORT_FUNCTION = ""
-        self._PRODUCTION_bool = True
+        self._PRODUCTION = True
         self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
 
         self.load_config_yml(config_file=config_file)
@@ -69,7 +69,7 @@ class BibigridConnector:
                 openstack_cfg.get("internal_gateway_ip") or openstack_cfg["gateway_ip"]
             )
             self._PORT_FUNCTION = openstack_cfg["ssh_port_calculation"]
-            self._PRODUCTION = cfg["production"]
+            self._PRODUCTION = cfg.get("production", True)
 
             protocol = "https" if self._BIBIGRID_USE_HTTPS else "http"
             self._BIBIGRID_EP = (
