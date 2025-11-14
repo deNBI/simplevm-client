@@ -213,7 +213,7 @@ class BibigridConnector:
         worker_config = []
         for wk in worker_instances:
             logger.info(wk)
-            worker_volumes = wk.volumes
+            worker_volumes = wk.volumes if wk.volumes else []
             config = vars(
                 wk
             ).copy()  # create a copy to avoid modifying the original object
