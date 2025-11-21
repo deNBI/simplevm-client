@@ -166,6 +166,43 @@ class ForcConnector:
             logger.exception(e)
             raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
 
+    def activate_auth_for_backend(self, backend_id: str):
+        logger.info(f"Activate authentication for backend {backend_id}")
+        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/true"  # TODO: remove true
+        try:
+            response = requests.post(
+                post_url,
+                timeout=(30, 30),
+                headers={"X-API-KEY": self.FORC_API_KEY},
+                # TODO: json={"auth_enabled": True},
+            )
+            data = response.json()
+            return data
+        except requests.Timeout as e:
+            logger.info(msg=f"Activate authentication for backend timed out. {e}")
+            return {"Error": "Timeout."}
+        except Exception as e:
+            logger.exception(e)
+            raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
+
+    def deactivate_auth_for_backend(self, backend_id: str):
+        logger.info(f"Deactivate authentication for backend {backend_id}")
+        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/false"
+        try:
+            response = requests.post(
+                post_url,
+                timeout=(30, 30),
+                headers={"X-API-KEY": self.FORC_API_KEY},
+            )
+            data = response.json()
+            return data
+        except requests.Timeout as e:
+            logger.info(msg=f"Deactivate authentication for backend timed out. {e}")
+            return {"Error": "Timeout."}
+        except Exception as e:
+            logger.exception(e)
+            raise BackendNotFoundException(message=str(e), name_or_id=backend_id)
+
     def delete_backend(self, backend_id: str) -> None:
         logger.info(f"Delete Backend {backend_id}")
         delete_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}"
@@ -265,6 +302,7 @@ class ForcConnector:
                 location_url=data["location_url"],
                 template=data["template"],
                 template_version=data["template_version"],
+                auth_enabled=data["auth_enabled"],
             )
             return new_backend
 
