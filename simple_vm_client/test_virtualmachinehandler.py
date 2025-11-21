@@ -485,6 +485,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             slurm_version=None,
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
+            additional_script="",
         )
 
     def test_start_server(self):
@@ -518,6 +519,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             slurm_version=None,
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
+            additional_script="",
         )
 
     def test_start_server_with_custom_key(self):
@@ -538,6 +540,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_user_keys=[],
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
+            additional_script="test",
         )
         self.handler.openstack_connector.start_server_with_playbook.assert_called_once_with(
             flavor_name=FLAVOR.name,
@@ -552,6 +555,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             research_environment_metadata=None,
             metadata_token="test",
             metadata_endpoint="http://metadata.endpoint",
+            additional_script="test",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -592,6 +596,7 @@ class TestVirtualMachineHandler(unittest.TestCase):
             additional_owner_keys=[],
             additional_user_keys=[],
             metadata_endpoint="http://metadata.endpoint",
+            additional_script="",
         )
         self.handler.forc_connector.set_vm_wait_for_playbook.assert_called_once_with(
             openstack_id=SERVER.id, private_key="priv", name=SERVER.name
@@ -658,14 +663,12 @@ class TestVirtualMachineHandler(unittest.TestCase):
             master_instance=master,
             worker_instances=worker_instances,
             metadata=CLUSTTER_METADATA,
-            shared_volume=CLUS_TER_SHARED_VOLUME,
         )
         self.handler.bibigrid_connector.start_cluster.assert_called_once_with(
             public_keys=["pub"],
             master_instance=master,
             worker_instances=worker_instances,
             metadata=CLUSTTER_METADATA,
-            shared_volume=CLUS_TER_SHARED_VOLUME,
         )
 
     def test_terminate_cluster(self):

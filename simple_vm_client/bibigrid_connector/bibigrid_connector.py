@@ -204,7 +204,7 @@ class BibigridConnector:
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata = None,
     ) -> ClusterMessage:
-        master_volumes = master_instance.volumes
+        master_volumes = master_instance.volumes if master_instance.volumes else []
         logger.info(
             f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}"
         )
@@ -213,7 +213,7 @@ class BibigridConnector:
         worker_config = []
         for wk in worker_instances:
             logger.info(wk)
-            worker_volumes = wk.volumes
+            worker_volumes = wk.volumes if wk.volumes else []
             config = vars(
                 wk
             ).copy()  # create a copy to avoid modifying the original object

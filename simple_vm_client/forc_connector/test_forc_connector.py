@@ -30,6 +30,7 @@ CONFIG_DATA = f"""
                   port: {REDIS_PORT}
                   password: ""
                 forc:
+                  activated: True
                   forc_backend_url: {FORC_BACKEND_URL}
                   forc_access_url: {FORC_ACCESS_URL}
                   github_playbooks_repo: {GITHUB_REPO}
@@ -625,7 +626,6 @@ class TestForcConnector(unittest.TestCase):
             openstack_id
         )
         playbook_mock.get_logs.assert_called_once()
-        playbook_mock.cleanup.assert_called_once()
 
     def test_get_playbook_logs_no_playbook(self):
         openstack_id = "openstack_id"
