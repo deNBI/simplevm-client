@@ -165,16 +165,26 @@ class ForcConnector:
 
     def activate_auth_for_backend(self, backend_id: str):
         logger.info(f"Activate authentication for backend {backend_id}")
-        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/true"  # TODO: remove true
+        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/"
         try:
             response = requests.post(
                 post_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
-                # TODO: json={"auth_enabled": True},
+                json={"auth_enabled": True},
             )
             data = response.json()
-            return data
+            logger.info(f"activate_auth_for_backend response: {data}")
+            # process data and return Backend object
+            new_backend = Backend(
+                id=int(data["id"]),
+                owner=data["owner"],
+                location_url=data["location_url"],
+                template=data["template"],
+                template_version=data["template_version"],
+                auth_enabled=bool(data["auth_enabled"]),
+            )
+            return new_backend
         except requests.Timeout as e:
             logger.info(msg=f"Activate authentication for backend timed out. {e}")
             return {"Error": "Timeout."}
@@ -184,15 +194,26 @@ class ForcConnector:
 
     def deactivate_auth_for_backend(self, backend_id: str):
         logger.info(f"Deactivate authentication for backend {backend_id}")
-        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/false"
+        post_url = f"{self.FORC_BACKEND_URL}backends/{backend_id}/auth/"
         try:
             response = requests.post(
                 post_url,
                 timeout=(30, 30),
                 headers={"X-API-KEY": self.FORC_API_KEY},
+                json={"auth_enabled": False},
             )
+            logger.debug(f"deactivate_auth_for_backend() Response: {response.text}")
             data = response.json()
-            return data
+            # process data and return Backend object
+            new_backend = Backend(
+                id=int(data["id"]),
+                owner=data["owner"],
+                location_url=data["location_url"],
+                template=data["template"],
+                template_version=data["template_version"],
+                auth_enabled=bool(data["auth_enabled"]),
+            )
+            return new_backend
         except requests.Timeout as e:
             logger.info(msg=f"Deactivate authentication for backend timed out. {e}")
             return {"Error": "Timeout."}

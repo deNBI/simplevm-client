@@ -157,3 +157,6 @@ fabric.properties
 .env_*
 VirtualMachineService/config/config_*
 clouds.yaml
+
+
+/thrift-0.22.0/
