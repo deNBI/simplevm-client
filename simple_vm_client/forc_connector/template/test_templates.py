@@ -227,8 +227,8 @@ class TestTemplate(unittest.TestCase):
             ".github",
             "cluster",
         ]
-        mock_isdir.side_effect = (
-            lambda path: "non_template" not in path
+        mock_isdir.side_effect = lambda path: "non_template" not in str(
+            path
         )  # Mock isdir to return True for templates
 
         # Call the method to test

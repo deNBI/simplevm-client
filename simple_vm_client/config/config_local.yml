@@ -66,8 +66,8 @@ bibigrid:
   # Set to True if Bibigrid should use HTTPS, otherwise False.
   localDnsLookup: False
   # Set to True if Bibigrid should perform local DNS lookup, otherwise False.
-  sub_network: portalexternalsubnetwork
-  # Name or identifier of the openstack subnetwork.
+  #sub_network: portalexternalsubnetwork
+  # Name or identifier of the openstack subnetwork can be ommitted when the network provided from the openstack sectin should be used.
   modes:
     - slurm
 

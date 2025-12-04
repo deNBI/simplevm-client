@@ -1594,6 +1594,7 @@ class TestOpenStackConnector(unittest.TestCase):
             additional_user_keys=additional_user_keys,
             metadata_token="test",
             metadata_endpoint=None,
+            additional_script="",
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(
@@ -1891,6 +1892,7 @@ class TestOpenStackConnector(unittest.TestCase):
             additional_owner_keys=additional_owner_keys,
             metadata_token="test",
             metadata_endpoint=None,
+            additional_script="",
         )
 
         mock_get_security_groups_starting_machine.assert_called_once_with(
@@ -2932,7 +2934,11 @@ class TestOpenStackConnector(unittest.TestCase):
             result,
             {
                 "gateway_ip": self.openstack_connector.GATEWAY_IP,
-                "internal_gateway_ip": None,
+                "internal_gateway_ip": (
+                    self.openstack_connector.INTERNAL_GATEWAY_IP
+                    if self.openstack_connector.INTERNAL_GATEWAY_IP
+                    else self.openstack_connector.GATEWAY_IP
+                ),
             },
         )
 

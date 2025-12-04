@@ -9,7 +9,6 @@ from simple_vm_client.ttypes import (
     ClusterMessage,
     ClusterNotFoundException,
     ClusterState,
-    ClusterVolume,
 )
 from simple_vm_client.util.logger import setup_custom_logger
 
@@ -30,7 +29,7 @@ class BibigridConnector:
         self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP: bool = False
         self._GATEWAY_IP = ""
         self._PORT_FUNCTION = ""
-        self._PRODUCTION_bool = True
+        self._PRODUCTION = True
         self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
 
         self.load_config_yml(config_file=config_file)
@@ -70,7 +69,7 @@ class BibigridConnector:
                 openstack_cfg.get("internal_gateway_ip") or openstack_cfg["gateway_ip"]
             )
             self._PORT_FUNCTION = openstack_cfg["ssh_port_calculation"]
-            self._PRODUCTION = cfg["production"]
+            self._PRODUCTION = cfg.get("production", True)
 
             protocol = "https" if self._BIBIGRID_USE_HTTPS else "http"
             self._BIBIGRID_EP = (
@@ -155,7 +154,7 @@ class BibigridConnector:
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
-        response = requests.get(
+        response = requests.post(
             url=request_url,
             headers=HEADERS,
             verify=self._PRODUCTION,
@@ -204,19 +203,32 @@ class BibigridConnector:
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata = None,
-        shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
+        master_volumes = master_instance.volumes if master_instance.volumes else []
         logger.info(
-            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}\nshared_volume:{shared_volume}"
+            f"Start Cluster:\n\tmaster_instance: {master_instance}\n\tworker_instances:{worker_instances}"
         )
         # Prepare worker instances in the required format
+
         worker_config = []
         for wk in worker_instances:
             logger.info(wk)
+            worker_volumes = wk.volumes if wk.volumes else []
             config = vars(
                 wk
             ).copy()  # create a copy to avoid modifying the original object
             config["onDemand"] = False
+            config["volumes"] = [
+                {
+                    "id": vol.openstack_id if vol.openstack_id else None,
+                    "size": vol.size,
+                    "mountPoint": vol.mount_path,
+                    "exists": vol.exists,
+                    "permanent": vol.permanent,
+                }
+                for vol in worker_volumes
+            ]
+
             worker_config.append(config)
         # Create configuration matching the required YAML structure
         body = [
@@ -239,16 +251,17 @@ class BibigridConnector:
                         {
                             "volumes": [
                                 {
-                                    "id": shared_volume.openstack_id,
-                                    "size": shared_volume.size,
-                                    "mountPoint": "/vol/spool",
-                                    "exists": shared_volume.exists,
-                                    "permanent": shared_volume.permanent,
+                                    "id": (
+                                        vol.openstack_id if vol.openstack_id else None
+                                    ),
+                                    "size": vol.size,
+                                    "mountPoint": vol.mount_path,
+                                    "exists": vol.exists,
+                                    "permanent": vol.permanent,
                                 }
+                                for vol in master_volumes
                             ]
                         }
-                        if shared_volume is not None
-                        else {}
                     ),
                 },
                 "nfs": True,

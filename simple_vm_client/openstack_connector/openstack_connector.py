@@ -828,7 +828,11 @@ class OpenStackConnector:
 
         return {
             "gateway_ip": self.GATEWAY_IP,
-            "internal_gateway_ip": self.INTERNAL_GATEWAY_IP,
+            "internal_gateway_ip": (
+                self.INTERNAL_GATEWAY_IP
+                if self.INTERNAL_GATEWAY_IP
+                else self.GATEWAY_IP
+            ),
         }
 
     def create_mount_init_script(

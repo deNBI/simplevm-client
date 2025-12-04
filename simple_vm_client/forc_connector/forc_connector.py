@@ -40,6 +40,7 @@ class ForcConnector:
         self.REDIS_HOST: str = ""  # type: ignore
         self.REDIS_PORT: int = None  # type: ignore
         self.FORC_API_KEY: str = ""
+        self.UPDATE_TEMPLATES_SCHEDULE = 12
         self.redis_pool: redis.ConnectionPool = None  # type: ignore
         self.redis_connection: redis.Redis.connection_pool = None
         self.load_config(config_file=config_file)
@@ -58,11 +59,12 @@ class ForcConnector:
             # Check if "bibigrid" key is present in the loaded YAML
             self.REDIS_HOST = cfg["redis"]["host"]
             self.REDIS_PORT = cfg["redis"]["port"]
+            self.forc_activated = cfg["forc"].get("activated", False)
             if "forc" not in cfg:
                 # Optionally, you can log a message or take other actions here
                 logger.info("Forc configuration not found. Skipping.")
                 return
-            if not cfg["forc"].get("activated", True):
+            if not self.forc_activated:
                 logger.info("Forc Config available but deactivated. Skipping..")
                 return
             self.FORC_BACKEND_URL = cfg["forc"]["forc_backend_url"]
@@ -96,19 +98,20 @@ class ForcConnector:
             )
 
     def start_template_update_scheduler(self):
-        logger.info(
-            f"Setting Update Playbook Schedule to: every {self.UPDATE_TEMPLATES_SCHEDULE} hours"
-        )
-        schedule_in_seconds = self.UPDATE_TEMPLATES_SCHEDULE * 60 * 60
+        if self.forc_activated:
+            logger.info(
+                f"Setting Update Playbook Schedule to: every {self.UPDATE_TEMPLATES_SCHEDULE} hours"
+            )
+            schedule_in_seconds = self.UPDATE_TEMPLATES_SCHEDULE * 60 * 60
 
-        self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(
-            self.update_templates,
-            "interval",
-            seconds=int(schedule_in_seconds),
-            coalesce=True,
-        )
-        self.scheduler.start()
+            self.scheduler = BackgroundScheduler()
+            self.scheduler.add_job(
+                self.update_templates,
+                "interval",
+                seconds=int(schedule_in_seconds),
+                coalesce=True,
+            )
+            self.scheduler.start()
 
     def connect_to_redis(self) -> None:
         logger.info("Connect to redis")
@@ -482,9 +485,16 @@ class ForcConnector:
             playbook = ForcConnector.active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
+            vm_status = self.redis_connection.hget(openstack_id, "status").decode(
+                "utf-8"
+            )
+            if vm_status in [
+                VmTaskStates.PLAYBOOK_FAILED.value,
+                VmTaskStates.PLAYBOOK_SUCCESSFUL.value,
+            ]:
 
-            playbook.cleanup(openstack_id)
-            ForcConnector.active_playbooks.pop(openstack_id)
+                playbook.cleanup(openstack_id)
+                ForcConnector.active_playbooks.pop(openstack_id)
 
             return PlaybookResult(status=status, stdout=stdout, stderr=stderr)
         else:

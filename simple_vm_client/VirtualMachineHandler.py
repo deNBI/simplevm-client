@@ -22,8 +22,6 @@ from .ttypes import (
     ClusterLog,
     ClusterMessage,
     ClusterState,
-    ClusterVolume,
-    ClusterWorker,
     CondaPackage,
     Flavor,
     Image,
@@ -519,7 +517,7 @@ class VirtualMachineHandler(Iface):
             cloud_site = self.openstack_connector.CLOUD_SITE
             gateway_ip = self.openstack_connector.get_gateway_ip()["gateway_ip"]
             internal_gateway_ip = self.openstack_connector.get_gateway_ip().get(
-                "internal_gateway_ip"
+                "internal_gateway_ip", gateway_ip
             )
             return self.forc_connector.create_and_deploy_playbook(
                 public_key=public_key,
@@ -558,9 +556,8 @@ class VirtualMachineHandler(Iface):
         self,
         public_keys: list[str],
         master_instance: ClusterInstance,
-        worker_instances: list[ClusterWorker],
+        worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata,
-        shared_volume: ClusterVolume = None,
     ) -> ClusterMessage:
 
         return self.bibigrid_connector.start_cluster(
@@ -568,7 +565,6 @@ class VirtualMachineHandler(Iface):
             master_instance=master_instance,
             worker_instances=worker_instances,
             metadata=metadata,
-            shared_volume=shared_volume,
         )
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
