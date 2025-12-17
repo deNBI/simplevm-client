@@ -11,7 +11,7 @@ pyvim==3.0.3
 redis==7.1.0
 requests==2.32.5
 pyyaml==6.0.3
-pre-commit==4.5.0
+pre-commit==4.5.1
 types-PyYAML==6.0.12.20250915
 sympy==1.14.0
 colorama==0.4.6
