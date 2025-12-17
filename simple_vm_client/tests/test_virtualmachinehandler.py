@@ -416,6 +416,18 @@ class TestVirtualMachineHandler(unittest.TestCase):
             backend_id=OPENSTACK_ID, user_id=USERNAME
         )
 
+    def test_activate_auth_for_backend(self):
+        self.handler.activate_auth_for_backend(backend_id=OPENSTACK_ID)
+        self.handler.forc_connector.activate_auth_for_backend.assert_called_once_with(
+            backend_id=OPENSTACK_ID
+        )
+
+    def test_deactivate_auth_for_backend(self):
+        self.handler.deactivate_auth_for_backend(backend_id=OPENSTACK_ID)
+        self.handler.forc_connector.deactivate_auth_for_backend.assert_called_once_with(
+            backend_id=OPENSTACK_ID
+        )
+
     def test_get_allowed_templates(self):
         self.handler.get_allowed_templates()
         self.handler.forc_connector.template.get_allowed_templates.assert_called_once()
