@@ -36,6 +36,31 @@ services:
     networks:
       - portal
 
+  simplevm_metadata_server:
+    container_name: simplevm_metadata_server
+    image: quay.io/denbicloud/simplevm-metadata-server:1.0.0
+    ports:
+      - "8008:8008"
+    depends_on:
+      - simplevm_metadata_server_redis
+    environment:
+      - METADATA_WRITE_TOKEN
+      - METADATA_PORT=8008
+      - METADATA_HOST=0.0.0.0
+    networks:
+      - portal
+    restart: unless-stopped
+
+  simplevm_metadata_server_redis:
+    container_name: simplevm_metadata_server_redis
+
+    image: redis:8.4.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+    restart: unless-stopped
+
 networks:
   portal:
     name: portal
