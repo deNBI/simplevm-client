@@ -41,6 +41,16 @@ services:
       - portal
     restart: unless-stopped
 
+  simplevm_metadata_server_redis:
+    container_name: simplevm_metadata_server_redis
+
+    image: redis:8.4.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+    restart: unless-stopped
+
 networks:
   portal:
     name: portal
