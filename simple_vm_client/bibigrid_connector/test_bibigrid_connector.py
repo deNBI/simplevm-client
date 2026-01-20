@@ -29,14 +29,24 @@ DEFAULT_CLUSTER_INFO = ClusterInfo(
     cluster_id="fake_cluster_id",
     ready=False,
 )
-DEFAULT_MASTER_INSTANCE = ClusterInstance(image="master_image", type="master_flavor")
 DEFAULT_WORKER_INSTANCES = [
-    ClusterInstance(image="worker_flavor", type="worker_flavor")
+    ClusterInstance(image="worker_flavor", type="worker_flavor", volumes=[])
 ]
 GATEWAY_IP = "192.168.0.1"
 INTERNAL_GATEWAY_IP = "192.168.0.2"
 METADATA = ClusterInstanceMetadata(user_id="123", project_id="345", project_name="TEST")
-SHARED_VOLUME = ClusterVolume(openstack_id="abcd", permanent=True, exists=True, size=50)
+SHARED_VOLUME = ClusterVolume(
+    openstack_id="abcd",
+    permanent=True,
+    exists=True,
+    size=50,
+    type="ext4",
+    mount_path="/vol/spool",
+)
+DEFAULT_MASTER_INSTANCE = ClusterInstance(
+    image="master_image", type="master_flavor", volumes=[SHARED_VOLUME]
+)
+
 PORT_FUNCTION = "30000 + 256 * oct3 + oct4"
 
 HEADERS = {"Content-Type": "application/json"}
@@ -209,7 +219,6 @@ class TestBibigridConnector(unittest.TestCase):
             master_instance=DEFAULT_MASTER_INSTANCE,
             worker_instances=DEFAULT_WORKER_INSTANCES,
             metadata=METADATA,
-            shared_volume=SHARED_VOLUME,
         )
         wI = []
         for wk in DEFAULT_WORKER_INSTANCES:
@@ -225,7 +234,7 @@ class TestBibigridConnector(unittest.TestCase):
                     {
                         "id": SHARED_VOLUME.openstack_id,
                         "size": SHARED_VOLUME.size,
-                        "mountPoint": "/vol/spool",
+                        "mountPoint": SHARED_VOLUME.mount_path,
                         "exists": SHARED_VOLUME.exists,
                         "permanent": SHARED_VOLUME.permanent,
                     }
@@ -243,11 +252,16 @@ class TestBibigridConnector(unittest.TestCase):
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
                 "gateway": {"ip": INTERNAL_GATEWAY_IP, "portFunction": PORT_FUNCTION},
-                "masterInstance": master_instance,
+                "masterInstance": {
+                    "type": master_instance["type"],
+                    "image": master_instance["image"],
+                    "volumes": master_instance["volumes"],
+                },
                 "nfs": True,
                 "workerInstances": wI,
                 "sshUser": "ubuntu",
                 "subnet": self.connector._SUB_NETWORK,
+                "network": "",
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
                 "sshPublicKeys": [public_key],
                 "securityGroups": ["defaultSimpleVM"],
