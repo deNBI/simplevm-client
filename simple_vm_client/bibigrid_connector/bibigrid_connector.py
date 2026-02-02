@@ -235,7 +235,7 @@ class BibigridConnector:
             {
                 "infrastructure": "openstack",
                 "cloud": "openstack",
-                "sshTimeout": 30,
+                "sshTimeout": 60,
                 "useMasterAsCompute": False,
                 "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 "dontUploadCredentials": True,
