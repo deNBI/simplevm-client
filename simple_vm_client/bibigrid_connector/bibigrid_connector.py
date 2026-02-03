@@ -223,8 +223,9 @@ class BibigridConnector:
                     "id": vol.openstack_id if vol.openstack_id else None,
                     "size": vol.size,
                     "mountPoint": vol.mount_path,
-                    "exists": vol.exists,
-                    "permanent": vol.permanent,
+                    **(
+                        {"exists": True} if vol.exists else {"permanent": vol.permanent}
+                    ),
                 }
                 for vol in worker_volumes
             ]
@@ -235,9 +236,9 @@ class BibigridConnector:
             {
                 "infrastructure": "openstack",
                 "cloud": "openstack",
-                "sshTimeout": 30,
+                "sshTimeout": 60,
                 "useMasterAsCompute": False,
-                "useMasterWithPublicIP": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
+                "useMasterWithPublicIp": self._BIBIGRID_USE_MASTER_WITH_PUBLIC_IP,
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
                 "gateway": {
@@ -256,8 +257,11 @@ class BibigridConnector:
                                     ),
                                     "size": vol.size,
                                     "mountPoint": vol.mount_path,
-                                    "exists": vol.exists,
-                                    "permanent": vol.permanent,
+                                    **(
+                                        {"exists": True}
+                                        if vol.exists
+                                        else {"permanent": vol.permanent}
+                                    ),
                                 }
                                 for vol in master_volumes
                             ]
