@@ -347,6 +347,7 @@ class Backend(object):
      - location_url
      - template
      - template_version
+     - auth_enabled
 
     """
 
@@ -359,12 +360,14 @@ class Backend(object):
         location_url=None,
         template=None,
         template_version=None,
+        auth_enabled=True,
     ):
         self.id = id
         self.owner = owner
         self.location_url = location_url
         self.template = template
         self.template_version = template_version
+        self.auth_enabled = auth_enabled
 
     def read(self, iprot):
         if (
@@ -420,6 +423,11 @@ class Backend(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.BOOL:
+                    self.auth_enabled = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -466,6 +474,10 @@ class Backend(object):
                 if sys.version_info[0] == 2
                 else self.template_version
             )
+            oprot.writeFieldEnd()
+        if self.auth_enabled is not None:
+            oprot.writeFieldBegin("auth_enabled", TType.BOOL, 6)
+            oprot.writeBool(self.auth_enabled)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -5256,6 +5268,13 @@ Backend.thrift_spec = (
         "UTF8",
         None,
     ),  # 5
+    (
+        6,
+        TType.BOOL,
+        "auth_enabled",
+        None,
+        True,
+    ),  # 6
 )
 all_structs.append(ResearchEnvironmentTemplate)
 ResearchEnvironmentTemplate.thrift_spec = (

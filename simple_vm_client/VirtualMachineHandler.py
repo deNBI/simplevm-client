@@ -350,6 +350,12 @@ class VirtualMachineHandler(Iface):
             user_id=user_id, backend_id=backend_id
         )
 
+    def activate_auth_for_backend(self, backend_id: str):
+        return self.forc_connector.activate_auth_for_backend(backend_id=backend_id)
+
+    def deactivate_auth_for_backend(self, backend_id: str):
+        return self.forc_connector.deactivate_auth_for_backend(backend_id=backend_id)
+
     def get_allowed_templates(self) -> list[ResearchEnvironmentTemplate]:
         return self.forc_connector.template.get_allowed_templates()
 

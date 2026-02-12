@@ -27,7 +27,8 @@ struct Backend {
     2: string owner,
     3: string location_url,
     4: string template,
-    5: string template_version
+    5: string template_version,
+    6: optional bool auth_enabled = true
 }
 
 
@@ -672,6 +673,16 @@ service VirtualMachineService {
     map<string,string> delete_user_from_backend(
     1:i64 backend_id,
     2:string user_id
+    ) throws (1:BackendNotFoundException b)
+
+    /** Activate Authentification for backend*/
+    Backend activate_auth_for_backend(
+    1:i64 backend_id
+    ) throws (1:BackendNotFoundException b)
+
+    /** Deactivate Authentification for backend*/
+    Backend deactivate_auth_for_backend(
+    1:i64 backend_id
     ) throws (1:BackendNotFoundException b)
 
 

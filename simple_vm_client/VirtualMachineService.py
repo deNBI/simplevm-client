@@ -459,6 +459,24 @@ class Iface(object):
 
         """
 
+    def activate_auth_for_backend(self, backend_id):
+        """
+        Activate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+
+    def deactivate_auth_for_backend(self, backend_id):
+        """
+        Deactivate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+
     def get_allowed_templates(self):
         pass
 
@@ -2709,6 +2727,88 @@ class Client(Iface):
             "delete_user_from_backend failed: unknown result",
         )
 
+    def activate_auth_for_backend(self, backend_id):
+        """
+        Activate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+        self.send_activate_auth_for_backend(backend_id)
+        return self.recv_activate_auth_for_backend()
+
+    def send_activate_auth_for_backend(self, backend_id):
+        self._oprot.writeMessageBegin(
+            "activate_auth_for_backend", TMessageType.CALL, self._seqid
+        )
+        args = activate_auth_for_backend_args()
+        args.backend_id = backend_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_activate_auth_for_backend(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = activate_auth_for_backend_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.b is not None:
+            raise result.b
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "activate_auth_for_backend failed: unknown result",
+        )
+
+    def deactivate_auth_for_backend(self, backend_id):
+        """
+        Deactivate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+        self.send_deactivate_auth_for_backend(backend_id)
+        return self.recv_deactivate_auth_for_backend()
+
+    def send_deactivate_auth_for_backend(self, backend_id):
+        self._oprot.writeMessageBegin(
+            "deactivate_auth_for_backend", TMessageType.CALL, self._seqid
+        )
+        args = deactivate_auth_for_backend_args()
+        args.backend_id = backend_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_deactivate_auth_for_backend(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = deactivate_auth_for_backend_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.b is not None:
+            raise result.b
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "deactivate_auth_for_backend failed: unknown result",
+        )
+
     def get_allowed_templates(self):
         self.send_get_allowed_templates()
         return self.recv_get_allowed_templates()
@@ -4230,6 +4330,12 @@ class Processor(Iface, TProcessor):
         self._processMap["delete_user_from_backend"] = (
             Processor.process_delete_user_from_backend
         )
+        self._processMap["activate_auth_for_backend"] = (
+            Processor.process_activate_auth_for_backend
+        )
+        self._processMap["deactivate_auth_for_backend"] = (
+            Processor.process_deactivate_auth_for_backend
+        )
         self._processMap["get_allowed_templates"] = (
             Processor.process_get_allowed_templates
         )
@@ -5659,6 +5765,62 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("delete_user_from_backend", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_activate_auth_for_backend(self, seqid, iprot, oprot):
+        args = activate_auth_for_backend_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = activate_auth_for_backend_result()
+        try:
+            result.success = self._handler.activate_auth_for_backend(args.backend_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except BackendNotFoundException as b:
+            msg_type = TMessageType.REPLY
+            result.b = b
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("activate_auth_for_backend", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_deactivate_auth_for_backend(self, seqid, iprot, oprot):
+        args = deactivate_auth_for_backend_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = deactivate_auth_for_backend_result()
+        try:
+            result.success = self._handler.deactivate_auth_for_backend(args.backend_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except BackendNotFoundException as b:
+            msg_type = TMessageType.REPLY
+            result.b = b
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("deactivate_auth_for_backend", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -16291,6 +16453,364 @@ delete_user_from_backend_result.thrift_spec = (
         TType.MAP,
         "success",
         (TType.STRING, "UTF8", TType.STRING, "UTF8", False),
+        None,
+    ),  # 0
+    (
+        1,
+        TType.STRUCT,
+        "b",
+        [BackendNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
+class activate_auth_for_backend_args(object):
+    """
+    Attributes:
+     - backend_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        backend_id=None,
+    ):
+        self.backend_id = backend_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.backend_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("activate_auth_for_backend_args")
+        if self.backend_id is not None:
+            oprot.writeFieldBegin("backend_id", TType.I64, 1)
+            oprot.writeI64(self.backend_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(activate_auth_for_backend_args)
+activate_auth_for_backend_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.I64,
+        "backend_id",
+        None,
+        None,
+    ),  # 1
+)
+
+
+class activate_auth_for_backend_result(object):
+    """
+    Attributes:
+     - success
+     - b
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+        b=None,
+    ):
+        self.success = success
+        self.b = b
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Backend()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.b = BackendNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("activate_auth_for_backend_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.b is not None:
+            oprot.writeFieldBegin("b", TType.STRUCT, 1)
+            self.b.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(activate_auth_for_backend_result)
+activate_auth_for_backend_result.thrift_spec = (
+    (
+        0,
+        TType.STRUCT,
+        "success",
+        [Backend, None],
+        None,
+    ),  # 0
+    (
+        1,
+        TType.STRUCT,
+        "b",
+        [BackendNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
+class deactivate_auth_for_backend_args(object):
+    """
+    Attributes:
+     - backend_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        backend_id=None,
+    ):
+        self.backend_id = backend_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.backend_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("deactivate_auth_for_backend_args")
+        if self.backend_id is not None:
+            oprot.writeFieldBegin("backend_id", TType.I64, 1)
+            oprot.writeI64(self.backend_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(deactivate_auth_for_backend_args)
+deactivate_auth_for_backend_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.I64,
+        "backend_id",
+        None,
+        None,
+    ),  # 1
+)
+
+
+class deactivate_auth_for_backend_result(object):
+    """
+    Attributes:
+     - success
+     - b
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+        b=None,
+    ):
+        self.success = success
+        self.b = b
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Backend()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.b = BackendNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("deactivate_auth_for_backend_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.b is not None:
+            oprot.writeFieldBegin("b", TType.STRUCT, 1)
+            self.b.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(deactivate_auth_for_backend_result)
+deactivate_auth_for_backend_result.thrift_spec = (
+    (
+        0,
+        TType.STRUCT,
+        "success",
+        [Backend, None],
         None,
     ),  # 0
     (
