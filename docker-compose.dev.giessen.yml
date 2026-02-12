@@ -20,7 +20,7 @@ services:
 
   simplevm_client_giessen_redis:
     container_name: simplevm_client_giessen_redis
-    image: redis:8.4.0
+    image: redis:8.6.0
     expose:
       - "6379"
     networks:
