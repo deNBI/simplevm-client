@@ -87,6 +87,7 @@ class OpenStackConnector:
         self.APPLICATION_CREDENTIAL_SECRET = ""
         self.USE_APPLICATION_CREDENTIALS: bool = False
         self.NOVA_MICROVERSION = "2.1"
+        self.THREADS = 32
 
         self.load_env_config()
         logger.info(f"Loading config file -- {config_file}")
@@ -109,7 +110,8 @@ class OpenStackConnector:
 
                 # Configure session settings as needed
                 sess.session.connections_pool = True
-                sess.session.connection_pool_size = 32
+
+                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
 
                 # Create the Connection object with the session
                 self.openstack_connection = connection.Connection(session=sess)
@@ -126,7 +128,8 @@ class OpenStackConnector:
                 )
                 sess = session.Session(auth=auth)
                 sess.session.connections_pool = True
-                sess.session.connection_pool_size = 32  # Number of connections to pool
+
+                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
                 self.openstack_connection = connection.Connection(
                     session=sess,
                     compute_api_version=self.NOVA_MICROVERSION,
@@ -158,6 +161,7 @@ class OpenStackConnector:
             self.FORC_SECURITY_GROUP_ID = cfg["openstack"].get(
                 "forc_security_group_id", None
             )
+            self.THREADS = cfg["server"].get("threads", 32)
             if not self.FORC_SECURITY_GROUP_ID:
                 logger.info("No Forc Security Group defined")
             self.DEFAULT_SECURITY_GROUP_NAME = "defaultSimpleVM"
