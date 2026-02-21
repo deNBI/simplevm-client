@@ -686,49 +686,82 @@ class OpenStackConnector:
         ignore_not_active: bool = False,
         replace_not_found: bool = False,
         ignore_not_found: bool = False,
-        slurm_version: str = None,
-    ) -> Image:
+        slurm_version: str | None = None,
+    ) -> Image | None:
         logger.info(f"Get Image {name_or_id}")
 
-        image: Image = self.openstack_connection.get_image(name_or_id=name_or_id)
-        if image is None and not ignore_not_found:
-            raise ImageNotFoundException(
-                message=f"Image {name_or_id} not found!", name_or_id=name_or_id
-            )
-        elif image is None and replace_not_found:
-            for version in SUPPORTED_OS_VERSIONS:
-                if version in name_or_id:
-                    if slurm_version:
-                        image = self.get_active_image_by_os_version_and_slurm_version(
-                            os_version=version,
-                            os_distro="ubuntu",
-                            slurm_version=slurm_version,
-                        )
-                    else:
-                        image = self.get_active_image_by_os_version(
-                            os_version=version, os_distro="ubuntu"
-                        )
+        image: Image | None = self.openstack_connection.get_image(name_or_id=name_or_id)
 
-        elif image and image.status != "active" and replace_inactive:
-            image_os_version = image["os_version"]
-            image_os_distro = image["os_distro"]
-            if slurm_version:
-                image = self.get_active_image_by_os_version_and_slurm_version(
-                    os_version=image_os_version,
-                    os_distro=image_os_distro,
-                    slurm_version=slurm_version,
-                )
-            else:
-                image = self.get_active_image_by_os_version(
-                    os_version=image_os_version, os_distro=image_os_distro
-                )
-        elif not image or (
-            image and image.status != "active" and not ignore_not_active
-        ):
+        # Image not foud
+        if image is None:
+
+            # Try to replace if replace not found
+            if replace_not_found:
+                for version in SUPPORTED_OS_VERSIONS:
+                    if version in name_or_id:
+                        if slurm_version:
+                            image = (
+                                self.get_active_image_by_os_version_and_slurm_version(
+                                    os_version=version,
+                                    os_distro="ubuntu",
+                                    slurm_version=slurm_version,
+                                )
+                            )
+                        else:
+                            image = self.get_active_image_by_os_version(
+                                os_version=version,
+                                os_distro="ubuntu",
+                            )
+                        break
+
+                if image:
+                    return image
+
+            # if no image and not replac enot found and ignore not found ingore it
+            if ignore_not_found:
+                return None
+
+            # else exepction
+            raise ImageNotFoundException(
+                message=f"Image {name_or_id} not found!",
+                name_or_id=name_or_id,
+            )
+
+        # Image found
+        if image.status != "active":
+
+            # Image inative but should be replaced
+            if replace_inactive:
+                image_os_version = image["os_version"]
+                image_os_distro = image["os_distro"]
+
+                if slurm_version:
+                    image = self.get_active_image_by_os_version_and_slurm_version(
+                        os_version=image_os_version,
+                        os_distro=image_os_distro,
+                        slurm_version=slurm_version,
+                    )
+                else:
+                    image = self.get_active_image_by_os_version(
+                        os_version=image_os_version,
+                        os_distro=image_os_distro,
+                    )
+
+                if image:
+                    return image
+
+            # if no image and not replac enot found and ignore not found ingore it
+
+            if ignore_not_active:
+                return image
+
+            # else secption
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} found but not active!",
                 name_or_id=name_or_id,
             )
+
+        # Active image found
         return image
 
     def create_snapshot(
