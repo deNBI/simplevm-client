@@ -364,7 +364,7 @@ class OpenStackConnector:
                     server.flavor = flavors.get(flavor.id)
             image = server.image
             if image and not image.get("name"):
-                if not image.get(image.id):
+                if not images.get(image.id):
                     openstack_image = self.openstack_connection.get_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
@@ -616,7 +616,7 @@ class OpenStackConnector:
                     server.flavor = flavors.get(flavor.id)
             image = server.image
             if not image.get("name"):
-                if not image.get(image.id):
+                if not images.get(image.id):
                     openstack_image = self.openstack_connection.get_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
