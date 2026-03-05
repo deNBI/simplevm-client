@@ -55,7 +55,7 @@ logger = setup_custom_logger(__name__)
 BIOCONDA = "bioconda"
 
 ALL_TEMPLATES = [BIOCONDA]
-
+SUPPORTED_OS_VERSIONS = ["22.04", "24.04"]
 lock_dict = {}
 lock_access = threading.Lock()
 
@@ -364,7 +364,7 @@ class OpenStackConnector:
                     server.flavor = flavors.get(flavor.id)
             image = server.image
             if image and not image.get("name"):
-                if not image.get(image.id):
+                if not images.get(image.id):
                     openstack_image = self.openstack_connection.get_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
@@ -616,7 +616,7 @@ class OpenStackConnector:
                     server.flavor = flavors.get(flavor.id)
             image = server.image
             if not image.get("name"):
-                if not image.get(image.id):
+                if not images.get(image.id):
                     openstack_image = self.openstack_connection.get_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
@@ -692,7 +692,7 @@ class OpenStackConnector:
                 message=f"Image {name_or_id} not found!", name_or_id=name_or_id
             )
         elif image is None and replace_not_found:
-            for version in ["20.04", "22.04", "2004", "2204"]:
+            for version in SUPPORTED_OS_VERSIONS:
                 if version in name_or_id:
                     if slurm_version:
                         image = self.get_active_image_by_os_version_and_slurm_version(
@@ -718,7 +718,9 @@ class OpenStackConnector:
                 image = self.get_active_image_by_os_version(
                     os_version=image_os_version, os_distro=image_os_distro
                 )
-        elif image and image.status != "active" and not ignore_not_active:
+        elif not image or (
+            image and image.status != "active" and not ignore_not_active
+        ):
             raise ImageNotFoundException(
                 message=f"Image {name_or_id} found but not active!",
                 name_or_id=name_or_id,
