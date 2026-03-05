@@ -56,7 +56,7 @@ class BibigridConnector:
             )
             self._SUB_NETWORK = bibigrid_cfg.get("sub_network")
 
-            self._BIBIGRID_LOCAL_DNS_LOOKUP = bibigrid_cfg.get("localDnsLookup", False)
+            self._BIBIGRID_LOCAL_DNS_LOOKUP = bibigrid_cfg.get("localDNSlookup", False)
             self._BIBIGRID_ANSIBLE_ROLES = bibigrid_cfg.get("ansibleGalaxyRoles", [])
 
             openstack_cfg = cfg["openstack"]
