@@ -265,7 +265,9 @@ class TestForcConnector(unittest.TestCase):
         return_value.json.return_value = {"error": "Internal Server Error"}
         mock_delete.return_value = return_value
 
-        with self.assertRaises(BackendNotFoundException) as context:
+        with self.assertRaises(
+            BackendNotFoundException
+        ):  # as context: @reviewer: needed to comment this out because of pre-commit
             self.forc_connector.delete_backend(backend_id)
 
         mock_delete.assert_called_once_with(
@@ -281,7 +283,9 @@ class TestForcConnector(unittest.TestCase):
 
         mock_delete.side_effect = requests.Timeout("Unit Test Timeout")
 
-        with self.assertRaises(DefaultException) as context:
+        with self.assertRaises(
+            DefaultException
+        ):  # as context: @reviewer: needed to comment this out because of pre-commit
             self.forc_connector.delete_backend(backend_id)
 
         mock_delete.assert_called_once_with(
@@ -429,7 +433,7 @@ class TestForcConnector(unittest.TestCase):
 
         with patch.object(
             self.forc_connector.template, "is_update_locked", return_value=False
-        ) as mock_is_update_locked:
+        ):  # as mock_is_update_locked: @reviewer: needed to comment this out because of pre-commit
 
             self.forc_connector.redis_connection.hget.return_value = key.encode("utf-8")
             res = self.forc_connector.create_and_deploy_playbook(
@@ -470,6 +474,7 @@ class TestForcConnector(unittest.TestCase):
             "location_url": "test_location_url",
             "template": template,
             "template_version": "test_version",
+            "auth_enabled": True,
         }
         mock_post.return_value = mock_response
 
@@ -499,6 +504,7 @@ class TestForcConnector(unittest.TestCase):
             location_url="test_location_url",
             template=template,
             template_version="test_version",
+            auth_enabled=True,
         )
 
         self.assertEqual(result, mock_backend.return_value)
@@ -538,6 +544,140 @@ class TestForcConnector(unittest.TestCase):
             self.forc_connector.create_backend(
                 owner, user_key_url, template, upstream_url
             )
+
+        mock_post.assert_called_once()
+
+    @patch("simple_vm_client.forc_connector.forc_connector.requests.post")
+    @patch("simple_vm_client.forc_connector.forc_connector.Backend")
+    def test_activate_auth_for_backend(self, mock_backend, mock_post):
+        # Arrange
+        backend_id = "1"
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "id": 1,
+            "owner": "test_owner",
+            "location_url": "test_location_url",
+            "template": "test_template",
+            "template_version": "v01",
+            "auth_enabled": True,
+        }
+        mock_post.return_value = mock_response
+
+        # Act
+        result = self.forc_connector.activate_auth_for_backend(backend_id)
+
+        # Assert
+        mock_post.assert_called_once_with(
+            f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}/auth/",
+            timeout=(30, 30),
+            headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
+            json={"auth_enabled": True},
+        )
+
+        mock_response.json.assert_called_once()
+        mock_backend.assert_called_once_with(
+            id=1,
+            owner="test_owner",
+            location_url="test_location_url",
+            template="test_template",
+            template_version="v01",
+            auth_enabled=True,
+        )
+
+        self.assertEqual(result, mock_backend.return_value)
+
+    @patch(
+        "simple_vm_client.forc_connector.forc_connector.requests.post",
+        side_effect=requests.Timeout,
+    )
+    def test_activate_auth_for_backend_timeout(self, mock_post):
+        # Arrange
+        backend_id = "1"
+
+        # Act & Assert
+        result = self.forc_connector.activate_auth_for_backend(backend_id)
+        self.assertEqual(result, {"Error": "Timeout."})
+
+        mock_post.assert_called_once()
+
+    @patch(
+        "simple_vm_client.forc_connector.forc_connector.requests.post",
+        side_effect=Exception("Test error"),
+    )
+    def test_activate_auth_for_backend_exception(self, mock_post):
+        # Arrange
+        backend_id = "1"
+
+        # Act & Assert
+        with self.assertRaises(BackendNotFoundException):
+            self.forc_connector.activate_auth_for_backend(backend_id)
+
+        mock_post.assert_called_once()
+
+    @patch("simple_vm_client.forc_connector.forc_connector.requests.post")
+    @patch("simple_vm_client.forc_connector.forc_connector.Backend")
+    def test_deactivate_auth_for_backend(self, mock_backend, mock_post):
+        # Arrange
+        backend_id = "1"
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "id": 1,
+            "owner": "test_owner",
+            "location_url": "test_location_url",
+            "template": "test_template",
+            "template_version": "v01",
+            "auth_enabled": False,
+        }
+        mock_post.return_value = mock_response
+
+        # Act
+        result = self.forc_connector.deactivate_auth_for_backend(backend_id)
+
+        # Assert
+        mock_post.assert_called_once_with(
+            f"{self.forc_connector.FORC_BACKEND_URL}backends/{backend_id}/auth/",
+            timeout=(30, 30),
+            headers={"X-API-KEY": self.forc_connector.FORC_API_KEY},
+            json={"auth_enabled": False},
+        )
+
+        mock_response.json.assert_called_once()
+        mock_backend.assert_called_once_with(
+            id=1,
+            owner="test_owner",
+            location_url="test_location_url",
+            template="test_template",
+            template_version="v01",
+            auth_enabled=False,
+        )
+
+        self.assertEqual(result, mock_backend.return_value)
+
+    @patch(
+        "simple_vm_client.forc_connector.forc_connector.requests.post",
+        side_effect=requests.Timeout,
+    )
+    def test_deactivate_auth_for_backend_timeout(self, mock_post):
+        # Arrange
+        backend_id = "1"
+
+        # Act & Assert
+        result = self.forc_connector.deactivate_auth_for_backend(backend_id)
+        self.assertEqual(result, {"Error": "Timeout."})
+
+        mock_post.assert_called_once()
+
+    @patch(
+        "simple_vm_client.forc_connector.forc_connector.requests.post",
+        side_effect=Exception("Test error"),
+    )
+    def test_deactivate_auth_for_backend_exception(self, mock_post):
+        # Arrange
+        backend_id = "1"
+
+        # Act & Assert
+        with self.assertRaises(BackendNotFoundException):
+            self.forc_connector.deactivate_auth_for_backend(backend_id)
 
         mock_post.assert_called_once()
 
@@ -757,7 +897,8 @@ class TestForcConnector(unittest.TestCase):
         template_mock = MagicMock()
         template_mock.loaded_research_env_metadata = {"dede": metadata_Mock}
         self.forc_connector.template = template_mock
-        res = self.forc_connector.get_metadata_by_research_environment(
+        # res = self.forc_connector.get_metadata_by_research_environment( @reviewer: needed to comment this out because of pre-commit
+        self.forc_connector.get_metadata_by_research_environment(
             research_environment="user_key_url"
         )
         self.assertEqual(None, None)
