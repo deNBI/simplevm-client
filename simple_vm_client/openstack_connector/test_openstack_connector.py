@@ -394,6 +394,51 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
+    def test_get_image_ignore_not_found(self, mock_logger_info):
+        # Configure mock to return None (image not found)
+        self.mock_openstack_connection.get_image.return_value = None
+
+        image = self.openstack_connector.get_image(
+            name_or_id="non-existing-image",
+            ignore_not_found=True,
+        )
+
+        mock_logger_info.assert_called_once_with("Get Image non-existing-image")
+
+        # Should return None and not raise an exception
+        self.assertIsNone(image)
+
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
+    def test_get_image_ignore_not_active(self, mock_logger_info):
+        # Configure the mock to return an inactive image
+        self.mock_openstack_connection.get_image.return_value = INACTIVE_IMAGE
+
+        image = self.openstack_connector.get_image(
+            name_or_id=INACTIVE_IMAGE.name,
+            ignore_not_active=True,
+        )
+
+        mock_logger_info.assert_called_once_with(f"Get Image {INACTIVE_IMAGE.name}")
+
+        # Should return the inactive image and not raise an exception
+        self.assertEqual(image, INACTIVE_IMAGE)
+
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
+    def test_get_image_ignore_not_found_and_not_active(self, mock_logger_info):
+        # Image not found
+        self.mock_openstack_connection.get_image.return_value = None
+
+        image = self.openstack_connector.get_image(
+            name_or_id="missing-image",
+            ignore_not_found=True,
+            ignore_not_active=True,
+        )
+
+        mock_logger_info.assert_called_once_with("Get Image missing-image")
+
+        self.assertIsNone(image)
+
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
     def test_get_images(self, mock_logger_info):
         # Configure the mock_openstack_connection.image.images to return the fake images
         self.mock_openstack_connection.image.images.return_value = IMAGES
