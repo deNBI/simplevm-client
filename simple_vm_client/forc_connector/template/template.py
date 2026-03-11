@@ -65,6 +65,7 @@ class ResearchEnvironmentMetadata:
         is_maintained: bool = True,
         forc_versions: list[str] = [],
         incompatible_versions: list[str] = [],
+        create_only_backend: bool = False,
     ):
         self.template_name = template_name
         self.port = port
@@ -86,6 +87,7 @@ class ResearchEnvironmentMetadata:
         self.is_maintained = is_maintained
         self.forc_versions = forc_versions
         self.incompatible_versions = incompatible_versions
+        self.create_only_backend = create_only_backend
 
 
 class Template(object):
