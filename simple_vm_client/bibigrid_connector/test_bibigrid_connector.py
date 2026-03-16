@@ -64,7 +64,7 @@ class TestBibigridConnector(unittest.TestCase):
            https: {HTTPS}
            modes: {MODES}
            use_master_with_public_ip: {MASTER_WITH_PUBLIC_IP}
-           localDnsLookup: {LOCAL_DNS_LOOKUP}
+           localDNSlookup: {LOCAL_DNS_LOOKUP}
            sub_network: {SUB_NETWORK}
 
            ansibleGalaxyRoles:
@@ -246,7 +246,7 @@ class TestBibigridConnector(unittest.TestCase):
             {
                 "infrastructure": "openstack",
                 "cloud": "openstack",
-                "sshTimeout": 30,
+                "sshTimeout": 60,
                 "useMasterAsCompute": False,
                 "useMasterWithPublicIP": False,
                 "dontUploadCredentials": True,
