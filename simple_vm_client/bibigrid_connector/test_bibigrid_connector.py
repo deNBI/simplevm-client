@@ -37,7 +37,6 @@ INTERNAL_GATEWAY_IP = "192.168.0.2"
 METADATA = ClusterInstanceMetadata(user_id="123", project_id="345", project_name="TEST")
 SHARED_VOLUME = ClusterVolume(
     openstack_id="abcd",
-    permanent=True,
     exists=True,
     size=50,
     type="ext4",
@@ -236,7 +235,6 @@ class TestBibigridConnector(unittest.TestCase):
                         "size": SHARED_VOLUME.size,
                         "mountPoint": SHARED_VOLUME.mount_path,
                         "exists": SHARED_VOLUME.exists,
-                        "permanent": SHARED_VOLUME.permanent,
                     }
                 ]
             }
@@ -248,7 +246,7 @@ class TestBibigridConnector(unittest.TestCase):
                 "cloud": "openstack",
                 "sshTimeout": 60,
                 "useMasterAsCompute": False,
-                "useMasterWithPublicIP": False,
+                "useMasterWithPublicIp": False,
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
                 "gateway": {"ip": INTERNAL_GATEWAY_IP, "portFunction": PORT_FUNCTION},

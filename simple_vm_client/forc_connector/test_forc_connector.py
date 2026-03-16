@@ -25,6 +25,8 @@ REDIS_HOST = "redis_host"
 REDIS_PORT = 6379
 FORC_API_KEY = "unit_test-key"
 CONFIG_DATA = f"""
+                server:
+                  threads: 32
                 redis:
                   host: {REDIS_HOST}
                   port: {REDIS_PORT}
