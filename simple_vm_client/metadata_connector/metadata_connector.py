@@ -76,7 +76,7 @@ class MetadataConnector:
         remove_metadata_url = urljoin(self.METADATA_BASE_URL, f"metadata/{ip}")
 
         try:
-            response = self.session.delete(remove_metadata_url, timeout=(30, 30))
+            response = self.session.delete(remove_metadata_url, timeout=(10, 10))
             response.raise_for_status()
             logger.info(f"Metadata removed successfully for {ip}")
             return True
