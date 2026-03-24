@@ -28,7 +28,7 @@ services:
 
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
-    image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
+    image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
     volumes:
       - ./clouds.yaml:/root/.config/bibigrid/clouds.yaml
     expose:
@@ -38,7 +38,7 @@ services:
 
   simplevm_metadata_server:
     container_name: simplevm_metadata_server
-    image: quay.io/denbicloud/simplevm-metadata-server:1.0.0
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:1.0.0
     ports:
       - "8008:8008"
     depends_on:

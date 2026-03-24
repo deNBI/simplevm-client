@@ -1,7 +1,7 @@
 services:
   simplevm-client:
     container_name: simplevm-client
-    image: quay.io/denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
+    image: oci.bi.denbi.de/simplevm/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
     expose:
       - "9090"  # Expose the service port
     env_file:
@@ -26,7 +26,7 @@ services:
 
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
-    image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
+    image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
     network_mode: host  # Use the host network namespace
 
     volumes:
