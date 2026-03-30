@@ -124,6 +124,8 @@ IMAGES = [
 PORT_CALCULATION = "30000 + oct4 + oct3 * 256"
 DEFAULT_SECURITY_GROUPS = ["defaultSimpleVM"]
 CONFIG_DATA = f"""
+            server:
+                threads: 32
             openstack:
               gateway_ip: "192.168.1.1"
               network: "my_network"
