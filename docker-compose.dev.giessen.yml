@@ -20,7 +20,7 @@ services:
 
   simplevm_client_giessen_redis:
     container_name: simplevm_client_giessen_redis
-    image: redis:8.6.1
+    image: redis:8.6.2
     expose:
       - "6379"
     networks:
@@ -28,7 +28,7 @@ services:
 
   simplevm_metadata_server:
     container_name: simplevm_metadata_server
-    image: quay.io/denbicloud/simplevm-metadata-server:1.0.0
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:1.0.0
     ports:
       - "8008:8008"
     depends_on:
