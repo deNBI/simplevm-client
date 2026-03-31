@@ -45,6 +45,8 @@ struct ResearchEnvironmentTemplate{
 10: optional int min_ram = 0
 11: optional int min_cores = 0
 12: optional string securitygroup_name
+13: optional bool allow_disable_auth = false
+14: optional bool create_only_backend = false
 
 }
 struct CondaPackage{

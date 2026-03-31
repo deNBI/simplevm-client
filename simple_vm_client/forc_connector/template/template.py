@@ -60,6 +60,8 @@ class ResearchEnvironmentMetadata:
         community_driven: bool = False,
         wiki_link: str = "",
         needs_forc_support: bool = True,
+        create_only_backend: bool = False,
+        allow_disable_auth: bool = False,
         min_ram: int = 0,
         min_cores: int = 0,
         is_maintained: bool = True,
@@ -86,6 +88,8 @@ class ResearchEnvironmentMetadata:
         self.is_maintained = is_maintained
         self.forc_versions = forc_versions
         self.incompatible_versions = incompatible_versions
+        self.create_only_backend = create_only_backend
+        self.allow_disable_auth = allow_disable_auth
 
 
 class Template(object):
@@ -307,6 +311,8 @@ class Template(object):
                 information_for_display=metadata.information_for_display,
                 min_ram=metadata.min_ram,
                 min_cores=metadata.min_cores,
+                create_only_backend=metadata.create_only_backend,
+                allow_disable_auth=metadata.allow_disable_auth,
             )
             self._allowed_forc_templates.append(template)
 

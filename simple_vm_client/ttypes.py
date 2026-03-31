@@ -47,7 +47,7 @@ class MetadataUser(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -62,7 +62,7 @@ class MetadataUser(object):
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.public_keys = []
-                    (_etype3, _size0) = iprot.readListBegin()
+                    _etype3, _size0 = iprot.readListBegin()
                     for _i4 in range(_size0):
                         _elem5 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -166,13 +166,13 @@ class MetadataUserData(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 2:
                 if ftype == TType.MAP:
                     self.data = {}
-                    (_ktype8, _vtype9, _size7) = iprot.readMapBegin()
+                    _ktype8, _vtype9, _size7 = iprot.readMapBegin()
                     for _i11 in range(_size7):
                         _key12 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -258,7 +258,7 @@ class VirtualMachineServerMetadata(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -379,7 +379,7 @@ class Backend(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -511,6 +511,8 @@ class ResearchEnvironmentTemplate(object):
      - min_ram
      - min_cores
      - securitygroup_name
+     - allow_disable_auth
+     - create_only_backend
 
     """
 
@@ -530,6 +532,8 @@ class ResearchEnvironmentTemplate(object):
         min_ram=0,
         min_cores=0,
         securitygroup_name=None,
+        allow_disable_auth=False,
+        create_only_backend=False,
     ):
         self.template_name = template_name
         self.title = title
@@ -547,6 +551,8 @@ class ResearchEnvironmentTemplate(object):
             min_cores = 0
         self.min_cores = min_cores
         self.securitygroup_name = securitygroup_name
+        self.allow_disable_auth = allow_disable_auth
+        self.create_only_backend = create_only_backend
 
     def read(self, iprot):
         if (
@@ -558,7 +564,7 @@ class ResearchEnvironmentTemplate(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -614,7 +620,7 @@ class ResearchEnvironmentTemplate(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.incompatible_versions = []
-                    (_etype19, _size16) = iprot.readListBegin()
+                    _etype19, _size16 = iprot.readListBegin()
                     for _i20 in range(_size16):
                         _elem21 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -633,7 +639,7 @@ class ResearchEnvironmentTemplate(object):
             elif fid == 9:
                 if ftype == TType.MAP:
                     self.information_for_display = {}
-                    (_ktype23, _vtype24, _size22) = iprot.readMapBegin()
+                    _ktype23, _vtype24, _size22 = iprot.readMapBegin()
                     for _i26 in range(_size22):
                         _key27 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -666,6 +672,16 @@ class ResearchEnvironmentTemplate(object):
                         if sys.version_info[0] == 2
                         else iprot.readString()
                     )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.BOOL:
+                    self.allow_disable_auth = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.BOOL:
+                    self.create_only_backend = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             else:
@@ -766,6 +782,14 @@ class ResearchEnvironmentTemplate(object):
                 else self.securitygroup_name
             )
             oprot.writeFieldEnd()
+        if self.allow_disable_auth is not None:
+            oprot.writeFieldBegin("allow_disable_auth", TType.BOOL, 13)
+            oprot.writeBool(self.allow_disable_auth)
+            oprot.writeFieldEnd()
+        if self.create_only_backend is not None:
+            oprot.writeFieldBegin("create_only_backend", TType.BOOL, 14)
+            oprot.writeBool(self.create_only_backend)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -820,7 +844,7 @@ class CondaPackage(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -978,7 +1002,7 @@ class Volume(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -1176,7 +1200,7 @@ class Snapshot(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -1356,7 +1380,7 @@ class Flavor(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -1531,7 +1555,7 @@ class Image(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -1601,7 +1625,7 @@ class Image(object):
             elif fid == 9:
                 if ftype == TType.LIST:
                     self.tags = []
-                    (_etype35, _size32) = iprot.readListBegin()
+                    _etype35, _size32 = iprot.readListBegin()
                     for _i36 in range(_size32):
                         _elem37 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -1853,7 +1877,7 @@ class VM(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -1871,7 +1895,7 @@ class VM(object):
             elif fid == 3:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype40, _vtype41, _size39) = iprot.readMapBegin()
+                    _ktype40, _vtype41, _size39 = iprot.readMapBegin()
                     for _i43 in range(_size39):
                         _key44 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -1971,7 +1995,7 @@ class VM(object):
             elif fid == 13:
                 if ftype == TType.LIST:
                     self.attached_volume_ids = []
-                    (_etype49, _size46) = iprot.readListBegin()
+                    _etype49, _size46 = iprot.readListBegin()
                     for _i50 in range(_size46):
                         _elem51 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -2154,7 +2178,7 @@ class ClusterInstanceMetadata(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2278,7 +2302,7 @@ class ClusterInstance(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2307,7 +2331,7 @@ class ClusterInstance(object):
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.volumes = []
-                    (_etype58, _size55) = iprot.readListBegin()
+                    _etype58, _size55 = iprot.readListBegin()
                     for _i59 in range(_size55):
                         _elem60 = ClusterVolume()
                         _elem60.read(iprot)
@@ -2412,7 +2436,7 @@ class ClusterVolume(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2557,7 +2581,7 @@ class ClusterMessage(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2659,7 +2683,7 @@ class ClusterInfo(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2781,7 +2805,7 @@ class ClusterState(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -2951,7 +2975,7 @@ class ClusterLog(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3072,7 +3096,7 @@ class PlaybookResult(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3185,7 +3209,7 @@ class MetadataServerNotAvailableException(TException):
         iprot.readStructBegin()
         message = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3276,7 +3300,7 @@ class MetadataServerNotAllowedException(TException):
         iprot.readStructBegin()
         message = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3383,7 +3407,7 @@ class ResourceNotFoundException(TException):
         resource_type = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3510,7 +3534,7 @@ class ResourceNotAvailableException(TException):
         iprot.readStructBegin()
         message = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3610,7 +3634,7 @@ class TemplateNotFoundException(TException):
         message = None
         template = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3728,7 +3752,7 @@ class NameAlreadyUsedException(TException):
         message = None
         name = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3844,7 +3868,7 @@ class ServerNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -3964,7 +3988,7 @@ class SecurityGroupNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4084,7 +4108,7 @@ class SecurityGroupRuleNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4202,7 +4226,7 @@ class FlavorNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4320,7 +4344,7 @@ class VolumeNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4438,7 +4462,7 @@ class SnapshotNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4556,7 +4580,7 @@ class ImageNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4674,7 +4698,7 @@ class ClusterNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4792,7 +4816,7 @@ class BackendNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -4910,7 +4934,7 @@ class PlaybookNotFoundException(TException):
         message = None
         name_or_id = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -5019,7 +5043,7 @@ class DefaultException(TException):
         iprot.readStructBegin()
         message = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -5112,7 +5136,7 @@ class OpenStackConflictException(TException):
         iprot.readStructBegin()
         message = None
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -5363,6 +5387,20 @@ ResearchEnvironmentTemplate.thrift_spec = (
         "UTF8",
         None,
     ),  # 12
+    (
+        13,
+        TType.BOOL,
+        "allow_disable_auth",
+        None,
+        False,
+    ),  # 13
+    (
+        14,
+        TType.BOOL,
+        "create_only_backend",
+        None,
+        False,
+    ),  # 14
 )
 all_structs.append(CondaPackage)
 CondaPackage.thrift_spec = (
