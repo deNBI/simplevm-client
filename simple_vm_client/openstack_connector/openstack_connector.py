@@ -63,7 +63,9 @@ lock_access = threading.Lock()
 class OpenStackConnector:
     def __init__(self, config_file: str):
         # Config FIle Data
-        logger.info("Initializing OpenStack Connector")
+        logger.info(
+            "Initializing OpenStack connector", extra={"config_file": config_file}
+        )
         self.GATEWAY_IP: str = ""
         self.INTERNAL_GATEWAY_IP: str = ""
         self.NETWORK: str = ""
@@ -147,7 +149,7 @@ class OpenStackConnector:
         self.DEACTIVATE_UPGRADES_SCRIPT = self.create_deactivate_update_script()
 
     def load_config_yml(self, config_file: str) -> None:
-        logger.info(f"Loading OpenStack config file: {config_file}")
+        logger.info("Loading OpenStack config file", extra={"config_file": config_file})
         with open(config_file, "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
 
@@ -177,7 +179,8 @@ class OpenStackConnector:
             if "compute_api_version" in cfg["openstack"]:
                 self.NOVA_MICROVERSION = cfg["openstack"]["compute_api_version"]
                 logger.debug(
-                    f"Using custom compute API version: {self.NOVA_MICROVERSION}"
+                    "Using custom compute API version",
+                    extra={"api_version": self.NOVA_MICROVERSION},
                 )
 
             logger.debug(
@@ -195,19 +198,24 @@ class OpenStackConnector:
         return self.DEFAULT_SECURITY_GROUPS.copy()
 
     def load_env_config(self) -> None:
-        logger.info("Loading OpenStack environment configuration")
-
         self.AUTH_URL = os.environ.get("OS_AUTH_URL")
         if not self.AUTH_URL:
-            logger.error("OS_AUTH_URL environment variable is required but not set")
+            logger.error(
+                "OS_AUTH_URL environment variable is required but not set",
+                exc_info=True,
+            )
             sys.exit(1)
 
         self.USE_APPLICATION_CREDENTIALS = (
             os.environ.get("USE_APPLICATION_CREDENTIALS", "False").lower() == "true"
         )
 
+        logger.info(
+            "Loading OpenStack environment configuration",
+            extra={"use_application_credentials": self.USE_APPLICATION_CREDENTIALS},
+        )
+
         if self.USE_APPLICATION_CREDENTIALS:
-            logger.info("Using Application Credentials for authentication")
             try:
                 self.APPLICATION_CREDENTIAL_ID = os.environ[
                     "OS_APPLICATION_CREDENTIAL_ID"
@@ -215,8 +223,12 @@ class OpenStackConnector:
                 self.APPLICATION_CREDENTIAL_SECRET = os.environ[
                     "OS_APPLICATION_CREDENTIAL_SECRET"
                 ]
+                logger.info(
+                    "Using Application Credentials for authentication",
+                    extra={"credential_id": self.APPLICATION_CREDENTIAL_ID[:8] + "..."},
+                )
                 logger.debug(
-                    "Application credentials loaded",
+                    "Application credentials loaded successfully",
                     extra={"credential_id": self.APPLICATION_CREDENTIAL_ID[:8] + "..."},
                 )
             except KeyError as e:
@@ -286,25 +298,25 @@ class OpenStackConnector:
             boot_from_volume=False,
         )
         logger.info(
-            "Server created successfully",
+            "OpenStack server created successfully",
             extra={"server_id": server.id, "server_name": name},
         )
         return server
 
     def get_volume(self, name_or_id: str) -> Volume:
-        logger.debug(f"Fetching volume by name_or_id: {name_or_id}")
+        logger.debug("Fetching volume by name_or_id", extra={"name_or_id": name_or_id})
         try:
             volume: Volume = self.openstack_connection.get_volume(name_or_id=name_or_id)
             if volume is None:
-                logger.warning(f"Volume not found: {name_or_id}")
+                logger.warning("Volume not found", extra={"name_or_id": name_or_id})
                 raise VolumeNotFoundException(
                     message=f"Volume not found: {name_or_id}", name_or_id=name_or_id
                 )
-            logger.debug(f"Volume found: {volume.id}")
+            logger.debug("Volume found", extra={"volume_id": volume.id})
             return volume
         except Exception as e:
             logger.error(
-                f"Error fetching volume {name_or_id}",
+                "Error fetching volume",
                 extra={"name_or_id": name_or_id, "error": str(e)},
                 exc_info=True,
             )
@@ -334,7 +346,7 @@ class OpenStackConnector:
                 extra={"volume_id": volume_id, "error": str(e)},
                 exc_info=True,
             )
-            raise DefaultException(message=e.message)
+            raise DefaultException(message=str(e))
 
     def create_volume_snapshot(
         self, volume_id: str, name: str, description: str
@@ -368,18 +380,20 @@ class OpenStackConnector:
             raise DefaultException(message=e.message)
 
     def get_volume_snapshot(self, name_or_id: str) -> Snapshot:
-        logger.debug(f"Fetching volume snapshot: {name_or_id}")
+        logger.debug("Fetching volume snapshot", extra={"name_or_id": name_or_id})
         try:
             snapshot: Snapshot = self.openstack_connection.get_volume_snapshot(
                 name_or_id=name_or_id
             )
             if snapshot is None:
-                logger.warning(f"Volume snapshot not found: {name_or_id}")
+                logger.warning(
+                    "Volume snapshot not found", extra={"name_or_id": name_or_id}
+                )
                 raise VolumeNotFoundException(
                     message=f"Volume snapshot not found: {name_or_id}",
                     name_or_id=name_or_id,
                 )
-            logger.debug(f"Volume snapshot found: {snapshot.id}")
+            logger.debug("Volume snapshot found", extra={"snapshot_id": snapshot.id})
             return snapshot
         except Exception as e:
             logger.error(
@@ -416,7 +430,7 @@ class OpenStackConnector:
                 extra={"snapshot_id": snapshot_id, "error": str(e)},
                 exc_info=True,
             )
-            raise DefaultException(message=e.message)
+            raise DefaultException(message=str(e))
 
     def create_volume_by_source_volume(
         self, volume_name: str, metadata: dict[str, str], source_volume_id: str
@@ -430,7 +444,7 @@ class OpenStackConnector:
                 name=volume_name, metadata=metadata, source_volume_id=source_volume_id
             )
             logger.info(
-                "Volume created from source",
+                "Volume created from source volume",
                 extra={"volume_id": volume.id, "source_volume_id": source_volume_id},
             )
             return volume
@@ -509,14 +523,14 @@ class OpenStackConnector:
         logger.debug("Fetching servers by IDs", extra={"ids": ids})
         servers: list[Server] = []
         for server_id in ids:
-            logger.debug(f"Fetching server: {server_id}")
+            logger.debug("Fetching server", extra={"server_id": server_id})
             try:
                 server = self.openstack_connection.get_server_by_id(server_id)
                 if server:
                     servers.append(server)
-                    logger.debug(f"Server found: {server_id}")
+                    logger.debug("Server found", extra={"server_id": server_id})
                 else:
-                    logger.warning(f"Server not found: {server_id}")
+                    logger.warning("Server not found", extra={"server_id": server_id})
             except Exception as e:
                 logger.error(
                     "Error fetching server",
@@ -666,15 +680,15 @@ class OpenStackConnector:
             raise ResourceNotAvailableException(message=e.message)
 
     def get_network(self) -> Network:
-        logger.debug(f"Fetching network: {self.NETWORK}")
+        logger.debug("Fetching network", extra={"network_name": self.NETWORK})
         try:
             network: Network = self.openstack_connection.get_network(
                 name_or_id=self.NETWORK
             )
             if network is None:
-                logger.error(f"Network not found: {self.NETWORK}")
+                logger.error("Network not found", extra={"network_name": self.NETWORK})
                 raise Exception(f"Network {self.NETWORK} not found!")
-            logger.debug(f"Network found: {network.id}")
+            logger.debug("Network found", extra={"network_id": network.id})
             return network
         except Exception as e:
             logger.error(
@@ -685,7 +699,7 @@ class OpenStackConnector:
             raise
 
     def import_keypair(self, keyname: str, public_key: str) -> dict[str, str]:
-        logger.debug(f"Fetching keypair: {keyname}")
+        logger.debug("Fetching keypair", extra={"keyname": keyname})
         keypair: dict[str, str] = self.openstack_connection.get_keypair(
             name_or_id=keyname
         )
@@ -713,11 +727,11 @@ class OpenStackConnector:
             )
             return old_keypair
         else:
-            logger.debug(f"Keypair exists and is up-to-date: {keyname}")
+            logger.debug("Keypair exists and is up-to-date", extra={"keyname": keyname})
             return keypair
 
     def get_keypair_public_key_by_name(self, key_name: str):
-        logger.info(f"Get keypair: {key_name}")
+        logger.debug("Fetching keypair public key", extra={"key_name": key_name})
 
         key_pair: Keypair = self.openstack_connection.get_keypair(name_or_id=key_name)
         if key_pair:
@@ -734,7 +748,13 @@ class OpenStackConnector:
     def create_add_keys_script(
         self, additional_owner_keys: list[str], addtional_user_keys: list[str]
     ) -> str:
-        logger.info("create add key script")
+        logger.debug(
+            "Creating add keys script",
+            extra={
+                "owner_key_count": len(additional_owner_keys),
+                "user_key_count": len(addtional_user_keys),
+            },
+        )
         file_dir = os.path.dirname(os.path.abspath(__file__))
         key_script = os.path.join(file_dir, "scripts/bash/add_keys_to_authorized.sh")
         if not additional_owner_keys:
@@ -763,7 +783,12 @@ class OpenStackConnector:
     def create_save_metadata_auth_token_script(
         self, token: str, metadata_endpoint: str
     ) -> str:
-        logger.info("create save metadata auth token script")
+        logger.debug(
+            "Creating save metadata auth token script",
+            extra={
+                "metadata_endpoint": metadata_endpoint,
+            },
+        )
         file_dir = os.path.dirname(os.path.abspath(__file__))
         metadata_token_script_path = os.path.join(
             file_dir, "scripts/bash/save_metadata_auth_token.sh"
@@ -786,25 +811,30 @@ class OpenStackConnector:
 
     def netcat(self, port: int) -> bool:
         host = self.INTERNAL_GATEWAY_IP if self.INTERNAL_GATEWAY_IP else self.GATEWAY_IP
-        logger.debug(f"Checking SSH connectivity {host}:{port}")
+        logger.debug("Checking SSH connectivity", extra={"host": host, "port": port})
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             sock.settimeout(5)
             r = sock.connect_ex((host, port))
             if r == 0:
-                logger.debug(f"SSH connection successful {host}:{port}")
+                logger.debug(
+                    "SSH connection successful", extra={"host": host, "port": port}
+                )
             else:
-                logger.debug(f"SSH connection failed {host}:{port} (error code: {r})")
+                logger.debug(
+                    "SSH connection failed",
+                    extra={"host": host, "port": port, "error_code": r},
+                )
         return r == 0
 
     def get_flavor(self, name_or_id: str, ignore_error: bool = False) -> Flavor:
-        logger.debug(f"Fetching flavor: {name_or_id}")
+        logger.debug("Fetching flavor", extra={"name_or_id": name_or_id})
         try:
             flavor: Flavor = self.openstack_connection.get_flavor(
                 name_or_id=name_or_id, get_extra=True
             )
 
             if flavor is None:
-                logger.warning(f"Flavor not found: {name_or_id}")
+                logger.warning("Flavor not found", extra={"name_or_id": name_or_id})
 
                 if not ignore_error:
                     raise FlavorNotFoundException(
@@ -813,7 +843,7 @@ class OpenStackConnector:
                 else:
                     return None
 
-            logger.debug(f"Flavor found: {flavor.id}")
+            logger.debug("Flavor found", extra={"flavor_id": flavor.id})
             return flavor
         except Exception as e:
             logger.error(
@@ -1328,7 +1358,13 @@ class OpenStackConnector:
                 "VOLUME_PATHS_ATTACH", bash_volume_path_attach_array_string
             )
             text = encodeutils.safe_encode(text.encode("utf-8"))
-        logger.debug("Mount init script created successfully")
+        logger.debug(
+            "Mount init script created successfully",
+            extra={
+                "new_volume_count": len(new_volumes) if new_volumes else 0,
+                "attach_volume_count": len(attach_volumes) if attach_volumes else 0,
+            },
+        )
         return text
 
     def create_or_get_default_ssh_security_group(self):
@@ -1829,13 +1865,13 @@ class OpenStackConnector:
             raise
 
     def exist_server(self, name: str) -> bool:
-        logger.debug(f"Checking if server exists: {name}")
+        logger.debug("Checking if server exists", extra={"server_name": name})
         try:
             result = self.openstack_connection.compute.find_server(name) is not None
             if result:
-                logger.debug(f"Server exists: {name}")
+                logger.debug("Server exists", extra={"server_name": name})
             else:
-                logger.debug(f"Server not found: {name}")
+                logger.debug("Server not found", extra={"server_name": name})
             return result
         except Exception as e:
             logger.error(
