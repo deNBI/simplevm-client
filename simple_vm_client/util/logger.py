@@ -11,7 +11,7 @@ init()
 
 def setup_custom_logger(name):
     LOG_FILE_HANDLER_ACTIVATED = os.environ.get("LOG_FILE_HANDLER_ACTIVATED", True)
-    LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+    LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG")
     LOG_FILE = os.environ.get("LOG_FILE", "log/portal_client.log")
     LOG_BACKUP_COUNT = int(os.environ.get("LOG_BACKUP_COUNT", 5))
     LOG_MAX_BYTES = int(os.environ.get("LOG_MAX_BATES", 1073741824))
@@ -19,18 +19,29 @@ def setup_custom_logger(name):
     # Define the formatter with color coding
     class ColoredFormatter(logging.Formatter):
         def format(self, record):
-            if record.levelno == logging.ERROR or record.levelno == logging.CRITICAL:
-                message = f"{Fore.RED}{super().format(record)}{Style.RESET_ALL}"
-            elif record.levelno == logging.WARNING:
-                message = f"{Fore.YELLOW}{super().format(record)}{Style.RESET_ALL}"
-            else:
-                message = super().format(record)
+            # Handle potential key conflicts from extra parameters
+            # by temporarily removing conflicting keys from record.__dict__
+            original_record = record.__dict__.copy()
+            try:
+                if (
+                    record.levelno == logging.ERROR
+                    or record.levelno == logging.CRITICAL
+                ):
+                    message = f"{Fore.RED}{super().format(record)}{Style.RESET_ALL}"
+                elif record.levelno == logging.WARNING:
+                    message = f"{Fore.YELLOW}{super().format(record)}{Style.RESET_ALL}"
+                else:
+                    message = super().format(record)
 
-            if record.exc_info:
-                tb_lines = traceback.format_exception(*record.exc_info)
-                tb_message = "".join(tb_lines)
-                message += f"\n{Fore.RED}{tb_message}{Style.RESET_ALL}"
-            return message
+                if record.exc_info:
+                    tb_lines = traceback.format_exception(*record.exc_info)
+                    tb_message = "".join(tb_lines)
+                    message += f"\n{Fore.RED}{tb_message}{Style.RESET_ALL}"
+                return message
+            finally:
+                # Restore original record state
+                record.__dict__.clear()
+                record.__dict__.update(original_record)
 
     formatter = ColoredFormatter(
         fmt="%(asctime)s - [%(levelname)s] - [%(pathname)s:%(funcName)s:%(lineno)d] - %(message)s",

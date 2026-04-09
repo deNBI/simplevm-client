@@ -353,7 +353,11 @@ class OpenStackConnector:
     ) -> str:
         logger.info(
             "Creating volume snapshot",
-            extra={"volume_id": volume_id, "name": name, "description": description},
+            extra={
+                "volume_id": volume_id,
+                "name_or_id": name,
+                "description": description,
+            },
         )
         try:
             volume_snapshot = self.openstack_connection.create_volume_snapshot(
@@ -1502,7 +1506,7 @@ class OpenStackConnector:
     ) -> SecurityGroup:
         logger.info(
             "Creating new security group",
-            extra={"name": name, "description": description},
+            extra={"name_or_id": name, "description": description},
         )
         sec: SecurityGroup = self.openstack_connection.get_security_group(
             name_or_id=name
@@ -1510,7 +1514,7 @@ class OpenStackConnector:
         if sec:
             logger.debug(
                 "Security group already exists",
-                extra={"name": name, "security_group_id": sec.id},
+                extra={"name_or_id": name, "security_group_id": sec.id},
             )
             return sec
         new_security_group: SecurityGroup = (
@@ -1522,7 +1526,7 @@ class OpenStackConnector:
         if udp:
             logger.debug(
                 "Adding UDP rule to security group",
-                extra={"name": name, "port": udp_port},
+                extra={"name_or_id": name, "port": udp_port},
             )
 
             self.openstack_connection.create_security_group_rule(
@@ -1543,7 +1547,9 @@ class OpenStackConnector:
                 remote_group_id=self.GATEWAY_SECURITY_GROUP_ID,
             )
         if ssh:
-            logger.debug("Adding SSH rule to security group", extra={"name": name})
+            logger.debug(
+                "Adding SSH rule to security group", extra={"name_or_id": name}
+            )
 
             self.openstack_connection.create_security_group_rule(
                 direction="ingress",
@@ -1566,7 +1572,7 @@ class OpenStackConnector:
             logger.debug(
                 "Adding research environment rule to security group",
                 extra={
-                    "name": name,
+                    "name_or_id": name,
                     "direction": research_environment_metadata.direction,
                 },
             )
@@ -1582,7 +1588,7 @@ class OpenStackConnector:
 
         logger.info(
             "Security group created successfully",
-            extra={"name": name, "security_group_id": new_security_group["id"]},
+            extra={"name_or_id": name, "security_group_id": new_security_group["id"]},
         )
         return new_security_group
 
@@ -2377,7 +2383,17 @@ class OpenStackConnector:
                 + encodeutils.safe_encode(additional_script.encode("utf-8"))
             )
 
-        logger.debug("User data script created successfully")
+        logger.debug(
+            "User data script created successfully",
+            extra={
+                "has_volumes_new": len(volume_ids_path_new or []) > 0,
+                "has_volumes_attach": len(volume_ids_path_attach or []) > 0,
+                "has_owner_keys": len(additional_owner_keys or []) > 0,
+                "has_user_keys": len(additional_user_keys or []) > 0,
+                "has_metadata_token": metadata_token is not None,
+                "has_additional_script": bool(additional_script),
+            },
+        )
         return init_script
 
     def start_server(
@@ -2426,7 +2442,7 @@ class OpenStackConnector:
             )
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
-            logger.debug(f"Using key name: {key_name}")
+            logger.debug("Using key name", extra={"key_name": key_name})
             project_name = metadata.get("project_name")
             project_id = metadata.get("project_id")
             security_groups = self._get_security_groups_starting_machine(
@@ -2725,7 +2741,7 @@ class OpenStackConnector:
         server = self.get_server(openstack_id=server_id)
 
         self.openstack_connection.compute.set_server_metadata(server, **metadata)
-        logger.info("Server metadata set", extra={"server_id": server_id})
+        logger.debug("Server metadata set", extra={"server_id": server_id})
 
     def _is_security_group_already_added_to_server(
         self, server: Server, security_group_name: str
@@ -2751,7 +2767,7 @@ class OpenStackConnector:
         return False
 
     def add_udp_security_group(self, server_id):
-        logger.info("Setting up UDP security group", extra={"server_id": server_id})
+        logger.debug("Setting up UDP security group", extra={"server_id": server_id})
         server = self.get_server(openstack_id=server_id)
         sec_name = server.name + "_udp"
         existing_sec = self.openstack_connection.get_security_group(name_or_id=sec_name)
@@ -2768,7 +2784,7 @@ class OpenStackConnector:
                 )
                 return
 
-            logger.info(
+            logger.debug(
                 "Adding existing UDP security group to server",
                 extra={"server_id": server_id, "security_group": sec_name},
             )
@@ -2780,7 +2796,7 @@ class OpenStackConnector:
         vm_ports = self.get_vm_ports(openstack_id=server_id)
         udp_port = vm_ports["udp"]
 
-        logger.info(
+        logger.debug(
             "Creating new UDP security group",
             extra={"server_id": server_id, "udp_port": udp_port},
         )
@@ -2791,7 +2807,7 @@ class OpenStackConnector:
             ssh=False,
             description="UDP",
         )
-        logger.info(
+        logger.debug(
             "Adding UDP security group to server",
             extra={"server_id": server_id, "security_group_id": security_group.id},
         )

@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 from unittest.mock import ANY, MagicMock, call, patch
 
+from openstack.block_storage.v2.snapshot import Snapshot
 from openstack.block_storage.v3 import volume
 from openstack.block_storage.v3.limits import Limit
 from openstack.block_storage.v3.volume import Volume
@@ -239,7 +240,10 @@ class TestOpenStackConnector(unittest.TestCase):
         self.assertEqual(openstack_connector.PROJECT_DOMAIN_ID, "project_domain_id")
 
         # Assert that logger.info was called with the expected message
-        mock_logger.info.assert_called_once_with("Load environment config: OpenStack")
+        mock_logger.info.assert_called_once_with(
+            "Loading OpenStack environment configuration",
+            extra=mock.ANY,
+        )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger")
     @patch.dict(
@@ -268,8 +272,8 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assert that logger.info was called with the expected messages
         expected_calls = [
-            call("Load environment config: OpenStack"),
-            call("APPLICATION CREDENTIALS will be used!"),
+            call("Loading OpenStack environment configuration", extra=mock.ANY),
+            call("Using Application Credentials for authentication", extra=mock.ANY),
         ]
         mock_logger.info.assert_has_calls(expected_calls, any_order=False)
 
@@ -283,7 +287,10 @@ class TestOpenStackConnector(unittest.TestCase):
             # Call the load_env_config method
             openstack_connector.load_env_config()
         # Assert that logger.error was called with the expected message
-        mock_logger.error.assert_called_once_with("OS_AUTH_URL not provided in env!")
+        mock_logger.error.assert_called_once_with(
+            "OS_AUTH_URL environment variable is required but not set",
+            exc_info=True,
+        )
 
         # Assert that sys.exit was called with status code 1
         mock_exit.assert_called_once_with(1)
@@ -300,8 +307,8 @@ class TestOpenStackConnector(unittest.TestCase):
             openstack_connector.load_env_config()
 
         # Assert that logger.error was called with the expected message
-        expected_error_message = "Usage of Application Credentials enabled - but OS_APPLICATION_CREDENTIAL_ID not provided in env!"
-        mock_logger.error.assert_called_once_with(expected_error_message)
+        expected_error_message = "Application credentials enabled but OS_APPLICATION_CREDENTIAL_ID is missing"
+        mock_logger.error.assert_called_once_with(expected_error_message, exc_info=True)
 
         # Assert that sys.exit was called with status code 1
         mock_exit.assert_called_once_with(1)
@@ -333,8 +340,12 @@ class TestOpenStackConnector(unittest.TestCase):
             openstack_connector.load_env_config()
 
         # Assert that logger.error was called with the expected message
-        expected_error_message = "Usage of Username/Password enabled - but keys OS_USERNAME, OS_PASSWORD not provided in env!"
-        mock_logger.error.assert_called_once_with(expected_error_message)
+        expected_error_message = (
+            "Username/Password auth enabled but missing environment variables"
+        )
+        mock_logger.error.assert_called_once_with(
+            expected_error_message, extra=mock.ANY
+        )
 
         # Assert that sys.exit was called with status code 1
         mock_exit.assert_called_once_with(1)
@@ -356,15 +367,18 @@ class TestOpenStackConnector(unittest.TestCase):
             default_security_groups, self.openstack_connector.DEFAULT_SECURITY_GROUPS
         )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image(self, mock_logger_debug):
         self.mock_openstack_connection.get_image.return_value = EXPECTED_IMAGE
         result = self.openstack_connector.get_image(EXPECTED_IMAGE.id)
-        mock_logger_info.assert_called_once_with(f"Get Image {EXPECTED_IMAGE.id}")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": EXPECTED_IMAGE.id, "slurm_version": None},
+        )
         self.assertEqual(result, EXPECTED_IMAGE)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image_not_found_exception(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image_not_found_exception(self, mock_logger_debug):
         # Configure the mock_openstack_connection.get_image to return None
         self.mock_openstack_connection.get_image.return_value = None
 
@@ -372,13 +386,16 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(ImageNotFoundException) as context:
             # Call the method with an image ID that will not be found
             self.openstack_connector.get_image("nonexistent_id", ignore_not_found=False)
-        mock_logger_info.assert_called_once_with("Get Image nonexistent_id")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": "nonexistent_id", "slurm_version": None},
+        )
 
         # Assert that the exception contains the expected message and image ID
-        self.assertEqual(context.exception.message, "Image nonexistent_id not found!")
+        self.assertEqual(context.exception.message, "Image not found: nonexistent_id")
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image_not_active_exception(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image_not_active_exception(self, mock_logger_debug):
         # Configure the mock_openstack_connection.get_image to return the not active image
         self.mock_openstack_connection.get_image.return_value = INACTIVE_IMAGE
         # Configure the ImageNotFoundException to be raised
@@ -387,16 +404,19 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.get_image(
                 name_or_id=INACTIVE_IMAGE.name, ignore_not_active=False
             )
-        mock_logger_info.assert_called_once_with(f"Get Image {INACTIVE_IMAGE.name}")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": INACTIVE_IMAGE.name, "slurm_version": None},
+        )
 
         # Assert that the exception contains the expected message and image ID
         self.assertEqual(
             context.exception.message,
-            f"Image {INACTIVE_IMAGE.name} found but not active!",
+            f"Image {INACTIVE_IMAGE.name} is not active (status: {INACTIVE_IMAGE.status})",
         )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image_ignore_not_found(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image_ignore_not_found(self, mock_logger_debug):
         # Configure mock to return None (image not found)
         self.mock_openstack_connection.get_image.return_value = None
 
@@ -405,13 +425,16 @@ class TestOpenStackConnector(unittest.TestCase):
             ignore_not_found=True,
         )
 
-        mock_logger_info.assert_called_once_with("Get Image non-existing-image")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": "non-existing-image", "slurm_version": None},
+        )
 
         # Should return None and not raise an exception
         self.assertIsNone(image)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image_ignore_not_active(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image_ignore_not_active(self, mock_logger_debug):
         # Configure the mock to return an inactive image
         self.mock_openstack_connection.get_image.return_value = INACTIVE_IMAGE
 
@@ -420,13 +443,16 @@ class TestOpenStackConnector(unittest.TestCase):
             ignore_not_active=True,
         )
 
-        mock_logger_info.assert_called_once_with(f"Get Image {INACTIVE_IMAGE.name}")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": INACTIVE_IMAGE.name, "slurm_version": None},
+        )
 
         # Should return the inactive image and not raise an exception
         self.assertEqual(image, INACTIVE_IMAGE)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_image_ignore_not_found_and_not_active(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_image_ignore_not_found_and_not_active(self, mock_logger_debug):
         # Image not found
         self.mock_openstack_connection.get_image.return_value = None
 
@@ -436,42 +462,51 @@ class TestOpenStackConnector(unittest.TestCase):
             ignore_not_active=True,
         )
 
-        mock_logger_info.assert_called_once_with("Get Image missing-image")
+        mock_logger_debug.assert_any_call(
+            "Fetching image",
+            extra={"name_or_id": "missing-image", "slurm_version": None},
+        )
 
         self.assertIsNone(image)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_images(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_images(self, mock_logger_debug):
         # Configure the mock_openstack_connection.image.images to return the fake images
         self.mock_openstack_connection.image.images.return_value = IMAGES
 
         # Call the method
         result = self.openstack_connector.get_images()
-        mock_logger_info.assert_any_call("Get Images")
+        mock_logger_debug.assert_any_call("Fetching all images")
         image_names = [image.name for image in IMAGES]
 
-        mock_logger_info.assert_any_call(f"Found  images - {image_names}")
+        mock_logger_debug.assert_any_call(
+            "Images fetched successfully",
+            extra={"count": len(IMAGES), "image_names": image_names},
+        )
 
         # Assert that the method returns the expected result
         self.assertEqual(result, IMAGES)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_private_images(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_private_images(self, mock_logger_debug):
         # Configure the mock_openstack_connection.image.images to return the fake images
         self.mock_openstack_connection.image.images.return_value = IMAGES
 
         # Call the method
         result = self.openstack_connector.get_private_images()
-        mock_logger_info.assert_any_call("Get private images")
+        mock_logger_debug.assert_any_call("Fetching private images")
         image_names = [image.name for image in IMAGES]
 
-        mock_logger_info.assert_any_call(f"Found private images - {image_names}")
+        mock_logger_debug.assert_any_call(
+            "Private images fetched successfully",
+            extra={"count": len(IMAGES), "image_names": image_names},
+        )
 
         # Assert that the method returns the expected result
         self.assertEqual(result, IMAGES)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_active_image_by_os_version(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_active_image_by_os_version(self, mock_logger_debug):
         # Generate a set of fake images with different properties
         os_version = "22.04"
 
@@ -482,8 +517,17 @@ class TestOpenStackConnector(unittest.TestCase):
         result = self.openstack_connector.get_active_image_by_os_version(
             os_version=os_version, os_distro="ubuntu"
         )
-        mock_logger_info.assert_called_with(
-            f"Get active Image by os-version: {os_version}"
+        mock_logger_debug.assert_any_call(
+            "Fetching active image by OS version",
+            extra={"os_version": os_version, "os_distro": "ubuntu"},
+        )
+        mock_logger_debug.assert_any_call(
+            "Active image found",
+            extra={
+                "image_id": EXPECTED_IMAGE.id,
+                "os_version": os_version,
+                "os_distro": "ubuntu",
+            },
         )
 
         # Assert that the method returns the expected image
@@ -493,8 +537,10 @@ class TestOpenStackConnector(unittest.TestCase):
         )
         self.assertEqual(result, EXPECTED_IMAGE)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_active_image_by_os_version_not_found_exception(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_active_image_by_os_version_not_found_exception(
+        self, mock_logger_debug
+    ):
         # Configure the mock_openstack_connection.list_images to return an empty list
         self.mock_openstack_connection.list_images.return_value = []
         os_version = "nonexistent_version"
@@ -505,14 +551,15 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.get_active_image_by_os_version(
                 os_version, "nonexistent_distro"
             )
-        mock_logger_info.assert_called_with(
-            f"Get active Image by os-version: {os_version}"
+        mock_logger_debug.assert_any_call(
+            "Fetching active image by OS version",
+            extra={"os_version": os_version, "os_distro": "nonexistent_distro"},
         )
 
         # Assert that the exception contains the expected message
         self.assertEqual(
             context.exception.message,
-            "Old Image was deactivated! No image with os_version:nonexistent_version and os_distro:nonexistent_distro found!",
+            "No active image found for os_version=nonexistent_version, os_distro=nonexistent_distro",
         )
 
     def test_replace_inactive_image(self):
@@ -579,8 +626,19 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         # Check if the method logs the correct information
-        mock_logger_info.assert_called_once_with(
-            f"Create Server:\n\tname: {name}\n\timage_id:{image_id}\n\tflavor_id:{flavor_id}\n\tmetadata:{metadata}"
+        mock_logger_info.assert_any_call(
+            "Creating new OpenStack server",
+            extra={
+                "server_name": name,
+                "image_id": image_id,
+                "flavor_id": flavor_id,
+                "network_id": network_id,
+                "security_groups": security_groups,
+            },
+        )
+        mock_logger_info.assert_any_call(
+            "OpenStack server created successfully",
+            extra={"server_id": fake_server.id, "server_name": name},
         )
 
         # Check if the create_server method on openstack_connection was called with the expected parameters
@@ -599,9 +657,9 @@ class TestOpenStackConnector(unittest.TestCase):
         # Check if the method returns the fake server object
         self.assertEqual(result, fake_server)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_get_volume(self, mock_logger_exception, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_get_volume(self, mock_logger_error, mock_logger_debug):
         # Prepare test data
         name_or_id = "test_volume_id"
 
@@ -613,7 +671,12 @@ class TestOpenStackConnector(unittest.TestCase):
         result = self.openstack_connector.get_volume(name_or_id)
 
         # Check if the method logs the correct information
-        mock_logger_info.assert_called_once_with(f"Get Volume {name_or_id}")
+        mock_logger_debug.assert_any_call(
+            "Fetching volume by name_or_id", extra={"name_or_id": name_or_id}
+        )
+        mock_logger_debug.assert_any_call(
+            "Volume found", extra={"volume_id": fake_volume.id}
+        )
 
         # Check if the get_volume method on openstack_connection was called with the expected parameters
         self.mock_openstack_connection.get_volume.assert_called_once_with(
@@ -623,8 +686,9 @@ class TestOpenStackConnector(unittest.TestCase):
         # Check if the method returns the fake volume object
         self.assertEqual(result, fake_volume)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_get_volume_exception(self, mock_logger_exception):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_get_volume_exception(self, mock_logger_error, mock_logger_debug):
         # Prepare test data
         name_or_id = "non_existing_volume_id"
 
@@ -638,11 +702,26 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.get_volume(name_or_id)
 
         # Check if the method logs the correct exception information
-        mock_logger_exception.assert_called_once_with(f"No Volume with id {name_or_id}")
+        mock_logger_debug.assert_any_call(
+            "Fetching volume by name_or_id", extra={"name_or_id": name_or_id}
+        )
+        mock_logger_error.assert_any_call(
+            "Error fetching volume",
+            extra={"name_or_id": name_or_id, "error": mock.ANY},
+            exc_info=True,
+        )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_delete_volume(self, mock_logger_exception, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.warning")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_delete_volume(
+        self,
+        mock_logger_error,
+        mock_logger_warning,
+        mock_logger_debug,
+        mock_logger_info,
+    ):
         # Prepare test data
         volume_id = "test_volume_id"
 
@@ -663,22 +742,34 @@ class TestOpenStackConnector(unittest.TestCase):
         # Call the delete_volume method for different scenarios
         # 1. No exception
         self.openstack_connector.delete_volume(volume_id)
-        mock_logger_info.assert_called_once_with(f"Delete Volume {volume_id}")
-        mock_logger_exception.assert_not_called()
+        mock_logger_info.assert_any_call(
+            "Deleting volume", extra={"volume_id": volume_id}
+        )
+        mock_logger_info.assert_any_call(
+            "Volume deleted successfully", extra={"volume_id": volume_id}
+        )
+        mock_logger_debug.assert_not_called()
 
         # 2. ResourceNotFound, expect VolumeNotFoundException
         with self.assertRaises(
             VolumeNotFoundException
         ):  # Replace Exception with the actual exception type
             self.openstack_connector.delete_volume(volume_id)
-        mock_logger_exception.assert_called_with(f"No Volume with id {volume_id}")
+        mock_logger_warning.assert_called_with(
+            "Volume not found for deletion",
+            extra={"volume_id": volume_id, "error": mock.ANY},
+        )
 
         # 3. ConflictException, expect OpenStackCloudException
         with self.assertRaises(
             OpenStackCloudException
         ):  # Replace Exception with the actual exception type
             self.openstack_connector.delete_volume(volume_id)
-        mock_logger_exception.assert_called_with(f"Delete volume: {volume_id}) failed!")
+        mock_logger_error.assert_called_with(
+            "Failed to delete volume - conflict",
+            extra={"volume_id": volume_id, "error": mock.ANY},
+            exc_info=True,
+        )
 
         # 4. OpenStackCloudException, expect DefaultException
         with self.assertRaises(
@@ -711,8 +802,16 @@ class TestOpenStackConnector(unittest.TestCase):
             volume_id, snapshot_name, snapshot_description
         )
         self.assertEqual(snapshot_id, "snapshot_id")
-        mock_logger_info.assert_called_once_with(
-            f"Create Snapshot for Volume {volume_id}"
+        mock_logger_info.assert_any_call(
+            "Creating volume snapshot",
+            extra={
+                "volume_id": volume_id,
+                "name_or_id": snapshot_name,
+                "description": snapshot_description,
+            },
+        )
+        mock_logger_info.assert_any_call(
+            "Volume snapshot created successfully", extra={"snapshot_id": "snapshot_id"}
         )
 
         # 2. ResourceNotFound, expect VolumeNotFoundException
@@ -720,7 +819,11 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.create_volume_snapshot(
                 volume_id, snapshot_name, snapshot_description
             )
-        mock_logger_error.assert_called_with(f"No Volume with id {volume_id}")
+        mock_logger_error.assert_called_with(
+            "Volume not found for snapshot creation",
+            extra={"volume_id": volume_id, "error": mock.ANY},
+            exc_info=True,
+        )
 
         # 3. OpenStackCloudException, expect DefaultException
         with self.assertRaises(DefaultException):
@@ -728,34 +831,52 @@ class TestOpenStackConnector(unittest.TestCase):
                 volume_id, snapshot_name, snapshot_description
             )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_get_volume_snapshot(self, mock_logger_exception, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_get_volume_snapshot(self, mock_logger_error, mock_logger_debug):
         # Prepare test data
         snapshot_id = "test_snapshot_id"
 
+        # Create a fake Snapshot object
+        fake_snapshot = Snapshot(id=snapshot_id, status="available")
+
         # Mock the get_volume_snapshot method to avoid actual retrieval in the test
         self.mock_openstack_connection.get_volume_snapshot.side_effect = [
-            {"id": snapshot_id},  # No exception case
+            fake_snapshot,  # No exception case
             None,  # VolumeNotFoundException case
         ]
 
         # Call the get_volume_snapshot method for different scenarios
         # 1. No exception
         snapshot = self.openstack_connector.get_volume_snapshot(snapshot_id)
-        self.assertEqual(snapshot["id"], snapshot_id)
-        mock_logger_info.assert_called_once_with(f"Get volume Snapshot {snapshot_id}")
+        self.assertEqual(snapshot.id, snapshot_id)
+        mock_logger_debug.assert_any_call(
+            "Fetching volume snapshot", extra={"name_or_id": snapshot_id}
+        )
+        mock_logger_debug.assert_any_call(
+            "Volume snapshot found", extra={"snapshot_id": snapshot_id}
+        )
 
         # 2. None returned, expect VolumeNotFoundException
         with self.assertRaises(VolumeNotFoundException):
             self.openstack_connector.get_volume_snapshot(snapshot_id)
-        mock_logger_exception.assert_called_with(
-            f"No volume Snapshot with id {snapshot_id}"
+        mock_logger_error.assert_called_with(
+            "Error fetching volume snapshot",
+            extra={"name_or_id": snapshot_id, "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_delete_volume_snapshot(self, mock_logger_exception, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.warning")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_delete_volume_snapshot(
+        self,
+        mock_logger_error,
+        mock_logger_warning,
+        mock_logger_debug,
+        mock_logger_info,
+    ):
         # Prepare test data
         snapshot_id = "test_snapshot_id"
 
@@ -776,8 +897,11 @@ class TestOpenStackConnector(unittest.TestCase):
         # Call the delete_volume_snapshot method for different scenarios
         # 1. No exception
         self.openstack_connector.delete_volume_snapshot(snapshot_id)
-        mock_logger_info.assert_called_once_with(
-            f"Delete volume Snapshot {snapshot_id}"
+        mock_logger_info.assert_any_call(
+            "Deleting volume snapshot", extra={"snapshot_id": snapshot_id}
+        )
+        mock_logger_info.assert_any_call(
+            "Volume snapshot deleted successfully", extra={"snapshot_id": snapshot_id}
         )
 
         # 2. ResourceNotFound, expect SnapshotNotFoundException
@@ -785,15 +909,20 @@ class TestOpenStackConnector(unittest.TestCase):
             SnapshotNotFoundException
         ):  # Replace Exception with the actual exception type
             self.openstack_connector.delete_volume_snapshot(snapshot_id)
-        mock_logger_exception.assert_called_with(f"Snapshot not found: {snapshot_id}")
+        mock_logger_warning.assert_called_with(
+            "Snapshot not found for deletion",
+            extra={"snapshot_id": snapshot_id, "error": mock.ANY},
+        )
 
         # 3. ConflictException, expect OpenStackCloudException
         with self.assertRaises(
             OpenStackCloudException
         ):  # Replace Exception with the actual exception type
             self.openstack_connector.delete_volume_snapshot(snapshot_id)
-        mock_logger_exception.assert_called_with(
-            f"Delete volume snapshot: {snapshot_id}) failed!"
+        mock_logger_error.assert_called_with(
+            "Failed to delete volume snapshot - conflict",
+            extra={"snapshot_id": snapshot_id, "error": mock.ANY},
+            exc_info=True,
         )
 
         # 4. OpenStackCloudException, expect DefaultException
@@ -802,10 +931,10 @@ class TestOpenStackConnector(unittest.TestCase):
         ):  # Replace Exception with the actual exception type
             self.openstack_connector.delete_volume_snapshot(snapshot_id)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_servers(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_servers(self, mock_logger_debug):
         # Prepare test data
-        expected_servers = fakes.generate_fake_resources(server.Server, count=3)
+        expected_servers = list(fakes.generate_fake_resources(server.Server, count=3))
 
         # Mock the list_servers method to simulate fetching servers
         self.mock_openstack_connection.list_servers.return_value = expected_servers
@@ -815,14 +944,11 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_servers, expected_servers)
-        mock_logger_info.assert_called_once_with("Get servers")
+        mock_logger_debug.assert_any_call("Fetching all servers")
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_servers_by_ids(
-        self, mock_logger_info, mock_logger_exception, mock_logger_error
-    ):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_servers_by_ids(self, mock_logger_debug, mock_logger_error):
         # Prepare test data
         server_ids = ["id1", "id2", "id3", "id4"]
         expected_servers = [Server(id="id1"), Server(id="id2")]
@@ -840,17 +966,22 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_servers, expected_servers)  # Exclude the None case
-        mock_logger_info.assert_any_call(f"Get Servers by IDS : {server_ids}")
-        mock_logger_info.assert_any_call("Get server id1")
-        mock_logger_info.assert_any_call("Get server id2")
-        mock_logger_info.assert_any_call("Get server id3")
-        mock_logger_info.assert_any_call("Get server id4")
-        mock_logger_error.assert_called_once_with("Requested VM id3 not found!")
-        mock_logger_exception.assert_called_once_with("Requested VM id4 not found!\n ")
+        mock_logger_debug.assert_any_call(
+            "Fetching servers by IDs", extra={"ids": server_ids}
+        )
+        mock_logger_debug.assert_any_call("Fetching server", extra={"server_id": "id1"})
+        mock_logger_debug.assert_any_call("Fetching server", extra={"server_id": "id2"})
+        mock_logger_debug.assert_any_call("Fetching server", extra={"server_id": "id3"})
+        mock_logger_debug.assert_any_call("Fetching server", extra={"server_id": "id4"})
+        mock_logger_error.assert_any_call(
+            "Error fetching server",
+            extra={"server_id": "id4", "error": mock.ANY},
+            exc_info=True,
+        )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_attach_volume_to_server(self, mock_logger_info, mock_logger_exception):
+    def test_attach_volume_to_server(self, mock_logger_info, mock_logger_error):
         # Prepare test data
         expected_attachment = {
             "device": "/dev/vdb"
@@ -876,8 +1007,17 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_attachment, expected_attachment)
-        mock_logger_info.assert_called_with(
-            f"Attaching volume {volume_id} to virtualmachine {openstack_id}"
+        mock_logger_info.assert_any_call(
+            "Attaching volume to server",
+            extra={"server_id": openstack_id, "volume_id": volume_id},
+        )
+        mock_logger_info.assert_any_call(
+            "Volume attached successfully",
+            extra={
+                "server_id": openstack_id,
+                "volume_id": volume_id,
+                "device": expected_attachment["device"],
+            },
         )
         self.mock_openstack_connection.get_server_by_id.assert_called_once_with(
             id=openstack_id
@@ -895,14 +1035,19 @@ class TestOpenStackConnector(unittest.TestCase):
         )
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.attach_volume_to_server(openstack_id, volume_id)
-        mock_logger_exception.assert_called_once_with(
-            f"Trying to attach volume {volume_id} to vm {openstack_id} error failed!",
+        mock_logger_error.assert_called_once_with(
+            "Failed to attach volume - conflict",
+            extra={
+                "server_id": openstack_id,
+                "volume_id": volume_id,
+                "error": mock.ANY,
+            },
             exc_info=True,
         )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_detach_volume(self, mock_logger_info, mock_logger_exception):
+    def test_detach_volume(self, mock_logger_info, mock_logger_error):
         # Prepare test data
         expected_server = fakes.generate_fake_resource(server.Server)
         expected_volume = fakes.generate_fake_resource(volume.Volume)
@@ -921,7 +1066,8 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         mock_logger_info.assert_any_call(
-            f"Delete Volume Attachment  {volume_id} - {server_id}"
+            "Detaching volume from server",
+            extra={"server_id": server_id, "volume_id": volume_id},
         )
         self.mock_openstack_connection.get_volume.assert_called_once_with(
             name_or_id=volume_id
@@ -939,13 +1085,15 @@ class TestOpenStackConnector(unittest.TestCase):
         )
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.detach_volume(volume_id, server_id)
-        mock_logger_exception.assert_called_once_with(
-            f"Delete volume attachment (server: {server_id} volume: {volume_id}) failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to detach volume - conflict",
+            extra={"server_id": server_id, "volume_id": volume_id, "error": mock.ANY},
+            exc_info=True,
         )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_resize_volume(self, mock_logger_info, mock_logger_exception):
+    def test_resize_volume(self, mock_logger_info, mock_logger_error):
         # Prepare test data
         expected_volume = fakes.generate_fake_resource(volume.Volume)
         volume_id = expected_volume.id
@@ -962,8 +1110,12 @@ class TestOpenStackConnector(unittest.TestCase):
         # Call the resize_volume method for different scenarios
         # 1. No exception
         self.openstack_connector.resize_volume(volume_id, size)
-        mock_logger_info.assert_called_once_with(
-            f"Extend volume {volume_id} to size {size}"
+        mock_logger_info.assert_any_call(
+            "Resizing volume", extra={"volume_id": volume_id, "new_size": size}
+        )
+        mock_logger_info.assert_any_call(
+            "Volume resized successfully",
+            extra={"volume_id": volume_id, "new_size": size},
         )
 
         # 2. ResourceNotFound, expect VolumeNotFoundException
@@ -974,9 +1126,9 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(DefaultException):
             self.openstack_connector.resize_volume(volume_id, size)
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_create_volume(self, mock_logger_info, mock_logger_exception):
+    def test_create_volume(self, mock_logger_info, mock_logger_error):
         # Prepare test data
         volume_name = "test_volume"
         volume_storage = 100
@@ -995,8 +1147,21 @@ class TestOpenStackConnector(unittest.TestCase):
         result_volume = self.openstack_connector.create_volume(
             volume_name, volume_storage, metadata
         )
-        mock_logger_info.assert_called_once_with(
-            f"Creating volume with {volume_storage} GB storage"
+        mock_logger_info.assert_any_call(
+            "Creating new volume",
+            extra={
+                "volume_name": volume_name,
+                "size_gb": volume_storage,
+                "metadata": metadata,
+            },
+        )
+        mock_logger_info.assert_any_call(
+            "Volume created successfully",
+            extra={
+                "volume_id": "volume_id",
+                "volume_name": volume_name,
+                "size_gb": volume_storage,
+            },
         )
         self.assertIsInstance(result_volume, Volume)
 
@@ -1005,8 +1170,14 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.create_volume(
                 volume_name, volume_storage, metadata
             )
-        mock_logger_exception.assert_called_once_with(
-            f"Trying to create volume with {volume_storage} GB  failed", exc_info=True
+        mock_logger_error.assert_called_once_with(
+            "Failed to create volume",
+            extra={
+                "volume_name": volume_name,
+                "size_gb": volume_storage,
+                "error": mock.ANY,
+            },
+            exc_info=True,
         )
 
     def test_network_not_found(self):
@@ -1014,8 +1185,8 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(Exception):
             self.openstack_connector.get_network()
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_get_network(self, mock_logger_exception):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_get_network(self, mock_logger_error):
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
             temp_file.write(CONFIG_DATA)
 
@@ -1035,11 +1206,11 @@ class TestOpenStackConnector(unittest.TestCase):
         self.mock_openstack_connection.get_network.assert_called_once_with(
             name_or_id=self.openstack_connector.NETWORK
         )
-        mock_logger_exception.assert_not_called()  # Ensure no exception is logged
+        mock_logger_error.assert_not_called()  # Ensure no exception is logged
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_import_existing_keypair(self, mock_logger_info, mock_logger_exception):
+    def test_import_existing_keypair(self, mock_logger_info, mock_logger_debug):
         # Mock the get_keypair method for existing keypair
         existing_keypair = fakes.generate_fake_resource(keypair.Keypair)
 
@@ -1055,14 +1226,18 @@ class TestOpenStackConnector(unittest.TestCase):
         self.mock_openstack_connection.get_keypair.assert_called_once_with(
             name_or_id=existing_keypair.name
         )
-        mock_logger_info.assert_called_once_with(f"Get Keypair {existing_keypair.name}")
+        mock_logger_debug.assert_any_call(
+            "Fetching keypair", extra={"keyname": existing_keypair.name}
+        )
         self.mock_openstack_connection.create_keypair.assert_not_called()
         self.mock_openstack_connection.delete_keypair.assert_not_called()
-        mock_logger_exception.assert_not_called()
+        mock_logger_debug.assert_any_call(
+            "Keypair exists and is up-to-date", extra={"keyname": existing_keypair.name}
+        )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_import_non_existing_keypair(self, mock_logger_info, mock_logger_exception):
+    def test_import_non_existing_keypair(self, mock_logger_info, mock_logger_debug):
         # Mock the get_keypair method for non-existing keypair
         new_keypair = fakes.generate_fake_resource(keypair.Keypair)
 
@@ -1083,13 +1258,17 @@ class TestOpenStackConnector(unittest.TestCase):
         self.mock_openstack_connection.create_keypair.assert_called_once_with(
             name=new_keypair.name, public_key=new_keypair.public_key
         )
-        mock_logger_info.assert_called_with(f"Create Keypair {new_keypair.name}")
+        mock_logger_debug.assert_any_call(
+            "Fetching keypair", extra={"keyname": new_keypair.name}
+        )
+        mock_logger_info.assert_any_call(
+            "Creating new keypair", extra={"keyname": new_keypair.name}
+        )
         self.mock_openstack_connection.delete_keypair.assert_not_called()
-        mock_logger_exception.assert_not_called()
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_import_changed_keypair(self, mock_logger_info, mock_logger_exception):
+    def test_import_changed_keypair(self, mock_logger_info, mock_logger_debug):
         # Mock the get_keypair method for keypair with changed public_key
         changed_keypair = fakes.generate_fake_resource(keypair.Keypair)
         old_keypair = fakes.generate_fake_resource(keypair.Keypair)
@@ -1114,15 +1293,20 @@ class TestOpenStackConnector(unittest.TestCase):
         self.mock_openstack_connection.delete_keypair.assert_called_once_with(
             name=changed_keypair.name
         )
-        mock_logger_info.assert_any_call(f"Delete keypair: {changed_keypair.name}")
-        mock_logger_info.assert_any_call(
-            f"Key {changed_keypair.name} has changed. Replace old Key"
+        mock_logger_debug.assert_any_call(
+            "Fetching keypair", extra={"keyname": changed_keypair.name}
         )
-        mock_logger_exception.assert_not_called()
+        mock_logger_info.assert_any_call(
+            "Keypair has changed - replacing", extra={"keyname": changed_keypair.name}
+        )
+        mock_logger_info.assert_any_call(
+            "Keypair replaced successfully",
+            extra={"keyname": changed_keypair.name, "key_id": changed_keypair.id},
+        )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_import_same_keypair(self, mock_logger_info, mock_logger_exception):
+    def test_import_same_keypair(self, mock_logger_info, mock_logger_debug):
         # Mock the get_keypair method for keypair with same public_key
         same_keypair = fakes.generate_fake_resource(keypair.Keypair)
 
@@ -1140,11 +1324,15 @@ class TestOpenStackConnector(unittest.TestCase):
         )
         self.mock_openstack_connection.create_keypair.assert_not_called()
         self.mock_openstack_connection.delete_keypair.assert_not_called()
-        mock_logger_info.assert_called_with(f"Get Keypair {same_keypair.name}")
-        mock_logger_exception.assert_not_called()
+        mock_logger_debug.assert_any_call(
+            "Fetching keypair", extra={"keyname": same_keypair.name}
+        )
+        mock_logger_debug.assert_any_call(
+            "Keypair exists and is up-to-date", extra={"keyname": same_keypair.name}
+        )
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_create_add_keys_script(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_create_add_keys_script(self, mock_logger_debug):
         # Prepare test data
         additional_owner_keys = ["key1", "key2", "key3"]
         additional_user_keys = ["key4"]
@@ -1161,11 +1349,14 @@ class TestOpenStackConnector(unittest.TestCase):
         for key in additional_user_keys:
             self.assertIn(key.encode("utf-8"), result_script)  # Encode the key to bytes
         # Additional assertions
-        mock_logger_info.assert_called_once_with("create add key script")
+        mock_logger_debug.assert_called_once_with(
+            "Creating add keys script",
+            extra={"owner_key_count": 3, "user_key_count": 1},
+        )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.socket.socket")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_netcat(self, mock_logger_info, mock_socket):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_netcat(self, mock_logger_debug, mock_socket):
         # Replace with the actual host and port
         port = 22
 
@@ -1184,8 +1375,8 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.socket.socket")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_netcat_internal_gateway(self, mock_logger_info, mock_socket):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_netcat_internal_gateway(self, mock_logger_debug, mock_socket):
         # Replace with the actual host and port
         port = 22
         self.openstack_connector.INTERNAL_GATEWAY_IP = "example.com"
@@ -1209,8 +1400,8 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(FlavorNotFoundException):
             self.openstack_connector.get_flavor("not_found")
 
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_flavor(self, mock_logger_info):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_flavor(self, mock_logger_debug):
         # Replace with the actual flavor name or ID
         expected_flavor = fakes.generate_fake_resource(flavor.Flavor)
 
@@ -1222,13 +1413,18 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_flavor, expected_flavor)
-        mock_logger_info.assert_called_with(f"Get flavor {expected_flavor.name}")
+        mock_logger_debug.assert_any_call(
+            "Fetching flavor", extra={"name_or_id": expected_flavor.name}
+        )
+        mock_logger_debug.assert_any_call(
+            "Flavor found", extra={"flavor_id": expected_flavor.id}
+        )
         self.mock_openstack_connection.get_flavor.assert_called_once_with(
             name_or_id=expected_flavor.name, get_extra=True
         )
 
-    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_flavors(self, mock_logger_info):
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_flavors(self, mock_logger_debug):
         # Replace with the actual flavors you want to simulate
         expected_flavors = list(fakes.generate_fake_resources(flavor.Flavor, count=3))
 
@@ -1240,15 +1436,14 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_flavors, expected_flavors)
-        mock_logger_info.assert_any_call("Get Flavors")
-        mock_logger_info.assert_any_call([flav["name"] for flav in expected_flavors])
+        mock_logger_debug.assert_any_call("Fetching all flavors")
 
         self.mock_openstack_connection.list_flavors.assert_called_once_with(
             get_extra=True
         )
 
-    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_servers_by_bibigrid_id(self, mock_logger_info):
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_servers_by_bibigrid_id(self, mock_logger_debug):
         # Replace with the actual Bibigrid ID you want to test
         bibigrid_id = "your_bibigrid_id"
 
@@ -1268,18 +1463,16 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_servers, expected_servers)
-        mock_logger_info.assert_called_with(
-            f"Get Servery by Bibigrid id: {bibigrid_id}"
+        mock_logger_debug.assert_any_call(
+            "Fetching servers by Bibigrid ID", extra={"bibigrid_id": bibigrid_id}
         )
         self.mock_openstack_connection.list_servers.assert_called_once_with(
             filters={"bibigrid_id": bibigrid_id, "name": bibigrid_id}
         )
 
-    @mock.patch(
-        "simple_vm_client.openstack_connector.openstack_connector.logger.exception"
-    )
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_create_snapshot(self, mock_logger_info, mock_logger_exception):
+    def test_create_snapshot(self, mock_logger_info, mock_logger_error):
         # Replace with the actual parameters you want to test
         openstack_id = "your_openstack_id"
         name = "your_snapshot_name"
@@ -1297,6 +1490,24 @@ class TestOpenStackConnector(unittest.TestCase):
             openstack_id, name, username, base_tags, description
         )
         self.assertEqual(result_snapshot_id, new_snapshot.id)
+        mock_logger_info.assert_any_call(
+            "Creating snapshot from server instance",
+            extra={
+                "server_id": openstack_id,
+                "snapshot_name": name,
+                "username": username,
+                "description": description,
+                "tags": base_tags,
+            },
+        )
+        mock_logger_info.assert_any_call(
+            "Snapshot created successfully",
+            extra={
+                "snapshot_id": new_snapshot.id,
+                "server_id": openstack_id,
+                "snapshot_name": name,
+            },
+        )
 
         # Case 2: ConflictException
         self.mock_openstack_connection.create_image_snapshot.side_effect = (
@@ -1306,8 +1517,10 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.create_snapshot(
                 openstack_id, name, username, base_tags, description
             )
-        mock_logger_exception.assert_called_once_with(
-            "Create snapshot your_openstack_id failed!"
+        mock_logger_error.assert_any_call(
+            "Failed to create snapshot - conflict",
+            extra={"server_id": openstack_id, "snapshot_name": name, "error": mock.ANY},
+            exc_info=True,
         )
 
         # Case 3: OpenStackCloudException
@@ -1324,11 +1537,9 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(Exception):
             self.openstack_connector.delete_image("not_found")
 
-    @mock.patch(
-        "simple_vm_client.openstack_connector.openstack_connector.logger.exception"
-    )
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_delete_image(self, mock_logger_info, mock_logger_exception):
+    def test_delete_image(self, mock_logger_info, mock_logger_error):
         # Replace with the actual image_id you want to test
         fake_image = fakes.generate_fake_resource(image.Image)
 
@@ -1338,7 +1549,12 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Case 1: No exception
         self.openstack_connector.delete_image(fake_image.id)
-        mock_logger_info.assert_any_call(f"Delete Image {fake_image.id}")
+        mock_logger_info.assert_any_call(
+            "Deleting image", extra={"image_id": fake_image.id}
+        )
+        mock_logger_info.assert_any_call(
+            "Image deleted successfully", extra={"image_id": fake_image.id}
+        )
         self.mock_openstack_connection.compute.delete_image.assert_called_once_with(
             fake_image.id
         )
@@ -1347,12 +1563,14 @@ class TestOpenStackConnector(unittest.TestCase):
         self.mock_openstack_connection.get_image.side_effect = Exception("Some error")
         with self.assertRaises(DefaultException):
             self.openstack_connector.delete_image(fake_image.id)
-        mock_logger_exception.assert_called_once_with(
-            f"Delete Image {fake_image.id} failed!"
+        mock_logger_error.assert_called_once_with(
+            f"Failed to delete image",
+            extra={"image_id": fake_image.id, "error": mock.ANY},
+            exc_info=True,
         )
 
-    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_get_public_images(self, mock_logger_info):
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_get_public_images(self, mock_logger_debug):
         # Replace with the actual public images you want to test
         images = list(fakes.generate_fake_resources(image.Image, count=3))
         images[2].visibility = "private"
@@ -1365,7 +1583,7 @@ class TestOpenStackConnector(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result_images, images[:2])  # Exclude the private image
-        mock_logger_info.assert_any_call("Get public images")
+        mock_logger_debug.assert_any_call("Fetching public images")
 
     @patch.object(OpenStackConnector, "get_image")
     @patch.object(OpenStackConnector, "get_flavor")
@@ -1440,9 +1658,25 @@ class TestOpenStackConnector(unittest.TestCase):
             },
             security_groups=cluster_group_id,
         )
-        mock_logger_info.assert_any_call(f"Add machine to {cluster_id}")
+        mock_logger_info.assert_any_call(
+            "Adding machine to cluster",
+            extra={
+                "cluster_id": cluster_id,
+                "cluster_user": cluster_user,
+                "machine_name": name,
+                "batch_idx": batch_idx,
+                "worker_idx": worker_idx,
+            },
+        )
 
-        mock_logger_info.assert_any_call(f"Created cluster machine:{mock_server['id']}")
+        mock_logger_info.assert_any_call(
+            "Cluster machine created",
+            extra={
+                "cluster_id": cluster_id,
+                "machine_id": mock_server["id"],
+                "machine_name": name,
+            },
+        )
         self.assertEqual(result, mock_server["id"])
 
     def test_add_udp_security_group_existing_group(self):
@@ -1469,9 +1703,9 @@ class TestOpenStackConnector(unittest.TestCase):
 
     @patch.object(OpenStackConnector, "get_vm_ports")
     @patch.object(OpenStackConnector, "create_security_group")
-    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     def test_add_udp_security_group_new_group(
-        self, mock_logger_info, mock_create_security_group, mock_get_vm_ports
+        self, mock_logger_debug, mock_create_security_group, mock_get_vm_ports
     ):
         # Test when a new UDP security group needs to be created
 
@@ -1510,15 +1744,16 @@ class TestOpenStackConnector(unittest.TestCase):
         self.openstack_connector.openstack_connection.compute.add_security_group_to_server.assert_called_once_with(
             server=server.id, security_group=sec_group
         )
-        mock_logger_info.assert_any_call(
-            f"Setting up UDP security group for {server.id}"
+        mock_logger_debug.assert_any_call(
+            "Setting up UDP security group", extra={"server_id": server.id}
         )
-        mock_logger_info.assert_any_call(
-            (f"Add security group {sec_group.id} to server {server.id}")
+        mock_logger_debug.assert_any_call(
+            "Adding UDP security group to server",
+            extra={"server_id": server.id, "security_group_id": sec_group.id},
         )
 
-    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
-    def test_add_udp_security_group_already_added(self, mock_logger_info):
+    @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
+    def test_add_udp_security_group_already_added(self, mock_logger_debug):
         # Test when an existing UDP security group is found
         server = fakes.generate_fake_resource(Server)
 
@@ -1538,23 +1773,27 @@ class TestOpenStackConnector(unittest.TestCase):
         ]
         self.openstack_connector.add_udp_security_group(server.id)
         self.openstack_connector.openstack_connection.add_security_group_to_server.assert_not_called()
-        mock_logger_info.assert_any_call(
-            f"Setting up UDP security group for {server.id}"
+        mock_logger_debug.assert_any_call(
+            "Setting up UDP security group", extra={"server_id": server.id}
         )
-        mock_logger_info.assert_any_call(
-            f"UDP Security group with name {sec_group.name} already exists."
+        mock_logger_debug.assert_any_call(
+            "UDP Security group already exists",
+            extra={"security_group": sec_group.name},
         )
 
-        mock_logger_info.assert_any_call(
-            f"UDP Security group with name {sec_group.name} already added to server."
+        mock_logger_debug.assert_any_call(
+            "UDP Security group already added to server",
+            extra={"security_group": sec_group.name, "server_id": server.id},
         )
 
     @patch.object(OpenStackConnector, "_get_security_groups_starting_machine")
     @patch.object(OpenStackConnector, "_get_volumes_machines_start")
     @patch.object(OpenStackConnector, "create_userdata")
     @patch.object(OpenStackConnector, "delete_keypair")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.info")
     def test_start_server_with_playbook(
         self,
+        mock_logger_info,
         mock_delete_keypair,
         mock_create_userdata,
         mock_get_volumes,
@@ -1665,14 +1904,30 @@ class TestOpenStackConnector(unittest.TestCase):
         # Check the result
         self.assertEqual(result, (server.id, server_keypair.private_key))
 
+        # Verify logging
+        mock_logger_info.assert_any_call(
+            "Starting server with playbook",
+            extra={
+                "servername": servername,
+                "flavor_name": flavor_name,
+                "image_name": image_name,
+                "project": metadata.get("project_name"),
+                "playbook": True,
+            },
+        )
+        mock_logger_info.assert_any_call(
+            "Server with playbook started successfully",
+            extra={"server_id": server.id, "servername": servername},
+        )
+
     @patch.object(OpenStackConnector, "_get_security_groups_starting_machine")
     @patch.object(OpenStackConnector, "_get_volumes_machines_start")
     @patch.object(OpenStackConnector, "create_userdata")
     @patch.object(OpenStackConnector, "delete_keypair")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     def test_start_server_with_playbook_exception(
         self,
-        mock_logger_exception,
+        mock_logger_error,
         mock_delete_keypair,
         mock_create_userdata,
         mock_get_volumes,
@@ -1731,8 +1986,15 @@ class TestOpenStackConnector(unittest.TestCase):
                 additional_security_group_ids=additional_security_group_ids,
             )
         mock_delete_keypair.assert_called_once_with(key_name=server_keypair.name)
-        mock_logger_exception.assert_called_once_with(
-            (f"Start Server {servername} error")
+        mock_logger_error.assert_called_once_with(
+            "Failed to start server with playbook",
+            extra={
+                "servername": servername,
+                "flavor_name": flavor_name,
+                "image_name": image_name,
+                "error": "Unit Test Error",
+            },
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "_get_default_security_groups")
@@ -1970,10 +2232,10 @@ class TestOpenStackConnector(unittest.TestCase):
     @patch.object(OpenStackConnector, "_get_volumes_machines_start")
     @patch.object(OpenStackConnector, "create_userdata")
     @patch.object(OpenStackConnector, "delete_keypair")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     def test_start_server_exception(
         self,
-        mock_logger_exception,
+        mock_logger_error,
         mock_delete_keypair,
         mock_create_userdata,
         mock_get_volumes,
@@ -2033,7 +2295,9 @@ class TestOpenStackConnector(unittest.TestCase):
                 additional_security_group_ids=additional_security_group_ids,
                 public_key=public_key,
             )
-        mock_logger_exception.assert_any_call((f"Start Server {servername} error"))
+        mock_logger_error.assert_any_call(
+            "Failed to start server", extra=mock.ANY, exc_info=True
+        )
 
     @patch.object(OpenStackConnector, "create_add_keys_script")
     @patch.object(OpenStackConnector, "create_mount_init_script")
@@ -2233,10 +2497,8 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_stop_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
-    ):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_stop_server_conflict_exception(self, mock_logger_error, mock_get_server):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
@@ -2246,8 +2508,10 @@ class TestOpenStackConnector(unittest.TestCase):
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.stop_server(openstack_id="some_openstack_id")
-        mock_logger_exception.assert_called_once_with(
-            "Stop Server some_openstack_id failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to stop server - conflict",
+            extra={"server_id": "some_openstack_id", "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "get_server")
@@ -2299,18 +2563,18 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_resume_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
-    ):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_resume_server_conflict_exception(self, mock_logger_error, mock_get_server):
         self.openstack_connector.openstack_connection.compute.start_server.side_effect = ConflictException(
             "Unit Test"
         )
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.resume_server("some_openstack_id")
-        mock_logger_exception.assert_called_once_with(
-            "Resume Server some_openstack_id failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to resume server - conflict",
+            extra={"server_id": "some_openstack_id", "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "_calculate_vm_ports")
@@ -2393,10 +2657,8 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_rescue_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
-    ):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_rescue_server_conflict_exception(self, mock_logger_error, mock_get_server):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
         mock_get_server.return_value = server_mock
@@ -2407,8 +2669,10 @@ class TestOpenStackConnector(unittest.TestCase):
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.rescue_server(openstack_id="some_openstack_id")
-        mock_logger_exception.assert_called_once_with(
-            "Rescue Server some_openstack_id failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to rescue server - conflict",
+            extra={"server_id": "some_openstack_id", "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "get_server")
@@ -2426,9 +2690,9 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     def test_unrescue_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
+        self, mock_logger_error, mock_get_server
     ):
         # Arrange
         server_mock = fakes.generate_fake_resource(server.Server)
@@ -2439,8 +2703,10 @@ class TestOpenStackConnector(unittest.TestCase):
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.unrescue_server(openstack_id="some_openstack_id")
-        mock_logger_exception.assert_called_once_with(
-            "Unrescue Server some_openstack_id failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to unrescue server - conflict",
+            extra={"server_id": "some_openstack_id", "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "get_server")
@@ -2472,18 +2738,22 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.set_server_metadata(server_mock.id, metadata)
 
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
-    def test_reboot_server_conflict_exception(
-        self, mock_logger_exception, mock_get_server
-    ):
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
+    def test_reboot_server_conflict_exception(self, mock_logger_error, mock_get_server):
         self.openstack_connector.openstack_connection.compute.reboot_server.side_effect = ConflictException(
             "Unit Test"
         )
         # Act
         with self.assertRaises(OpenStackConflictException):
             self.openstack_connector.reboot_server("some_openstack_id", "SOFT")
-        mock_logger_exception.assert_called_once_with(
-            "Reboot Server some_openstack_id failed!"
+        mock_logger_error.assert_called_once_with(
+            "Failed to reboot server - conflict",
+            extra={
+                "server_id": "some_openstack_id",
+                "reboot_type": "SOFT",
+                "error": mock.ANY,
+            },
+            exc_info=True,
         )
 
     def test_exist_server_true(self):
@@ -2786,9 +3056,9 @@ class TestOpenStackConnector(unittest.TestCase):
     @patch.object(OpenStackConnector, "get_or_create_project_security_group")
     @patch.object(OpenStackConnector, "get_or_create_vm_security_group")
     @patch.object(OpenStackConnector, "get_server")
-    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.exception")
+    @patch("simple_vm_client.openstack_connector.openstack_connector.logger.error")
     def test_open_port_range_for_vm_in_project_conflict_exception(
-        self, mock_logger_exception, mock_get_server, mock_get_vm_sg, mock_get_proj_sg
+        self, mock_logger_error, mock_get_server, mock_get_vm_sg, mock_get_proj_sg
     ):
         fake_server = fakes.generate_fake_resource(server.Server)
 
@@ -2814,8 +3084,10 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.open_port_range_for_vm_in_project(
                 range_start=1000, range_stop=1000, openstack_id="test"
             )
-        mock_logger_exception.assert_called_once_with(
-            "Could not create security group rule for instance test"
+        mock_logger_error.assert_called_once_with(
+            "Failed to create security group rule - conflict",
+            extra={"server_id": "test", "error": mock.ANY},
+            exc_info=True,
         )
 
     @patch.object(OpenStackConnector, "get_or_create_project_security_group")
