@@ -23,15 +23,33 @@ def setup_custom_logger(name):
             # by temporarily removing conflicting keys from record.__dict__
             original_record = record.__dict__.copy()
             try:
+                # Collect extra fields to append to the message
+                extra_fields = {}
+                standard_attrs = logging.LogRecord(
+                    "", 0, "", 0, "", [], None
+                ).__dict__.keys()
+                for key in record.__dict__:
+                    if key not in standard_attrs:
+                        extra_fields[key] = record.__dict__[key]
+
+                base_message = super().format(record)
+
+                # Append extra fields if any exist
+                if extra_fields:
+                    extra_str = ", ".join(
+                        f"{key}={value}" for key, value in extra_fields.items()
+                    )
+                    message = f"{base_message} [{extra_str}]"
+                else:
+                    message = base_message
+
                 if (
                     record.levelno == logging.ERROR
                     or record.levelno == logging.CRITICAL
                 ):
-                    message = f"{Fore.RED}{super().format(record)}{Style.RESET_ALL}"
+                    message = f"{Fore.RED}{message}{Style.RESET_ALL}"
                 elif record.levelno == logging.WARNING:
-                    message = f"{Fore.YELLOW}{super().format(record)}{Style.RESET_ALL}"
-                else:
-                    message = super().format(record)
+                    message = f"{Fore.YELLOW}{message}{Style.RESET_ALL}"
 
                 if record.exc_info:
                     tb_lines = traceback.format_exception(*record.exc_info)
