@@ -459,6 +459,24 @@ class Iface(object):
 
         """
 
+    def activate_auth_for_backend(self, backend_id):
+        """
+        Activate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+
+    def deactivate_auth_for_backend(self, backend_id):
+        """
+        Deactivate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+
     def get_allowed_templates(self):
         pass
 
@@ -822,7 +840,7 @@ class Client(Iface):
 
     def recv_is_version(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -857,7 +875,7 @@ class Client(Iface):
 
     def recv_get_client_version(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -890,7 +908,7 @@ class Client(Iface):
 
     def recv_get_gateway_ip(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -921,7 +939,7 @@ class Client(Iface):
 
     def recv_get_calculation_values(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -961,7 +979,7 @@ class Client(Iface):
 
     def recv_import_keypair(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -999,7 +1017,7 @@ class Client(Iface):
 
     def recv_get_vm_ports(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1039,7 +1057,7 @@ class Client(Iface):
 
     def recv_add_udp_security_group(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1083,7 +1101,7 @@ class Client(Iface):
 
     def recv_add_research_environment_security_group(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1127,7 +1145,7 @@ class Client(Iface):
 
     def recv_add_project_security_group_to_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1167,7 +1185,7 @@ class Client(Iface):
 
     def recv_add_metadata_to_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1200,7 +1218,7 @@ class Client(Iface):
 
     def recv_get_flavors(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1233,7 +1251,7 @@ class Client(Iface):
 
     def recv_get_images(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1268,7 +1286,7 @@ class Client(Iface):
 
     def recv_get_public_images(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1304,7 +1322,7 @@ class Client(Iface):
 
     def recv_get_private_images(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1344,7 +1362,7 @@ class Client(Iface):
 
     def recv_get_image(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1380,7 +1398,7 @@ class Client(Iface):
 
     def recv_get_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1418,7 +1436,7 @@ class Client(Iface):
 
     def recv_get_volumes_by_ids(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1455,7 +1473,7 @@ class Client(Iface):
 
     def recv_resize_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1505,7 +1523,7 @@ class Client(Iface):
 
     def recv_open_port_range_for_vm_in_project(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1548,7 +1566,7 @@ class Client(Iface):
 
     def recv_delete_security_group_rule(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1584,7 +1602,7 @@ class Client(Iface):
 
     def recv_remove_security_groups_from_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1621,7 +1639,7 @@ class Client(Iface):
 
     def recv_delete_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1659,7 +1677,7 @@ class Client(Iface):
 
     def recv_rescue_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1693,7 +1711,7 @@ class Client(Iface):
 
     def recv_unrescue_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1805,7 +1823,7 @@ class Client(Iface):
 
     def recv_start_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1845,7 +1863,7 @@ class Client(Iface):
 
     def recv_is_bibigrid_available(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1884,7 +1902,7 @@ class Client(Iface):
 
     def recv_detach_ip_from_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -1988,7 +2006,7 @@ class Client(Iface):
 
     def recv_start_server_with_custom_key(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2035,7 +2053,7 @@ class Client(Iface):
 
     def recv_exist_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2111,7 +2129,7 @@ class Client(Iface):
 
     def recv_create_and_deploy_playbook(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2152,7 +2170,7 @@ class Client(Iface):
 
     def recv_get_playbook_logs(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2187,7 +2205,7 @@ class Client(Iface):
 
     def recv_has_forc(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2217,7 +2235,7 @@ class Client(Iface):
 
     def recv_get_forc_access_url(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2260,7 +2278,7 @@ class Client(Iface):
 
     def recv_create_backend(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2297,7 +2315,7 @@ class Client(Iface):
 
     def recv_get_backends(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2337,7 +2355,7 @@ class Client(Iface):
 
     def recv_get_backends_by_owner(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2378,7 +2396,7 @@ class Client(Iface):
 
     def recv_get_backends_by_template(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2419,7 +2437,7 @@ class Client(Iface):
 
     def recv_get_backend_by_id(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2462,7 +2480,7 @@ class Client(Iface):
 
     def recv_set_metadata_server_data(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2498,7 +2516,7 @@ class Client(Iface):
 
     def recv_remove_metadata_server_data(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2528,7 +2546,7 @@ class Client(Iface):
 
     def recv_is_metadata_server_available(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2569,7 +2587,7 @@ class Client(Iface):
 
     def recv_delete_backend(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2607,7 +2625,7 @@ class Client(Iface):
 
     def recv_add_user_to_backend(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2648,7 +2666,7 @@ class Client(Iface):
 
     def recv_get_users_from_backend(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2691,7 +2709,7 @@ class Client(Iface):
 
     def recv_delete_user_from_backend(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2709,6 +2727,88 @@ class Client(Iface):
             "delete_user_from_backend failed: unknown result",
         )
 
+    def activate_auth_for_backend(self, backend_id):
+        """
+        Activate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+        self.send_activate_auth_for_backend(backend_id)
+        return self.recv_activate_auth_for_backend()
+
+    def send_activate_auth_for_backend(self, backend_id):
+        self._oprot.writeMessageBegin(
+            "activate_auth_for_backend", TMessageType.CALL, self._seqid
+        )
+        args = activate_auth_for_backend_args()
+        args.backend_id = backend_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_activate_auth_for_backend(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = activate_auth_for_backend_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.b is not None:
+            raise result.b
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "activate_auth_for_backend failed: unknown result",
+        )
+
+    def deactivate_auth_for_backend(self, backend_id):
+        """
+        Deactivate Authentification for backend
+
+        Parameters:
+         - backend_id
+
+        """
+        self.send_deactivate_auth_for_backend(backend_id)
+        return self.recv_deactivate_auth_for_backend()
+
+    def send_deactivate_auth_for_backend(self, backend_id):
+        self._oprot.writeMessageBegin(
+            "deactivate_auth_for_backend", TMessageType.CALL, self._seqid
+        )
+        args = deactivate_auth_for_backend_args()
+        args.backend_id = backend_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_deactivate_auth_for_backend(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = deactivate_auth_for_backend_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.b is not None:
+            raise result.b
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "deactivate_auth_for_backend failed: unknown result",
+        )
+
     def get_allowed_templates(self):
         self.send_get_allowed_templates()
         return self.recv_get_allowed_templates()
@@ -2724,7 +2824,7 @@ class Client(Iface):
 
     def recv_get_allowed_templates(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2758,7 +2858,7 @@ class Client(Iface):
 
     def recv_get_servers(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2797,7 +2897,7 @@ class Client(Iface):
 
     def recv_get_servers_by_ids(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2828,7 +2928,7 @@ class Client(Iface):
 
     def recv_get_cluster_supported_ubuntu_os_versions(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2868,7 +2968,7 @@ class Client(Iface):
 
     def recv_get_servers_by_bibigrid_id(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2905,7 +3005,7 @@ class Client(Iface):
 
     def recv_get_security_group_id_by_name(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -2962,7 +3062,7 @@ class Client(Iface):
 
     def recv_scale_up_cluster(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3047,7 +3147,7 @@ class Client(Iface):
 
     def recv_add_cluster_machine(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3084,7 +3184,7 @@ class Client(Iface):
 
     def recv_get_cluster_info(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3121,7 +3221,7 @@ class Client(Iface):
 
     def recv_get_cluster_log(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3160,7 +3260,7 @@ class Client(Iface):
 
     def recv_get_cluster_state(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3199,7 +3299,7 @@ class Client(Iface):
 
     def recv_get_keypair_public_key_by_name(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3234,7 +3334,7 @@ class Client(Iface):
 
     def recv_delete_keypair(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3266,7 +3366,7 @@ class Client(Iface):
 
     def recv_add_default_security_groups_to_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3300,7 +3400,7 @@ class Client(Iface):
 
     def recv_get_server_console(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3342,7 +3442,7 @@ class Client(Iface):
 
     def recv_get_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3382,7 +3482,7 @@ class Client(Iface):
 
     def recv_get_server_by_unique_name(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3422,7 +3522,7 @@ class Client(Iface):
 
     def recv_stop_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3470,7 +3570,7 @@ class Client(Iface):
 
     def recv_create_snapshot(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3510,7 +3610,7 @@ class Client(Iface):
 
     def recv_get_limits(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3554,7 +3654,7 @@ class Client(Iface):
 
     def recv_start_cluster(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3590,7 +3690,7 @@ class Client(Iface):
 
     def recv_terminate_cluster(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3625,7 +3725,7 @@ class Client(Iface):
 
     def recv_delete_image(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3661,7 +3761,7 @@ class Client(Iface):
 
     def recv_detach_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3699,7 +3799,7 @@ class Client(Iface):
 
     def recv_delete_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3740,7 +3840,7 @@ class Client(Iface):
 
     def recv_attach_volume_to_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3781,7 +3881,7 @@ class Client(Iface):
 
     def recv_resume_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3821,7 +3921,7 @@ class Client(Iface):
 
     def recv_create_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3871,7 +3971,7 @@ class Client(Iface):
 
     def recv_create_volume_by_source_volume(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3918,7 +4018,7 @@ class Client(Iface):
 
     def recv_create_volume_by_volume_snap(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -3966,7 +4066,7 @@ class Client(Iface):
 
     def recv_create_volume_snapshot(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -4010,7 +4110,7 @@ class Client(Iface):
 
     def recv_get_volume_snapshot(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -4051,7 +4151,7 @@ class Client(Iface):
 
     def recv_delete_volume_snapshot(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -4089,7 +4189,7 @@ class Client(Iface):
 
     def recv_reboot_hard_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -4127,7 +4227,7 @@ class Client(Iface):
 
     def recv_reboot_soft_server(self):
         iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -4230,6 +4330,12 @@ class Processor(Iface, TProcessor):
         self._processMap["delete_user_from_backend"] = (
             Processor.process_delete_user_from_backend
         )
+        self._processMap["activate_auth_for_backend"] = (
+            Processor.process_activate_auth_for_backend
+        )
+        self._processMap["deactivate_auth_for_backend"] = (
+            Processor.process_deactivate_auth_for_backend
+        )
         self._processMap["get_allowed_templates"] = (
             Processor.process_get_allowed_templates
         )
@@ -4295,7 +4401,7 @@ class Processor(Iface, TProcessor):
         self._on_message_begin = func
 
     def process(self, iprot, oprot):
-        (name, type, seqid) = iprot.readMessageBegin()
+        name, type, seqid = iprot.readMessageBegin()
         if self._on_message_begin:
             self._on_message_begin(name, type, seqid)
         if name not in self._processMap:
@@ -5663,6 +5769,62 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_activate_auth_for_backend(self, seqid, iprot, oprot):
+        args = activate_auth_for_backend_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = activate_auth_for_backend_result()
+        try:
+            result.success = self._handler.activate_auth_for_backend(args.backend_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except BackendNotFoundException as b:
+            msg_type = TMessageType.REPLY
+            result.b = b
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("activate_auth_for_backend", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_deactivate_auth_for_backend(self, seqid, iprot, oprot):
+        args = deactivate_auth_for_backend_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = deactivate_auth_for_backend_result()
+        try:
+            result.success = self._handler.deactivate_auth_for_backend(args.backend_id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except BackendNotFoundException as b:
+            msg_type = TMessageType.REPLY
+            result.b = b
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("deactivate_auth_for_backend", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_get_allowed_templates(self, seqid, iprot, oprot):
         args = get_allowed_templates_args()
         args.read(iprot)
@@ -6728,7 +6890,7 @@ class is_version_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -6808,7 +6970,7 @@ class is_version_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -6875,7 +7037,7 @@ class get_client_version_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -6937,7 +7099,7 @@ class get_client_version_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -7012,7 +7174,7 @@ class get_gateway_ip_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -7074,13 +7236,13 @@ class get_gateway_ip_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype63, _vtype64, _size62) = iprot.readMapBegin()
+                    _ktype63, _vtype64, _size62 = iprot.readMapBegin()
                     for _i66 in range(_size62):
                         _key67 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -7163,7 +7325,7 @@ class get_calculation_values_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -7225,13 +7387,13 @@ class get_calculation_values_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype72, _vtype73, _size71) = iprot.readMapBegin()
+                    _ktype72, _vtype73, _size71 = iprot.readMapBegin()
                     for _i75 in range(_size71):
                         _key76 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -7329,7 +7491,7 @@ class import_keypair_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -7441,7 +7603,7 @@ class import_keypair_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -7528,7 +7690,7 @@ class get_vm_ports_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -7619,13 +7781,13 @@ class get_vm_ports_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype81, _vtype82, _size80) = iprot.readMapBegin()
+                    _ktype81, _vtype82, _size80 = iprot.readMapBegin()
                     for _i84 in range(_size80):
                         _key85 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -7736,7 +7898,7 @@ class add_udp_security_group_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -7827,7 +7989,7 @@ class add_udp_security_group_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -7926,7 +8088,7 @@ class add_research_environment_security_group_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8041,7 +8203,7 @@ class add_research_environment_security_group_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8143,7 +8305,7 @@ class add_project_security_group_to_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8282,7 +8444,7 @@ class add_project_security_group_to_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8381,7 +8543,7 @@ class add_metadata_to_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8396,7 +8558,7 @@ class add_metadata_to_server_args(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype90, _vtype91, _size89) = iprot.readMapBegin()
+                    _ktype90, _vtype91, _size89 = iprot.readMapBegin()
                     for _i93 in range(_size89):
                         _key94 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -8510,7 +8672,7 @@ class add_metadata_to_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -8594,7 +8756,7 @@ class get_flavors_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -8656,13 +8818,13 @@ class get_flavors_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype101, _size98) = iprot.readListBegin()
+                    _etype101, _size98 = iprot.readListBegin()
                     for _i102 in range(_size98):
                         _elem103 = Flavor()
                         _elem103.read(iprot)
@@ -8732,7 +8894,7 @@ class get_images_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -8794,13 +8956,13 @@ class get_images_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype108, _size105) = iprot.readListBegin()
+                    _etype108, _size105 = iprot.readListBegin()
                     for _i109 in range(_size105):
                         _elem110 = Image()
                         _elem110.read(iprot)
@@ -8870,7 +9032,7 @@ class get_public_images_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -8932,13 +9094,13 @@ class get_public_images_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype115, _size112) = iprot.readListBegin()
+                    _etype115, _size112 = iprot.readListBegin()
                     for _i116 in range(_size112):
                         _elem117 = Image()
                         _elem117.read(iprot)
@@ -9008,7 +9170,7 @@ class get_private_images_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -9070,13 +9232,13 @@ class get_private_images_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype122, _size119) = iprot.readListBegin()
+                    _etype122, _size119 = iprot.readListBegin()
                     for _i123 in range(_size119):
                         _elem124 = Image()
                         _elem124.read(iprot)
@@ -9161,7 +9323,7 @@ class get_image_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -9268,7 +9430,7 @@ class get_image_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -9364,7 +9526,7 @@ class get_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -9455,7 +9617,7 @@ class get_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -9551,13 +9713,13 @@ class get_volumes_by_ids_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
                 if ftype == TType.LIST:
                     self.volume_ids = []
-                    (_etype129, _size126) = iprot.readListBegin()
+                    _etype129, _size126 = iprot.readListBegin()
                     for _i130 in range(_size126):
                         _elem131 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -9645,13 +9807,13 @@ class get_volumes_by_ids_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype136, _size133) = iprot.readListBegin()
+                    _etype136, _size133 = iprot.readListBegin()
                     for _i137 in range(_size133):
                         _elem138 = Volume()
                         _elem138.read(iprot)
@@ -9736,7 +9898,7 @@ class resize_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -9840,7 +10002,7 @@ class resize_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -9932,7 +10094,7 @@ class open_port_range_for_vm_in_project_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10109,7 +10271,7 @@ class open_port_range_for_vm_in_project_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -10244,7 +10406,7 @@ class delete_security_group_rule_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10335,7 +10497,7 @@ class delete_security_group_rule_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10431,7 +10593,7 @@ class remove_security_groups_from_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10522,7 +10684,7 @@ class remove_security_groups_from_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10618,7 +10780,7 @@ class delete_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10709,7 +10871,7 @@ class delete_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10811,7 +10973,7 @@ class rescue_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -10950,7 +11112,7 @@ class rescue_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -11046,7 +11208,7 @@ class unrescue_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -11137,7 +11299,7 @@ class unrescue_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -11275,7 +11437,7 @@ class start_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -11317,7 +11479,7 @@ class start_server_args(object):
             elif fid == 5:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype141, _vtype142, _size140) = iprot.readMapBegin()
+                    _ktype141, _vtype142, _size140 = iprot.readMapBegin()
                     for _i144 in range(_size140):
                         _key145 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -11336,10 +11498,10 @@ class start_server_args(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.volume_ids_path_new = []
-                    (_etype150, _size147) = iprot.readListBegin()
+                    _etype150, _size147 = iprot.readListBegin()
                     for _i151 in range(_size147):
                         _elem152 = {}
-                        (_ktype154, _vtype155, _size153) = iprot.readMapBegin()
+                        _ktype154, _vtype155, _size153 = iprot.readMapBegin()
                         for _i157 in range(_size153):
                             _key158 = (
                                 iprot.readString().decode("utf-8", errors="replace")
@@ -11360,10 +11522,10 @@ class start_server_args(object):
             elif fid == 8:
                 if ftype == TType.LIST:
                     self.volume_ids_path_attach = []
-                    (_etype163, _size160) = iprot.readListBegin()
+                    _etype163, _size160 = iprot.readListBegin()
                     for _i164 in range(_size160):
                         _elem165 = {}
-                        (_ktype167, _vtype168, _size166) = iprot.readMapBegin()
+                        _ktype167, _vtype168, _size166 = iprot.readMapBegin()
                         for _i170 in range(_size166):
                             _key171 = (
                                 iprot.readString().decode("utf-8", errors="replace")
@@ -11384,7 +11546,7 @@ class start_server_args(object):
             elif fid == 9:
                 if ftype == TType.LIST:
                     self.additional_owner_keys = []
-                    (_etype176, _size173) = iprot.readListBegin()
+                    _etype176, _size173 = iprot.readListBegin()
                     for _i177 in range(_size173):
                         _elem178 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -11398,7 +11560,7 @@ class start_server_args(object):
             elif fid == 10:
                 if ftype == TType.LIST:
                     self.additional_user_keys = []
-                    (_etype182, _size179) = iprot.readListBegin()
+                    _etype182, _size179 = iprot.readListBegin()
                     for _i183 in range(_size179):
                         _elem184 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -11421,7 +11583,7 @@ class start_server_args(object):
             elif fid == 12:
                 if ftype == TType.LIST:
                     self.additional_security_group_ids = []
-                    (_etype188, _size185) = iprot.readListBegin()
+                    _etype188, _size185 = iprot.readListBegin()
                     for _i189 in range(_size185):
                         _elem190 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -11799,7 +11961,7 @@ class start_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -11956,7 +12118,7 @@ class is_bibigrid_available_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -12018,7 +12180,7 @@ class is_bibigrid_available_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -12100,7 +12262,7 @@ class detach_ip_from_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -12212,7 +12374,7 @@ class detach_ip_from_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -12328,7 +12490,7 @@ class start_server_with_custom_key_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -12361,7 +12523,7 @@ class start_server_with_custom_key_args(object):
             elif fid == 4:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype203, _vtype204, _size202) = iprot.readMapBegin()
+                    _ktype203, _vtype204, _size202 = iprot.readMapBegin()
                     for _i206 in range(_size202):
                         _key207 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -12389,10 +12551,10 @@ class start_server_with_custom_key_args(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.volume_ids_path_new = []
-                    (_etype212, _size209) = iprot.readListBegin()
+                    _etype212, _size209 = iprot.readListBegin()
                     for _i213 in range(_size209):
                         _elem214 = {}
-                        (_ktype216, _vtype217, _size215) = iprot.readMapBegin()
+                        _ktype216, _vtype217, _size215 = iprot.readMapBegin()
                         for _i219 in range(_size215):
                             _key220 = (
                                 iprot.readString().decode("utf-8", errors="replace")
@@ -12413,10 +12575,10 @@ class start_server_with_custom_key_args(object):
             elif fid == 8:
                 if ftype == TType.LIST:
                     self.volume_ids_path_attach = []
-                    (_etype225, _size222) = iprot.readListBegin()
+                    _etype225, _size222 = iprot.readListBegin()
                     for _i226 in range(_size222):
                         _elem227 = {}
-                        (_ktype229, _vtype230, _size228) = iprot.readMapBegin()
+                        _ktype229, _vtype230, _size228 = iprot.readMapBegin()
                         for _i232 in range(_size228):
                             _key233 = (
                                 iprot.readString().decode("utf-8", errors="replace")
@@ -12437,7 +12599,7 @@ class start_server_with_custom_key_args(object):
             elif fid == 9:
                 if ftype == TType.LIST:
                     self.additional_security_group_ids = []
-                    (_etype238, _size235) = iprot.readListBegin()
+                    _etype238, _size235 = iprot.readListBegin()
                     for _i239 in range(_size235):
                         _elem240 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -12451,7 +12613,7 @@ class start_server_with_custom_key_args(object):
             elif fid == 10:
                 if ftype == TType.LIST:
                     self.additional_owner_keys = []
-                    (_etype244, _size241) = iprot.readListBegin()
+                    _etype244, _size241 = iprot.readListBegin()
                     for _i245 in range(_size241):
                         _elem246 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -12465,7 +12627,7 @@ class start_server_with_custom_key_args(object):
             elif fid == 11:
                 if ftype == TType.LIST:
                     self.additional_user_keys = []
-                    (_etype250, _size247) = iprot.readListBegin()
+                    _etype250, _size247 = iprot.readListBegin()
                     for _i251 in range(_size247):
                         _elem252 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -12804,7 +12966,7 @@ class start_server_with_custom_key_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -12971,7 +13133,7 @@ class exist_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -13057,7 +13219,7 @@ class exist_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -13154,7 +13316,7 @@ class create_and_deploy_playbook_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -13178,7 +13340,7 @@ class create_and_deploy_playbook_args(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.conda_packages = []
-                    (_etype267, _size264) = iprot.readListBegin()
+                    _etype267, _size264 = iprot.readListBegin()
                     for _i268 in range(_size264):
                         _elem269 = CondaPackage()
                         _elem269.read(iprot)
@@ -13198,7 +13360,7 @@ class create_and_deploy_playbook_args(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.apt_packages = []
-                    (_etype273, _size270) = iprot.readListBegin()
+                    _etype273, _size270 = iprot.readListBegin()
                     for _i274 in range(_size270):
                         _elem275 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -13388,7 +13550,7 @@ class create_and_deploy_playbook_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -13483,7 +13645,7 @@ class get_playbook_logs_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -13574,7 +13736,7 @@ class get_playbook_logs_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -13658,7 +13820,7 @@ class has_forc_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -13720,7 +13882,7 @@ class has_forc_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -13787,7 +13949,7 @@ class get_forc_access_url_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -13849,7 +14011,7 @@ class get_forc_access_url_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -13945,7 +14107,7 @@ class create_backend_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -14109,7 +14271,7 @@ class create_backend_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -14209,7 +14371,7 @@ class get_backends_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -14274,13 +14436,13 @@ class get_backends_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype281, _size278) = iprot.readListBegin()
+                    _etype281, _size278 = iprot.readListBegin()
                     for _i282 in range(_size278):
                         _elem283 = Backend()
                         _elem283.read(iprot)
@@ -14378,7 +14540,7 @@ class get_backends_by_owner_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -14467,13 +14629,13 @@ class get_backends_by_owner_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype288, _size285) = iprot.readListBegin()
+                    _etype288, _size285 = iprot.readListBegin()
                     for _i289 in range(_size285):
                         _elem290 = Backend()
                         _elem290.read(iprot)
@@ -14571,7 +14733,7 @@ class get_backends_by_template_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -14662,13 +14824,13 @@ class get_backends_by_template_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype295, _size292) = iprot.readListBegin()
+                    _etype295, _size292 = iprot.readListBegin()
                     for _i296 in range(_size292):
                         _elem297 = Backend()
                         _elem297.read(iprot)
@@ -14766,7 +14928,7 @@ class get_backend_by_id_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -14852,7 +15014,7 @@ class get_backend_by_id_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -14967,7 +15129,7 @@ class set_metadata_server_data_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15074,7 +15236,7 @@ class set_metadata_server_data_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15170,7 +15332,7 @@ class remove_metadata_server_data_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15259,7 +15421,7 @@ class remove_metadata_server_data_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15343,7 +15505,7 @@ class is_metadata_server_available_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -15411,7 +15573,7 @@ class is_metadata_server_available_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -15522,7 +15684,7 @@ class delete_backend_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15602,7 +15764,7 @@ class delete_backend_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15685,7 +15847,7 @@ class add_user_to_backend_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15792,13 +15954,13 @@ class add_user_to_backend_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype300, _vtype301, _size299) = iprot.readMapBegin()
+                    _ktype300, _vtype301, _size299 = iprot.readMapBegin()
                     for _i303 in range(_size299):
                         _key304 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -15909,7 +16071,7 @@ class get_users_from_backend_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -15992,13 +16154,13 @@ class get_users_from_backend_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype311, _size308) = iprot.readListBegin()
+                    _etype311, _size308 = iprot.readListBegin()
                     for _i312 in range(_size308):
                         _elem313 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -16104,7 +16266,7 @@ class delete_user_from_backend_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -16211,13 +16373,13 @@ class delete_user_from_backend_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype316, _vtype317, _size315) = iprot.readMapBegin()
+                    _ktype316, _vtype317, _size315 = iprot.readMapBegin()
                     for _i319 in range(_size315):
                         _key320 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -16303,6 +16465,364 @@ delete_user_from_backend_result.thrift_spec = (
 )
 
 
+class activate_auth_for_backend_args(object):
+    """
+    Attributes:
+     - backend_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        backend_id=None,
+    ):
+        self.backend_id = backend_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.backend_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("activate_auth_for_backend_args")
+        if self.backend_id is not None:
+            oprot.writeFieldBegin("backend_id", TType.I64, 1)
+            oprot.writeI64(self.backend_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(activate_auth_for_backend_args)
+activate_auth_for_backend_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.I64,
+        "backend_id",
+        None,
+        None,
+    ),  # 1
+)
+
+
+class activate_auth_for_backend_result(object):
+    """
+    Attributes:
+     - success
+     - b
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+        b=None,
+    ):
+        self.success = success
+        self.b = b
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Backend()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.b = BackendNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("activate_auth_for_backend_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.b is not None:
+            oprot.writeFieldBegin("b", TType.STRUCT, 1)
+            self.b.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(activate_auth_for_backend_result)
+activate_auth_for_backend_result.thrift_spec = (
+    (
+        0,
+        TType.STRUCT,
+        "success",
+        [Backend, None],
+        None,
+    ),  # 0
+    (
+        1,
+        TType.STRUCT,
+        "b",
+        [BackendNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
+class deactivate_auth_for_backend_args(object):
+    """
+    Attributes:
+     - backend_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        backend_id=None,
+    ):
+        self.backend_id = backend_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.backend_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("deactivate_auth_for_backend_args")
+        if self.backend_id is not None:
+            oprot.writeFieldBegin("backend_id", TType.I64, 1)
+            oprot.writeI64(self.backend_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(deactivate_auth_for_backend_args)
+deactivate_auth_for_backend_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.I64,
+        "backend_id",
+        None,
+        None,
+    ),  # 1
+)
+
+
+class deactivate_auth_for_backend_result(object):
+    """
+    Attributes:
+     - success
+     - b
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+        b=None,
+    ):
+        self.success = success
+        self.b = b
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Backend()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.b = BackendNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("deactivate_auth_for_backend_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.b is not None:
+            oprot.writeFieldBegin("b", TType.STRUCT, 1)
+            self.b.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(deactivate_auth_for_backend_result)
+deactivate_auth_for_backend_result.thrift_spec = (
+    (
+        0,
+        TType.STRUCT,
+        "success",
+        [Backend, None],
+        None,
+    ),  # 0
+    (
+        1,
+        TType.STRUCT,
+        "b",
+        [BackendNotFoundException, None],
+        None,
+    ),  # 1
+)
+
+
 class get_allowed_templates_args(object):
     thrift_spec = None
 
@@ -16316,7 +16836,7 @@ class get_allowed_templates_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -16378,13 +16898,13 @@ class get_allowed_templates_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype327, _size324) = iprot.readListBegin()
+                    _etype327, _size324 = iprot.readListBegin()
                     for _i328 in range(_size324):
                         _elem329 = ResearchEnvironmentTemplate()
                         _elem329.read(iprot)
@@ -16454,7 +16974,7 @@ class get_servers_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -16516,13 +17036,13 @@ class get_servers_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype334, _size331) = iprot.readListBegin()
+                    _etype334, _size331 = iprot.readListBegin()
                     for _i335 in range(_size331):
                         _elem336 = VM()
                         _elem336.read(iprot)
@@ -16604,13 +17124,13 @@ class get_servers_by_ids_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
                 if ftype == TType.LIST:
                     self.server_ids = []
-                    (_etype341, _size338) = iprot.readListBegin()
+                    _etype341, _size338 = iprot.readListBegin()
                     for _i342 in range(_size338):
                         _elem343 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -16698,13 +17218,13 @@ class get_servers_by_ids_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype348, _size345) = iprot.readListBegin()
+                    _etype348, _size345 = iprot.readListBegin()
                     for _i349 in range(_size345):
                         _elem350 = VM()
                         _elem350.read(iprot)
@@ -16774,7 +17294,7 @@ class get_cluster_supported_ubuntu_os_versions_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -16836,13 +17356,13 @@ class get_cluster_supported_ubuntu_os_versions_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype355, _size352) = iprot.readListBegin()
+                    _etype355, _size352 = iprot.readListBegin()
                     for _i356 in range(_size352):
                         _elem357 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -16929,7 +17449,7 @@ class get_servers_by_bibigrid_id_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -17017,13 +17537,13 @@ class get_servers_by_bibigrid_id_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype362, _size359) = iprot.readListBegin()
+                    _etype362, _size359 = iprot.readListBegin()
                     for _i363 in range(_size359):
                         _elem364 = VM()
                         _elem364.read(iprot)
@@ -17105,7 +17625,7 @@ class get_security_group_id_by_name_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -17194,7 +17714,7 @@ class get_security_group_id_by_name_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -17315,7 +17835,7 @@ class scale_up_cluster_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -17353,7 +17873,7 @@ class scale_up_cluster_args(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.names = []
-                    (_etype369, _size366) = iprot.readListBegin()
+                    _etype369, _size366 = iprot.readListBegin()
                     for _i370 in range(_size366):
                         _elem371 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -17529,13 +18049,13 @@ class scale_up_cluster_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype374, _vtype375, _size373) = iprot.readMapBegin()
+                    _ktype374, _vtype375, _size373 = iprot.readMapBegin()
                     for _i377 in range(_size373):
                         _key378 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -17543,7 +18063,7 @@ class scale_up_cluster_result(object):
                             else iprot.readString()
                         )
                         _val379 = []
-                        (_etype383, _size380) = iprot.readListBegin()
+                        _etype383, _size380 = iprot.readListBegin()
                         for _i384 in range(_size380):
                             _elem385 = (
                                 iprot.readString().decode("utf-8", errors="replace")
@@ -17662,7 +18182,7 @@ class add_cluster_machine_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -17924,7 +18444,7 @@ class add_cluster_machine_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -18011,7 +18531,7 @@ class get_cluster_info_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18102,7 +18622,7 @@ class get_cluster_info_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -18198,7 +18718,7 @@ class get_cluster_log_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18289,7 +18809,7 @@ class get_cluster_log_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -18385,7 +18905,7 @@ class get_cluster_state_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18476,7 +18996,7 @@ class get_cluster_state_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -18572,7 +19092,7 @@ class get_keypair_public_key_by_name_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18660,7 +19180,7 @@ class get_keypair_public_key_by_name_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -18747,7 +19267,7 @@ class delete_keypair_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18823,7 +19343,7 @@ class delete_keypair_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -18885,7 +19405,7 @@ class add_default_security_groups_to_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -18973,7 +19493,7 @@ class add_default_security_groups_to_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19053,7 +19573,7 @@ class get_server_console_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19144,7 +19664,7 @@ class get_server_console_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -19250,7 +19770,7 @@ class get_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19357,7 +19877,7 @@ class get_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -19456,7 +19976,7 @@ class get_server_by_unique_name_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19563,7 +20083,7 @@ class get_server_by_unique_name_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -19659,7 +20179,7 @@ class stop_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19750,7 +20270,7 @@ class stop_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19858,7 +20378,7 @@ class create_snapshot_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -19891,7 +20411,7 @@ class create_snapshot_args(object):
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.base_tags = []
-                    (_etype392, _size389) = iprot.readListBegin()
+                    _etype392, _size389 = iprot.readListBegin()
                     for _i393 in range(_size389):
                         _elem394 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -20052,7 +20572,7 @@ class create_snapshot_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -20159,7 +20679,7 @@ class get_limits_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             else:
@@ -20221,13 +20741,13 @@ class get_limits_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype397, _vtype398, _size396) = iprot.readMapBegin()
+                    _ktype397, _vtype398, _size396 = iprot.readMapBegin()
                     for _i400 in range(_size396):
                         _key401 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -20331,13 +20851,13 @@ class start_cluster_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
                 if ftype == TType.LIST:
                     self.public_keys = []
-                    (_etype408, _size405) = iprot.readListBegin()
+                    _etype408, _size405 = iprot.readListBegin()
                     for _i409 in range(_size405):
                         _elem410 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -20357,7 +20877,7 @@ class start_cluster_args(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.worker_instances = []
-                    (_etype414, _size411) = iprot.readListBegin()
+                    _etype414, _size411 = iprot.readListBegin()
                     for _i415 in range(_size411):
                         _elem416 = ClusterInstance()
                         _elem416.read(iprot)
@@ -20484,7 +21004,7 @@ class start_cluster_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -20564,7 +21084,7 @@ class terminate_cluster_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -20652,7 +21172,7 @@ class terminate_cluster_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -20732,7 +21252,7 @@ class delete_image_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -20820,7 +21340,7 @@ class delete_image_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -20903,7 +21423,7 @@ class detach_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21021,7 +21541,7 @@ class detach_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21133,7 +21653,7 @@ class delete_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21224,7 +21744,7 @@ class delete_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21323,7 +21843,7 @@ class attach_volume_to_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21441,13 +21961,13 @@ class attach_volume_to_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    (_ktype420, _vtype421, _size419) = iprot.readMapBegin()
+                    _ktype420, _vtype421, _size419 = iprot.readMapBegin()
                     for _i423 in range(_size419):
                         _key424 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -21574,7 +22094,7 @@ class resume_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21665,7 +22185,7 @@ class resume_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21767,7 +22287,7 @@ class create_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -21787,7 +22307,7 @@ class create_volume_args(object):
             elif fid == 3:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype429, _vtype430, _size428) = iprot.readMapBegin()
+                    _ktype429, _vtype430, _size428 = iprot.readMapBegin()
                     for _i432 in range(_size428):
                         _key433 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -21915,7 +22435,7 @@ class create_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -22033,7 +22553,7 @@ class create_volume_by_source_volume_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -22048,7 +22568,7 @@ class create_volume_by_source_volume_args(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype438, _vtype439, _size437) = iprot.readMapBegin()
+                    _ktype438, _vtype439, _size437 = iprot.readMapBegin()
                     for _i441 in range(_size437):
                         _key442 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -22189,7 +22709,7 @@ class create_volume_by_source_volume_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -22307,7 +22827,7 @@ class create_volume_by_volume_snap_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -22322,7 +22842,7 @@ class create_volume_by_volume_snap_args(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    (_ktype447, _vtype448, _size446) = iprot.readMapBegin()
+                    _ktype447, _vtype448, _size446 = iprot.readMapBegin()
                     for _i450 in range(_size446):
                         _key451 = (
                             iprot.readString().decode("utf-8", errors="replace")
@@ -22463,7 +22983,7 @@ class create_volume_by_volume_snap_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -22581,7 +23101,7 @@ class create_volume_snapshot_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -22721,7 +23241,7 @@ class create_volume_snapshot_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -22840,7 +23360,7 @@ class get_volume_snapshot_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -22931,7 +23451,7 @@ class get_volume_snapshot_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 0:
@@ -23027,7 +23547,7 @@ class delete_volume_snapshot_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -23118,7 +23638,7 @@ class delete_volume_snapshot_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -23214,7 +23734,7 @@ class reboot_hard_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -23305,7 +23825,7 @@ class reboot_hard_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -23401,7 +23921,7 @@ class reboot_soft_server_args(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
@@ -23492,7 +24012,7 @@ class reboot_soft_server_result(object):
             return
         iprot.readStructBegin()
         while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
+            fname, ftype, fid = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
             if fid == 1:
