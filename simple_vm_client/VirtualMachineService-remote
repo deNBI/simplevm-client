@@ -91,6 +91,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("   add_user_to_backend(i64 backend_id, string user_id)")
     print("   get_users_from_backend(i64 backend_id)")
     print("   delete_user_from_backend(i64 backend_id, string user_id)")
+    print("  Backend activate_auth_for_backend(i64 backend_id)")
+    print("  Backend deactivate_auth_for_backend(i64 backend_id)")
     print("   get_allowed_templates()")
     print("   get_servers()")
     print("   get_servers_by_ids( server_ids)")
@@ -677,6 +679,26 @@ elif cmd == "delete_user_from_backend":
         client.delete_user_from_backend(
             eval(args[0]),
             args[1],
+        )
+    )
+
+elif cmd == "activate_auth_for_backend":
+    if len(args) != 1:
+        print("activate_auth_for_backend requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.activate_auth_for_backend(
+            eval(args[0]),
+        )
+    )
+
+elif cmd == "deactivate_auth_for_backend":
+    if len(args) != 1:
+        print("deactivate_auth_for_backend requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.deactivate_auth_for_backend(
+            eval(args[0]),
         )
     )
 
