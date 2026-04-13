@@ -1,4 +1,4 @@
-FROM python:3.14.3
+FROM python:3.14.4
 RUN echo "deb https://deb.debian.org/debian/ stable main" > /etc/apt/sources.list
 RUN apt-get update -y \
     && apt-get install -y build-essential python3-openstackclient vim\
