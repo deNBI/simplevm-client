@@ -1,7 +1,7 @@
 services:
   simplevm-client:
     container_name: simplevm-client
-    image: quay.io/denbicloud/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
+    image: oci.bi.denbi.de/simplevm/simplevm-client:${CLOUD_PORTAL_CLIENT_TAG}
     ports:
       - ${CLIENT_PORT}:9090
     env_file:
@@ -20,7 +20,7 @@ services:
 
   simplevm_client_redis:
     container_name: simplevm_client_redis
-    image: redis:8.6.1
+    image: redis:8.6.2
     expose:
       - "6379"
     networks:
@@ -28,7 +28,7 @@ services:
 
   simplevm_bibigrid:
     container_name: simplevm_bibigrid
-    image: quay.io/denbicloud/bibigrid:${BIBIGRID_TAG}
+    image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
     volumes:
       - ./scripts/bibigrid/clear_keys_cron:/etc/crontabs/root
     env_file:
@@ -43,7 +43,7 @@ services:
 
   # filebeat
   simplevm_filebeat:
-    image: docker.elastic.co/beats/filebeat:9.3.1
+    image: docker.elastic.co/beats/filebeat:9.3.3
     env_file:
       - .env
     volumes:

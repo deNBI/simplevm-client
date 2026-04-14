@@ -417,6 +417,7 @@ class Backend(object):
      - location_url
      - template
      - template_version
+     - auth_enabled
 
     """
 
@@ -429,12 +430,14 @@ class Backend(object):
         location_url=None,
         template=None,
         template_version=None,
+        auth_enabled=True,
     ):
         self.id = id
         self.owner = owner
         self.location_url = location_url
         self.template = template
         self.template_version = template_version
+        self.auth_enabled = auth_enabled
 
     def read(self, iprot):
         if (
@@ -490,6 +493,11 @@ class Backend(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.BOOL:
+                    self.auth_enabled = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -537,6 +545,10 @@ class Backend(object):
                 else self.template_version
             )
             oprot.writeFieldEnd()
+        if self.auth_enabled is not None:
+            oprot.writeFieldBegin("auth_enabled", TType.BOOL, 6)
+            oprot.writeBool(self.auth_enabled)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -569,6 +581,8 @@ class ResearchEnvironmentTemplate(object):
      - min_ram
      - min_cores
      - securitygroup_name
+     - allow_disable_auth
+     - create_only_backend
 
     """
 
@@ -588,6 +602,8 @@ class ResearchEnvironmentTemplate(object):
         min_ram=0,
         min_cores=0,
         securitygroup_name=None,
+        allow_disable_auth=False,
+        create_only_backend=False,
     ):
         self.template_name = template_name
         self.title = title
@@ -605,6 +621,8 @@ class ResearchEnvironmentTemplate(object):
             min_cores = 0
         self.min_cores = min_cores
         self.securitygroup_name = securitygroup_name
+        self.allow_disable_auth = allow_disable_auth
+        self.create_only_backend = create_only_backend
 
     def read(self, iprot):
         if (
@@ -726,6 +744,16 @@ class ResearchEnvironmentTemplate(object):
                     )
                 else:
                     iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.BOOL:
+                    self.allow_disable_auth = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.BOOL:
+                    self.create_only_backend = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -823,6 +851,14 @@ class ResearchEnvironmentTemplate(object):
                 if sys.version_info[0] == 2
                 else self.securitygroup_name
             )
+            oprot.writeFieldEnd()
+        if self.allow_disable_auth is not None:
+            oprot.writeFieldBegin("allow_disable_auth", TType.BOOL, 13)
+            oprot.writeBool(self.allow_disable_auth)
+            oprot.writeFieldEnd()
+        if self.create_only_backend is not None:
+            oprot.writeFieldBegin("create_only_backend", TType.BOOL, 14)
+            oprot.writeBool(self.create_only_backend)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -5346,6 +5382,13 @@ Backend.thrift_spec = (
         "UTF8",
         None,
     ),  # 5
+    (
+        6,
+        TType.BOOL,
+        "auth_enabled",
+        None,
+        True,
+    ),  # 6
 )
 all_structs.append(ResearchEnvironmentTemplate)
 ResearchEnvironmentTemplate.thrift_spec = (
@@ -5434,6 +5477,20 @@ ResearchEnvironmentTemplate.thrift_spec = (
         "UTF8",
         None,
     ),  # 12
+    (
+        13,
+        TType.BOOL,
+        "allow_disable_auth",
+        None,
+        False,
+    ),  # 13
+    (
+        14,
+        TType.BOOL,
+        "create_only_backend",
+        None,
+        False,
+    ),  # 14
 )
 all_structs.append(CondaPackage)
 CondaPackage.thrift_spec = (

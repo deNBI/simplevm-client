@@ -32,7 +32,8 @@ struct Backend {
     2: string owner,
     3: string location_url,
     4: string template,
-    5: string template_version
+    5: string template_version,
+    6: optional bool auth_enabled = true
 }
 
 
@@ -49,6 +50,8 @@ struct ResearchEnvironmentTemplate{
 10: optional int min_ram = 0
 11: optional int min_cores = 0
 12: optional string securitygroup_name
+13: optional bool allow_disable_auth = false
+14: optional bool create_only_backend = false
 
 }
 struct CondaPackage{
@@ -677,6 +680,16 @@ service VirtualMachineService {
     map<string,string> delete_user_from_backend(
     1:i64 backend_id,
     2:string user_id
+    ) throws (1:BackendNotFoundException b)
+
+    /** Activate Authentification for backend*/
+    Backend activate_auth_for_backend(
+    1:i64 backend_id
+    ) throws (1:BackendNotFoundException b)
+
+    /** Deactivate Authentification for backend*/
+    Backend deactivate_auth_for_backend(
+    1:i64 backend_id
     ) throws (1:BackendNotFoundException b)
 
 
