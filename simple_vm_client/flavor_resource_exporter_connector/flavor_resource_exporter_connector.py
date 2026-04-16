@@ -5,9 +5,11 @@ that returns JSON data about available flavors.
 """
 
 import json
+import os
 from typing import Optional
 
 import requests
+from requests.auth import HTTPBasicAuth
 
 from simple_vm_client.ttypes import FlavorResource
 from simple_vm_client.util.logger import setup_custom_logger
@@ -32,6 +34,7 @@ class FlavorResourceExporterConnector:
         self.enabled: bool = False
 
         self.load_config(config_file=config_file)
+        self._check_credentials()
 
     def load_config(self, config_file: str) -> None:
         """Load configuration from YAML file.
@@ -60,11 +63,15 @@ class FlavorResourceExporterConnector:
 
                 self.endpoint_url = resource_config.get("endpoint_url", "")
                 self.timeout = resource_config.get("timeout", 30)
+                self.username = os.environ.get("FLAVOR_RESOURCE_EXPORTER_USERNAME", "")
 
                 if not self.endpoint_url:
                     logger.warning(
                         "Flavor Resource Exporter enabled but no endpoint_url configured"
                     )
+
+                # Get password from environment variable
+                self.password = os.environ.get("FLAVOR_RESOURCE_EXPORTER_PASSWORD", "")
 
                 logger.info(
                     f"Flavor Resource Exporter configured with endpoint: {self.endpoint_url}"
@@ -91,10 +98,17 @@ class FlavorResourceExporterConnector:
 
         logger.info(f"Fetching flavor resources from: {self.endpoint_url}")
 
+        # Build auth if credentials are available
+        auth = None
+        if self.username and self.password:
+            auth = HTTPBasicAuth(self.username, self.password)
+            logger.info("Using Basic Authentication")
+
         try:
             response = requests.get(
                 self.endpoint_url,
                 timeout=(self.timeout, self.timeout),
+                auth=auth,
             )
             response.raise_for_status()
 
@@ -178,10 +192,37 @@ class FlavorResourceExporterConnector:
             logger.exception(f"Unexpected error parsing flavor resource: {e}")
             return None
 
+    def _check_credentials(self) -> None:
+        """Check if basic auth credentials are available.
+
+        Connector is only enabled if username and password are available via env.
+        Password is loaded here to ensure it happens after config loading.
+        """
+        if not self.enabled:
+            return
+
+        # Load username and password from env
+        self.username = os.environ.get("FLAVOR_RESOURCE_EXPORTER_USERNAME", "")
+        self.password = os.environ.get("FLAVOR_RESOURCE_EXPORTER_PASSWORD", "")
+
+        if not self.username or not self.password:
+            logger.info(
+                "Flavor Resource Exporter deactivated: credentials not available (FLAVOR_RESOURCE_EXPORTER_USERNAME/FLAVOR_RESOURCE_EXPORTER_PASSWORD)"
+            )
+            self.enabled = False
+            return
+
+        logger.info("Basic auth credentials available - connector enabled")
+
     def is_available(self) -> bool:
         """Check if the flavor resource exporter is available.
 
         Returns:
             True if configured and enabled, False otherwise.
         """
-        return self.enabled and bool(self.endpoint_url)
+        return (
+            self.enabled
+            and bool(self.endpoint_url)
+            and bool(self.username)
+            and bool(self.password)
+        )
