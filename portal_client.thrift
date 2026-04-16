@@ -596,6 +596,13 @@ service VirtualMachineService {
     throws (1:NameAlreadyUsedException e,2:ResourceNotAvailableException r,5:ImageNotFoundException i,6:FlavorNotFoundException f,7:DefaultException o)
 
     bool is_bibigrid_available()
+
+    /**
+     * Health check for OpenStack connection.
+     * Returns true if the connection is still working, false otherwise.
+     */
+    bool is_openstack_connection_available()
+
     void detach_ip_from_server(1:string server_id,2:string floating_ip) throws(1:ServerNotFoundException s)
 
 

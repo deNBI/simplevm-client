@@ -546,6 +546,20 @@ class VirtualMachineHandler(Iface):
     def is_bibigrid_available(self) -> bool:
         return self.bibigrid_connector.is_bibigrid_available()
 
+    def is_openstack_connection_available(self) -> bool:
+        """Check if the OpenStack connection is still working.
+
+        Returns:
+            True if the connection is active, False otherwise.
+        """
+        try:
+            # Use get_limits() which is a lightweight call to verify connection
+            self.openstack_connector.get_limits()
+            return True
+        except Exception:
+            logger.error("OpenStack connection check failed")
+            return False
+
     def get_security_group_id_by_name(self, security_group_name) -> str:
         return self.openstack_connector.get_security_group_id_by_name(
             security_group_name=security_group_name

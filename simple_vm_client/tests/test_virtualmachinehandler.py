@@ -655,6 +655,20 @@ class TestVirtualMachineHandler(unittest.TestCase):
         self.handler.is_bibigrid_available()
         self.handler.bibigrid_connector.is_bibigrid_available.assert_called_once()
 
+    def test_is_openstack_connection_available_success(self):
+        self.handler.openstack_connector.get_limits.return_value = {"test": "value"}
+        result = self.handler.is_openstack_connection_available()
+        self.assertTrue(result)
+        self.handler.openstack_connector.get_limits.assert_called_once()
+
+    def test_is_openstack_connection_available_failure(self):
+        self.handler.openstack_connector.get_limits.side_effect = Exception(
+            "Connection failed"
+        )
+        result = self.handler.is_openstack_connection_available()
+        self.assertFalse(result)
+        self.handler.openstack_connector.get_limits.assert_called_once()
+
     #  def test_get_cluster_info(self):
     #     self.handler.get_cluster_info(cluster_id=OPENSTACK_ID)
     #    self.handler.bibigrid_connector.get_cluster_info.assert_called_once_with(

@@ -106,7 +106,7 @@ class FlavorResourceExporterConnector:
 
         try:
             response = requests.get(
-                self.endpoint_url,
+                self.endpoint_url + "/v2/flavors/",
                 timeout=(self.timeout, self.timeout),
                 auth=auth,
             )

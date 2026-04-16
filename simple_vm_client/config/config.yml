@@ -97,9 +97,9 @@ metadata_server:
 
 # Flavor Resource Exporter configuration
 flavor_resource_exporter:
-  activated: False
+  activated: True
   # If flavor resource exporter is activated -- defaults to False
-  endpoint_url: http://localhost:8000/flavor-resources
+  endpoint_url: https://exporter.bi.denbi.de:9070
   # URL of the external endpoint that returns flavor resource data in JSON format
   # Username and password must be set via environment variables:
   #   FLAVOR_RESOURCE_EXPORTER_USERNAME

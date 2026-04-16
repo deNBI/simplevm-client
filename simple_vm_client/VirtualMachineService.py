@@ -9,12 +9,7 @@
 import logging
 import sys
 
-from thrift.Thrift import (
-    TApplicationException,
-    TMessageType,
-    TProcessor,
-    TType,
-)
+from thrift.Thrift import TApplicationException, TMessageType, TProcessor, TType
 from thrift.transport import TTransport
 from thrift.TRecursive import fix_spec
 
@@ -267,6 +262,13 @@ class Iface(object):
 
     def is_bibigrid_available(self):
         pass
+
+    def is_openstack_connection_available(self):
+        """
+        Health check for OpenStack connection.
+        Returns true if the connection is still working, false otherwise.
+
+        """
 
     def detach_ip_from_server(self, server_id, floating_ip):
         """
@@ -1889,6 +1891,42 @@ class Client(Iface):
         raise TApplicationException(
             TApplicationException.MISSING_RESULT,
             "is_bibigrid_available failed: unknown result",
+        )
+
+    def is_openstack_connection_available(self):
+        """
+        Health check for OpenStack connection.
+        Returns true if the connection is still working, false otherwise.
+
+        """
+        self.send_is_openstack_connection_available()
+        return self.recv_is_openstack_connection_available()
+
+    def send_is_openstack_connection_available(self):
+        self._oprot.writeMessageBegin(
+            "is_openstack_connection_available", TMessageType.CALL, self._seqid
+        )
+        args = is_openstack_connection_available_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_is_openstack_connection_available(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = is_openstack_connection_available_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "is_openstack_connection_available failed: unknown result",
         )
 
     def detach_ip_from_server(self, server_id, floating_ip):
@@ -4339,6 +4377,9 @@ class Processor(Iface, TProcessor):
         self._processMap["is_bibigrid_available"] = (
             Processor.process_is_bibigrid_available
         )
+        self._processMap["is_openstack_connection_available"] = (
+            Processor.process_is_openstack_connection_available
+        )
         self._processMap["detach_ip_from_server"] = (
             Processor.process_detach_ip_from_server
         )
@@ -5238,6 +5279,31 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("is_bibigrid_available", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_is_openstack_connection_available(self, seqid, iprot, oprot):
+        args = is_openstack_connection_available_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = is_openstack_connection_available_result()
+        try:
+            result.success = self._handler.is_openstack_connection_available()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("is_openstack_connection_available", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12300,6 +12366,135 @@ class is_bibigrid_available_result(object):
 
 all_structs.append(is_bibigrid_available_result)
 is_bibigrid_available_result.thrift_spec = (
+    (
+        0,
+        TType.BOOL,
+        "success",
+        None,
+        None,
+    ),  # 0
+)
+
+
+class is_openstack_connection_available_args(object):
+    thrift_spec = None
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("is_openstack_connection_available_args")
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(is_openstack_connection_available_args)
+is_openstack_connection_available_args.thrift_spec = ()
+
+
+class is_openstack_connection_available_result(object):
+    """
+    Attributes:
+     - success
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+    ):
+        self.success = success
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.BOOL:
+                    self.success = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("is_openstack_connection_available_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.BOOL, 0)
+            oprot.writeBool(self.success)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(is_openstack_connection_available_result)
+is_openstack_connection_available_result.thrift_spec = (
     (
         0,
         TType.BOOL,
