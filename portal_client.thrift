@@ -118,6 +118,44 @@ struct Volume{
 	/** The ephemeral disk space of the flavor*/
 	6:optional i32 ephemeral_disk
 }
+
+/**
+ * This Struct defines a Flavor Resource (from external exporter).
+ */
+struct FlavorResource {
+	/** Unique identifier */
+	1: required string id,
+
+	/** Name of the flavor */
+	2: required string name,
+
+	/** Number of available instances */
+	3: required i32 available,
+
+	/** Total number of instances */
+	4: required i32 total,
+
+	/** Number of cores */
+	5: required i32 cores,
+
+	/** Memory in MB */
+	6: required i32 mem,
+
+	/** Type (e.g., gpu, cpu) */
+	7: required string type,
+
+	/** GPU type (if applicable) */
+	8: optional string gpu_type,
+
+	/** Number of GPUs */
+	9: optional i32 gpu_count,
+
+	/** Root disk in GB */
+	10: optional i32 root_disk,
+
+	/** Ephemeral disk in GB */
+	11: optional i32 ephemeral_disk
+}
 /**
  * This Struct defines an Image.
  */
@@ -793,6 +831,12 @@ service VirtualMachineService {
      *          'totalInstancesUsed': totalInstancesUsed}
      */
     map<string,string> get_limits()
+
+    /**
+     * Get Flavor Resources from external exporter.
+     * Returns: List of FlavorResource instances.
+     */
+    list<FlavorResource> get_flavor_resources()
 
      ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:ClusterInstanceMetadata metadata)
 

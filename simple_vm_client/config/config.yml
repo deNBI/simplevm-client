@@ -94,3 +94,12 @@ metadata_server:
   use_https: False
   host: simplevm_metadata_server
   port: 8008
+
+# Flavor Resource Exporter configuration
+flavor_resource_exporter:
+  activated: False
+  # If flavor resource exporter is activated -- defaults to False
+  endpoint_url: http://localhost:8000/flavor-resources
+  # URL of the external endpoint that returns flavor resource data in JSON format
+  timeout: 30
+  # Request timeout in seconds
