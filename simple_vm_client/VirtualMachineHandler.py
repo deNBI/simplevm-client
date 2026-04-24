@@ -7,6 +7,9 @@ Which can be used for the PortalClient.
 from __future__ import annotations
 
 from simple_vm_client.bibigrid_connector.bibigrid_connector import BibigridConnector
+from simple_vm_client.flavor_resource_exporter_connector.flavor_resource_exporter_connector import (
+    FlavorResourceExporterConnector,
+)
 from simple_vm_client.forc_connector.forc_connector import ForcConnector
 from simple_vm_client.openstack_connector.openstack_connector import OpenStackConnector
 from simple_vm_client.util import thrift_converter
@@ -24,6 +27,7 @@ from .ttypes import (
     ClusterState,
     CondaPackage,
     Flavor,
+    FlavorResource,
     Image,
     PlaybookResult,
     ResearchEnvironmentTemplate,
@@ -44,6 +48,9 @@ class VirtualMachineHandler(Iface):
         self.bibigrid_connector = BibigridConnector(config_file=config_file)
         self.forc_connector = ForcConnector(config_file=config_file)
         self.metadata_connetor = MetadataConnector(config_file=config_file)
+        self.flavor_resource_exporter = FlavorResourceExporterConnector(
+            config_file=config_file
+        )
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
         for k, v in self.forc_connector.active_playbooks.items():
@@ -212,6 +219,10 @@ class VirtualMachineHandler(Iface):
                 bibigrid_id=bibigrid_id
             )
         )
+
+    def get_flavor_resources(self) -> list[FlavorResource]:
+        """Get flavor resources from the external exporter."""
+        return self.flavor_resource_exporter.fetch_flavor_resources()
 
     def get_playbook_logs(self, openstack_id: str) -> PlaybookResult:
         return self.forc_connector.get_playbook_logs(openstack_id=openstack_id)
@@ -534,6 +545,20 @@ class VirtualMachineHandler(Iface):
 
     def is_bibigrid_available(self) -> bool:
         return self.bibigrid_connector.is_bibigrid_available()
+
+    def is_openstack_connection_available(self) -> bool:
+        """Check if the OpenStack connection is still working.
+
+        Returns:
+            True if the connection is active, False otherwise.
+        """
+        try:
+            # Use get_limits() which is a lightweight call to verify connection
+            self.openstack_connector.get_limits()
+            return True
+        except Exception:
+            logger.error("OpenStack connection check failed")
+            return False
 
     def get_security_group_id_by_name(self, security_group_name) -> str:
         return self.openstack_connector.get_security_group_id_by_name(
