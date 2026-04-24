@@ -33,6 +33,7 @@ from openstack.exceptions import (
 from openstack.network.v2.network import Network
 from openstack.network.v2.security_group import SecurityGroup
 from oslo_utils import encodeutils
+from requests.adapters import HTTPAdapter
 
 from simple_vm_client.forc_connector.template.template import (
     ResearchEnvironmentMetadata,
@@ -97,21 +98,16 @@ class OpenStackConnector:
         self.load_config_yml(config_file)
 
         try:
-            # Create an authentication session
+
             if self.USE_APPLICATION_CREDENTIALS:
-                logger.info(
-                    "Using Application Credentials for OpenStack Connection",
-                    extra={"auth_url": self.AUTH_URL},
-                )
+
+                logger.info("Using Application Credentials for OpenStack Connection")
                 auth = application_credential.ApplicationCredential(
                     auth_url=self.AUTH_URL,
                     application_credential_id=self.APPLICATION_CREDENTIAL_ID,
                     application_credential_secret=self.APPLICATION_CREDENTIAL_SECRET,
                 )
-                sess = session.Session(auth=auth)
-                sess.session.connections_pool = True
-                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
-                self.openstack_connection = connection.Connection(session=sess)
+
             else:
                 logger.info(
                     "Using User Credentials for OpenStack Connection",
@@ -125,13 +121,23 @@ class OpenStackConnector:
                     user_domain_name=self.USER_DOMAIN_NAME,
                     project_domain_id=self.PROJECT_DOMAIN_ID,
                 )
-                sess = session.Session(auth=auth)
-                sess.session.connections_pool = True
-                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
-                self.openstack_connection = connection.Connection(
-                    session=sess,
-                    compute_api_version=self.NOVA_MICROVERSION,
-                )
+
+            pool_size = int(self.THREADS * 1.5)
+
+            adapter = HTTPAdapter(
+                pool_connections=pool_size,
+                pool_maxsize=pool_size,
+                max_retries=3,
+            )
+
+            sess = session.Session(auth=auth, timeout=30)
+            sess.session.mount("http://", adapter)
+            sess.session.mount("https://", adapter)
+            self.openstack_connection = connection.Connection(
+                session=sess,
+                compute_api_version=self.NOVA_MICROVERSION,
+            )
+
             self.openstack_connection.authorize()
             self.get_network()
             logger.info(
@@ -140,12 +146,8 @@ class OpenStackConnector:
             )
             self.create_or_get_default_ssh_security_group()
         except Exception as e:
-            logger.error(
-                "Client failed authentication at OpenStack",
-                extra={"error": str(e), "cloud_site": self.CLOUD_SITE},
-                exc_info=True,
-            )
-            raise ConnectionError(f"Client failed authentication at OpenStack: {e}")
+            logger.error("Client failed authentication at Openstack!")
+            raise ConnectionError("Client failed authentication at Openstack") from e
 
         self.DEACTIVATE_UPGRADES_SCRIPT = self.create_deactivate_update_script()
 
@@ -1050,7 +1052,7 @@ class OpenStackConnector:
             extra={"name_or_id": name_or_id, "slurm_version": slurm_version},
         )
 
-        logger.info(f"Get Image {name_or_id}")
+        logger.info(f"Get Imagedsadsadas {name_or_id}")
 
         try:
             image = self.openstack_connection.get_image(name_or_id=name_or_id)
@@ -1075,88 +1077,6 @@ class OpenStackConnector:
                     "Selecting the newest one based on created_at."
                 )
                 image = self._get_newest_image(matching_images)
-
-            # --- Image not found ---
-            if image is None:
-                logger.debug(
-                    "Image not found directly, checking replacement options",
-                    extra={"name_or_id": name_or_id},
-                )
-                if replace_not_found:
-                    for version in SUPPORTED_OS_VERSIONS:
-                        if version in name_or_id:
-                            if slurm_version:
-                                image = self.get_active_image_by_os_version_and_slurm_version(
-                                    os_version=version,
-                                    os_distro="ubuntu",
-                                    slurm_version=slurm_version,
-                                )
-                                logger.debug(
-                                    "Found replacement image with Slurm version",
-                                    extra={"image_id": image.id if image else None},
-                                )
-                                return image
-                            image = self.get_active_image_by_os_version(
-                                os_version=version, os_distro="ubuntu"
-                            )
-                            logger.debug(
-                                "Found replacement image",
-                                extra={"image_id": image.id if image else None},
-                            )
-                            return image
-
-                if ignore_not_found:
-                    return None
-
-                logger.error("Image not found", extra={"name_or_id": name_or_id})
-                raise ImageNotFoundException(
-                    message=f"Image not found: {name_or_id}",
-                    name_or_id=name_or_id,
-                )
-
-            # --- Image found but inactive ---
-            if image.status != "active":
-                logger.warning(
-                    "Image found but not active",
-                    extra={"image_id": image.id, "status": image.status},
-                )
-                if replace_inactive:
-                    os_version = image["os_version"]
-                    os_distro = image["os_distro"]
-
-                    if slurm_version:
-                        image = self.get_active_image_by_os_version_and_slurm_version(
-                            os_version=os_version,
-                            os_distro=os_distro,
-                            slurm_version=slurm_version,
-                        )
-                    else:
-                        image = self.get_active_image_by_os_version(
-                            os_version=os_version, os_distro=os_distro
-                        )
-
-                    if image:
-                        logger.debug(
-                            "Found replacement for inactive image",
-                            extra={"image_id": image.id},
-                        )
-                        return image
-
-                if not ignore_not_active:
-                    logger.error(
-                        "Image is not active",
-                        extra={"image_id": image.id, "status": image.status},
-                    )
-                    raise ImageNotFoundException(
-                        message=f"Image {name_or_id} is not active (status: {image.status})",
-                        name_or_id=name_or_id,
-                    )
-
-            logger.debug(
-                "Image retrieved successfully",
-                extra={"image_id": image.id, "status": image.status},
-            )
-            return image
         except Exception as e:
             logger.error(
                 "Error fetching image",
@@ -1164,6 +1084,89 @@ class OpenStackConnector:
                 exc_info=True,
             )
             raise
+
+        # --- Image not found ---
+        if image is None:
+            logger.debug(
+                "Image not found directly, checking replacement options",
+                extra={"name_or_id": name_or_id},
+            )
+            if replace_not_found:
+                for version in SUPPORTED_OS_VERSIONS:
+                    if version in name_or_id:
+                        if slurm_version:
+                            image = (
+                                self.get_active_image_by_os_version_and_slurm_version(
+                                    os_version=version,
+                                    os_distro="ubuntu",
+                                    slurm_version=slurm_version,
+                                )
+                            )
+                            logger.debug(
+                                "Found replacement image with Slurm version",
+                                extra={"image_id": image.id if image else None},
+                            )
+                            return image
+                        image = self.get_active_image_by_os_version(
+                            os_version=version, os_distro="ubuntu"
+                        )
+                        logger.debug(
+                            "Found replacement image",
+                            extra={"image_id": image.id if image else None},
+                        )
+                        return image
+            if ignore_not_found:
+                return None
+            else:
+                logger.error("Image not found", extra={"name_or_id": name_or_id})
+                raise ImageNotFoundException(
+                    message=f"Image not found: {name_or_id}",
+                    name_or_id=name_or_id,
+                )
+
+        # --- Image found but inactive ---
+        if image.status != "active":
+            logger.warning(
+                "Image found but not active",
+                extra={"image_id": image.id, "status": image.status},
+            )
+            if replace_inactive:
+                os_version = image["os_version"]
+                os_distro = image["os_distro"]
+
+                if slurm_version:
+                    image = self.get_active_image_by_os_version_and_slurm_version(
+                        os_version=os_version,
+                        os_distro=os_distro,
+                        slurm_version=slurm_version,
+                    )
+                else:
+                    image = self.get_active_image_by_os_version(
+                        os_version=os_version, os_distro=os_distro
+                    )
+
+                if image:
+                    logger.debug(
+                        "Found replacement for inactive image",
+                        extra={"image_id": image.id},
+                    )
+                    return image
+
+            if not ignore_not_active:
+                logger.error(
+                    "Image is not active",
+                    extra={"image_id": image.id, "status": image.status},
+                )
+                raise ImageNotFoundException(
+                    message=f"Image {name_or_id} is not active (status: {image.status})",
+                    name_or_id=name_or_id,
+                )
+
+        logger.debug(
+            "Image retrieved successfully",
+            extra={"image_id": image.id, "status": image.status},
+        )
+        return image
 
     def create_snapshot(
         self,
