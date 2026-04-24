@@ -9,7 +9,9 @@ import os
 from typing import Optional
 
 import requests
+from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
+from urllib3.util.retry import Retry
 
 from simple_vm_client.ttypes import FlavorResource
 from simple_vm_client.util.logger import setup_custom_logger
@@ -35,6 +37,34 @@ class FlavorResourceExporterConnector:
 
         self.load_config(config_file=config_file)
         self._check_credentials()
+        self.session = None
+        if self.enabled:
+            self.session = self._create_session()
+
+    def _create_session(self):
+        session = requests.Session()
+
+        retry = Retry(
+            total=3,
+            backoff_factor=0.3,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET"],
+        )
+
+        adapter = HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=10,
+            max_retries=retry,
+        )
+
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+
+        if self.username and self.password:
+            session.auth = HTTPBasicAuth(self.username, self.password)
+            logger.info("Using Basic Authentication")
+
+        return session
 
     def load_config(self, config_file: str) -> None:
         """Load configuration from YAML file.
@@ -63,15 +93,11 @@ class FlavorResourceExporterConnector:
 
                 self.endpoint_url = resource_config.get("endpoint_url", "")
                 self.timeout = resource_config.get("timeout", 30)
-                self.username = os.environ.get("FLAVOR_RESOURCE_EXPORTER_USERNAME", "")
 
                 if not self.endpoint_url:
                     logger.warning(
                         "Flavor Resource Exporter enabled but no endpoint_url configured"
                     )
-
-                # Get password from environment variable
-                self.password = os.environ.get("FLAVOR_RESOURCE_EXPORTER_PASSWORD", "")
 
                 logger.info(
                     f"Flavor Resource Exporter configured with endpoint: {self.endpoint_url}"
@@ -98,17 +124,10 @@ class FlavorResourceExporterConnector:
 
         logger.info(f"Fetching flavor resources from: {self.endpoint_url}")
 
-        # Build auth if credentials are available
-        auth = None
-        if self.username and self.password:
-            auth = HTTPBasicAuth(self.username, self.password)
-            logger.info("Using Basic Authentication")
-
         try:
-            response = requests.get(
-                self.endpoint_url + "/v2/flavors/",
+            response = self.session.get(
+                url=f"{self.endpoint_url}/v2/flavors/",
                 timeout=(self.timeout, self.timeout),
-                auth=auth,
             )
             response.raise_for_status()
 
