@@ -25,6 +25,7 @@ from openstack.compute.v2.keypair import Keypair
 from openstack.compute.v2.server import Server
 from openstack.exceptions import (
     ConflictException,
+    DuplicateResource,
     OpenStackCloudException,
     ResourceFailure,
     ResourceNotFound,
@@ -1026,6 +1027,15 @@ class OpenStackConnector:
         )
         return backup_image
 
+    def _get_newest_image(self, images: list[Image]) -> Image:
+        """Return the newest image from a list based on created_at timestamp."""
+        if not images:
+            raise ImageNotFoundException(
+                message="No images provided to _get_newest_image",
+                name_or_id="unknown",
+            )
+        return max(images, key=lambda img: img.created_at)
+
     def get_image(
         self,
         name_or_id: str,
@@ -1040,10 +1050,31 @@ class OpenStackConnector:
             extra={"name_or_id": name_or_id, "slurm_version": slurm_version},
         )
 
+        logger.info(f"Get Image {name_or_id}")
+
         try:
-            image: Image | None = self.openstack_connection.get_image(
-                name_or_id=name_or_id
+            image = self.openstack_connection.get_image(name_or_id=name_or_id)
+        except DuplicateResource:
+            logger.warning(
+                f"Multiple images found with name '{name_or_id}'. "
+                "Fetching all images and filtering manually to select the newest one."
             )
+            # In newest openstacksdk, list_images() has no name filter — must filter manually
+            all_images = list(self.openstack_connection.list_images())
+            matching_images = [img for img in all_images if img.name == name_or_id]
+
+            if not matching_images:
+                logger.error(
+                    f"Unexpected: No images found matching name '{name_or_id}' after listing all images, "
+                    "despite DuplicateResource being raised. This may indicate a race condition or SDK inconsistency."
+                )
+                image = None
+            else:
+                logger.info(
+                    f"Found {len(matching_images)} image(s) with name '{name_or_id}'. "
+                    "Selecting the newest one based on created_at."
+                )
+                image = self._get_newest_image(matching_images)
 
             # --- Image not found ---
             if image is None:
