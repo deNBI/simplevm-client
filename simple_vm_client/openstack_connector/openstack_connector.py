@@ -32,6 +32,7 @@ from openstack.exceptions import (
 from openstack.network.v2.network import Network
 from openstack.network.v2.security_group import SecurityGroup
 from oslo_utils import encodeutils
+from requests.adapters import HTTPAdapter
 
 from simple_vm_client.forc_connector.template.template import (
     ResearchEnvironmentMetadata,
@@ -94,27 +95,15 @@ class OpenStackConnector:
         self.load_config_yml(config_file)
 
         try:
-            # Create an authentication session
 
             if self.USE_APPLICATION_CREDENTIALS:
 
                 logger.info("Using Application Credentials for OpenStack Connection")
-                # Create an authentication session
                 auth = application_credential.ApplicationCredential(
                     auth_url=self.AUTH_URL,
                     application_credential_id=self.APPLICATION_CREDENTIAL_ID,
                     application_credential_secret=self.APPLICATION_CREDENTIAL_SECRET,
                 )
-
-                sess = session.Session(auth=auth)
-
-                # Configure session settings as needed
-                sess.session.connections_pool = True
-
-                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
-
-                # Create the Connection object with the session
-                self.openstack_connection = connection.Connection(session=sess)
 
             else:
                 logger.info("Using User Credentials for OpenStack Connection")
@@ -126,22 +115,31 @@ class OpenStackConnector:
                     user_domain_name=self.USER_DOMAIN_NAME,
                     project_domain_id=self.PROJECT_DOMAIN_ID,
                 )
-                sess = session.Session(auth=auth)
-                sess.session.connections_pool = True
 
-                sess.session.connection_pool_size = math.ceil(self.THREADS * 1.20)
-                self.openstack_connection = connection.Connection(
-                    session=sess,
-                    compute_api_version=self.NOVA_MICROVERSION,
-                )
+            pool_size = int(self.THREADS * 1.5)
+
+            adapter = HTTPAdapter(
+                pool_connections=pool_size,
+                pool_maxsize=pool_size,
+                max_retries=3,
+            )
+
+            sess = session.Session(auth=auth, timeout=30)
+            sess.session.mount("http://", adapter)
+            sess.session.mount("https://", adapter)
+            self.openstack_connection = connection.Connection(
+                session=sess,
+                compute_api_version=self.NOVA_MICROVERSION,
+            )
+
             self.openstack_connection.authorize()
             self.get_network()
 
             logger.info("Connected to Openstack")
             self.create_or_get_default_ssh_security_group()
-        except Exception:
+        except Exception as e:
             logger.error("Client failed authentication at Openstack!")
-            raise ConnectionError("Client failed authentication at Openstack")
+            raise ConnectionError("Client failed authentication at Openstack") from e
 
         self.DEACTIVATE_UPGRADES_SCRIPT = self.create_deactivate_update_script()
 
