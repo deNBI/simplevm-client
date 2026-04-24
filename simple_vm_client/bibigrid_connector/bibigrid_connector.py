@@ -108,7 +108,7 @@ class BibigridConnector:
         request_url = f"{self._BIBIGRID_EP}/bibigrid/log/{cluster_id}"
 
         try:
-            response = self.session.get(url=request_url, timeout=DEFAULT_TIMEOUT)
+            response = self.session.get(url=request_url)
             response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
             json_resp = response.json(strict=False)
 
@@ -187,7 +187,7 @@ class BibigridConnector:
         try:
             response = self.session.get(url=request_url, timeout=DEFAULT_TIMEOUT)
             response.raise_for_status()
-            return True
+            return response.status_code == 200
         except Exception:
             return False
 

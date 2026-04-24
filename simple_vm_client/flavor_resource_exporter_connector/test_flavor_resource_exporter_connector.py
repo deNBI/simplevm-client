@@ -86,7 +86,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         result = connector.fetch_flavor_resources()
         self.assertEqual(result, [])
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     @patch("builtins.open")
     @patch("yaml.load")
     def test_fetch_flavor_resources_success(self, mock_yaml_load, mock_open, mock_get):
@@ -141,7 +141,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         self.assertEqual(result[0].root_disk, 50)
         self.assertEqual(result[0].ephemeral_disk, 0)
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     @patch("builtins.open")
     @patch("yaml.load")
     def test_fetch_flavor_resources_with_auth(
@@ -171,9 +171,8 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         connector.fetch_flavor_resources()
 
         mock_get.assert_called_once()
-        call_args = mock_get.call_args
-        self.assertEqual(call_args[1]["auth"].username, "testuser")
-        self.assertEqual(call_args[1]["auth"].password, "testpass")
+        assert connector.session.auth.username == "testuser"
+        assert connector.session.auth.password == "testpass"
 
     @patch("builtins.open")
     @patch("yaml.load")
@@ -259,7 +258,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         connector = FlavorResourceExporterConnector("config.yml")
         self.assertFalse(connector.is_available())
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     @patch("builtins.open")
     @patch("yaml.load")
     def test_fetch_flavor_resources_pagination(
@@ -313,7 +312,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         self.assertEqual(result[0].name, "Flavor 1")
         self.assertEqual(result[1].name, "Flavor 2")
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     @patch("builtins.open")
     @patch("yaml.load")
     def test_fetch_flavor_resources_single_object(
@@ -353,7 +352,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].name, "Single Flavor")
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     @patch("builtins.open")
     @patch("yaml.load")
     def test_fetch_flavor_resources_timeout(self, mock_yaml_load, mock_open, mock_get):
