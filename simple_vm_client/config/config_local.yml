@@ -80,7 +80,7 @@ forc:
   # URL for FORC.
   forc_access_url: https://proxy-dev.bi.denbi.de/
   # Access URL for FORC - optional - default is forc_url without port.
-  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/staging.zip
+  github_playbooks_repo: https://github.com/deNBI/resenvs/archive/refs/heads/staging.zip
   # GitHub repository URL for FORC playbooks.
   update_templates_schedule: 1.01
 
@@ -89,3 +89,14 @@ metadata_server:
   use_https: False
   host: simplevm_metadata_server
   port: 8000
+
+flavor_resource_exporter:
+  activated: True
+  # If flavor resource exporter is activated -- defaults to False
+  endpoint_url: https://exporter.bi.denbi.de:9070
+  # URL of the external endpoint that returns flavor resource data in JSON format
+  # Username and password must be set via environment variables:
+  #   FLAVOR_RESOURCE_EXPORTER_USERNAME
+  #   FLAVOR_RESOURCE_EXPORTER_PASSWORD
+  timeout: 30
+  # Request timeout in seconds

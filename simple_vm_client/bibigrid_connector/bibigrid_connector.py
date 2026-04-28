@@ -1,5 +1,7 @@
 import requests
 import yaml
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from simple_vm_client.ttypes import (
     ClusterInfo,
@@ -13,7 +15,7 @@ from simple_vm_client.ttypes import (
 from simple_vm_client.util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
-HEADERS = {"Content-Type": "application/json"}
+DEFAULT_TIMEOUT = (5, 30)
 
 
 class BibigridConnector:
@@ -33,6 +35,28 @@ class BibigridConnector:
         self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
 
         self.load_config_yml(config_file=config_file)
+        self.session = self._create_session()
+
+    def _create_session(self):
+        session = requests.Session()
+        session.headers.update({"Content-Type": "application/json"})
+        session.verify = self._PRODUCTION if self._PRODUCTION is not None else True
+        retry = Retry(
+            total=3,
+            backoff_factor=0.3,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST", "DELETE"],
+        )
+
+        adapter = HTTPAdapter(
+            pool_connections=20,
+            pool_maxsize=20,
+            max_retries=retry,
+        )
+
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        return session
 
     def load_config_yml(self, config_file: str) -> None:
         with open(config_file, "r") as ymlfile:
@@ -77,7 +101,6 @@ class BibigridConnector:
             )
 
             logger.info("Config loaded: Bibigrid")
-            self.is_bibigrid_available()
 
     def get_cluster_log(self, cluster_id: str) -> ClusterLog:
         logger.info(f"Get Cluster {cluster_id} logs...")
@@ -85,11 +108,7 @@ class BibigridConnector:
         request_url = f"{self._BIBIGRID_EP}/bibigrid/log/{cluster_id}"
 
         try:
-            response = requests.get(
-                url=request_url,
-                headers=HEADERS,
-                verify=self._PRODUCTION,
-            )
+            response = self.session.get(url=request_url)
             response.raise_for_status()  # Raise an exception for HTTP errors (4xx and 5xx)
             json_resp = response.json(strict=False)
 
@@ -116,9 +135,7 @@ class BibigridConnector:
         request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
 
         try:
-            response = requests.get(
-                url=request_url, headers=HEADERS, verify=self._PRODUCTION
-            )
+            response = self.session.get(url=request_url, timeout=DEFAULT_TIMEOUT)
             response.raise_for_status()  # Raise an exception for bad status codes
         except requests.RequestException as e:
             logger.error(f"Failed to retrieve node requirements: {e}")
@@ -138,11 +155,7 @@ class BibigridConnector:
     def get_cluster_state(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster state from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/state/{cluster_id}"
-        response = requests.get(
-            url=request_url,
-            headers=HEADERS,
-            verify=self._PRODUCTION,
-        )
+        response = self.session.get(url=request_url, timeout=DEFAULT_TIMEOUT)
         response.raise_for_status()
 
         if response.status_code == 200:
@@ -154,11 +167,7 @@ class BibigridConnector:
     def get_cluster_info(self, cluster_id: str) -> ClusterInfo:
         logger.info(f"Get Cluster info from {cluster_id}")
         request_url = f"{self._BIBIGRID_EP}/bibigrid/info/{cluster_id}"
-        response = requests.post(
-            url=request_url,
-            headers=HEADERS,
-            verify=self._PRODUCTION,
-        )
+        response = self.session.post(url=request_url, timeout=DEFAULT_TIMEOUT)
 
         if response.status_code == 200:
             response_content = response.json()
@@ -176,23 +185,18 @@ class BibigridConnector:
         request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
 
         try:
-            response = requests.get(
-                url=request_url, headers=HEADERS, verify=self._PRODUCTION
-            )
+            response = self.session.get(url=request_url, timeout=DEFAULT_TIMEOUT)
             response.raise_for_status()
-            if response.status_code == 200:
-                return True
+            return response.status_code == 200
         except Exception:
             return False
-        return False
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
         # TODO only needs specific config keywoards
         logger.info(f"Terminate cluster: {cluster_id}")
-        response: dict[str, str] = requests.delete(
+        response: dict[str, str] = self.session.delete(
             url=f"{self._BIBIGRID_EP}/bibigrid/terminate/{cluster_id}",
-            headers=HEADERS,
-            verify=self._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         ).json()
         logger.info(response)
         return response
@@ -278,16 +282,15 @@ class BibigridConnector:
                 "waitForServices": ["de.NBI_Bielefeld_environment.service"],
                 "sshPublicKeys": public_keys,
                 "securityGroups": [self._DEFAULT_SECURITY_GROUP_NAME],
-                "meta": vars(metadata),
+                "meta": vars(metadata) if metadata else {},
             }
         ]
         full_body = {"configurations": body}
         logger.info(full_body)
-        response: dict[str, str] = requests.post(
+        response: dict[str, str] = self.session.post(
             url=self._BIBIGRID_EP + "/bibigrid/create",
-            headers=HEADERS,
+            timeout=DEFAULT_TIMEOUT,
             json=full_body,
-            verify=self._PRODUCTION,
         ).json()
 
         logger.info(response)
