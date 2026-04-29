@@ -1559,6 +1559,235 @@ class Flavor(object):
         return not (self == other)
 
 
+class FlavorResource(object):
+    """
+    This Struct defines a Flavor Resource (from external exporter).
+
+    Attributes:
+     - id: Unique identifier
+     - name: Name of the flavor
+     - available: Number of available instances
+     - total: Total number of instances
+     - cores: Number of cores
+     - mem: Memory in MB
+     - type: Type (e.g., gpu, cpu)
+     - gpu_type: GPU type (if applicable)
+     - gpu_count: Number of GPUs
+     - root_disk: Root disk in GB
+     - ephemeral_disk: Ephemeral disk in GB
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        id=None,
+        name=None,
+        available=None,
+        total=None,
+        cores=None,
+        mem=None,
+        type=None,
+        gpu_type=None,
+        gpu_count=None,
+        root_disk=None,
+        ephemeral_disk=None,
+    ):
+        self.id = id
+        self.name = name
+        self.available = available
+        self.total = total
+        self.cores = cores
+        self.mem = mem
+        self.type = type
+        self.gpu_type = gpu_type
+        self.gpu_count = gpu_count
+        self.root_disk = root_disk
+        self.ephemeral_disk = ephemeral_disk
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.name = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.available = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.total = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.cores = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.mem = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.type = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.gpu_type = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.I32:
+                    self.gpu_count = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.root_disk = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I32:
+                    self.ephemeral_disk = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("FlavorResource")
+        if self.id is not None:
+            oprot.writeFieldBegin("id", TType.STRING, 1)
+            oprot.writeString(
+                self.id.encode("utf-8") if sys.version_info[0] == 2 else self.id
+            )
+            oprot.writeFieldEnd()
+        if self.name is not None:
+            oprot.writeFieldBegin("name", TType.STRING, 2)
+            oprot.writeString(
+                self.name.encode("utf-8") if sys.version_info[0] == 2 else self.name
+            )
+            oprot.writeFieldEnd()
+        if self.available is not None:
+            oprot.writeFieldBegin("available", TType.I32, 3)
+            oprot.writeI32(self.available)
+            oprot.writeFieldEnd()
+        if self.total is not None:
+            oprot.writeFieldBegin("total", TType.I32, 4)
+            oprot.writeI32(self.total)
+            oprot.writeFieldEnd()
+        if self.cores is not None:
+            oprot.writeFieldBegin("cores", TType.I32, 5)
+            oprot.writeI32(self.cores)
+            oprot.writeFieldEnd()
+        if self.mem is not None:
+            oprot.writeFieldBegin("mem", TType.I32, 6)
+            oprot.writeI32(self.mem)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin("type", TType.STRING, 7)
+            oprot.writeString(
+                self.type.encode("utf-8") if sys.version_info[0] == 2 else self.type
+            )
+            oprot.writeFieldEnd()
+        if self.gpu_type is not None:
+            oprot.writeFieldBegin("gpu_type", TType.STRING, 8)
+            oprot.writeString(
+                self.gpu_type.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.gpu_type
+            )
+            oprot.writeFieldEnd()
+        if self.gpu_count is not None:
+            oprot.writeFieldBegin("gpu_count", TType.I32, 9)
+            oprot.writeI32(self.gpu_count)
+            oprot.writeFieldEnd()
+        if self.root_disk is not None:
+            oprot.writeFieldBegin("root_disk", TType.I32, 10)
+            oprot.writeI32(self.root_disk)
+            oprot.writeFieldEnd()
+        if self.ephemeral_disk is not None:
+            oprot.writeFieldBegin("ephemeral_disk", TType.I32, 11)
+            oprot.writeI32(self.ephemeral_disk)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.id is None:
+            raise TProtocolException(message="Required field id is unset!")
+        if self.name is None:
+            raise TProtocolException(message="Required field name is unset!")
+        if self.available is None:
+            raise TProtocolException(message="Required field available is unset!")
+        if self.total is None:
+            raise TProtocolException(message="Required field total is unset!")
+        if self.cores is None:
+            raise TProtocolException(message="Required field cores is unset!")
+        if self.mem is None:
+            raise TProtocolException(message="Required field mem is unset!")
+        if self.type is None:
+            raise TProtocolException(message="Required field type is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class Image(object):
     """
     This Struct defines an Image.
@@ -5689,6 +5918,87 @@ Flavor.thrift_spec = (
         None,
         None,
     ),  # 6
+)
+all_structs.append(FlavorResource)
+FlavorResource.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "id",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "name",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.I32,
+        "available",
+        None,
+        None,
+    ),  # 3
+    (
+        4,
+        TType.I32,
+        "total",
+        None,
+        None,
+    ),  # 4
+    (
+        5,
+        TType.I32,
+        "cores",
+        None,
+        None,
+    ),  # 5
+    (
+        6,
+        TType.I32,
+        "mem",
+        None,
+        None,
+    ),  # 6
+    (
+        7,
+        TType.STRING,
+        "type",
+        "UTF8",
+        None,
+    ),  # 7
+    (
+        8,
+        TType.STRING,
+        "gpu_type",
+        "UTF8",
+        None,
+    ),  # 8
+    (
+        9,
+        TType.I32,
+        "gpu_count",
+        None,
+        None,
+    ),  # 9
+    (
+        10,
+        TType.I32,
+        "root_disk",
+        None,
+        None,
+    ),  # 10
+    (
+        11,
+        TType.I32,
+        "ephemeral_disk",
+        None,
+        None,
+    ),  # 11
 )
 all_structs.append(Image)
 Image.thrift_spec = (

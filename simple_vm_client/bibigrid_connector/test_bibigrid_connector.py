@@ -49,6 +49,7 @@ DEFAULT_MASTER_INSTANCE = ClusterInstance(
 PORT_FUNCTION = "30000 + 256 * oct3 + oct4"
 
 HEADERS = {"Content-Type": "application/json"}
+DEFAULT_TIMEOUT = (5, 30)
 
 
 class TestBibigridConnector(unittest.TestCase):
@@ -126,7 +127,9 @@ class TestBibigridConnector(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
+    )
     def test_is_bibigrid_available_when_request_succeeds(self, mock_get):
         # Arrange
         mock_get.return_value = Mock(status_code=200)
@@ -138,11 +141,12 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertTrue(result)
         mock_get.assert_called_once_with(
             url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
-            headers=HEADERS,
-            verify=self.connector._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         )
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
+    )
     def test_is_bibigrid_available_when_request_wrong_status_code(
         self,
         mock_get,
@@ -157,11 +161,12 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertFalse(result)
         mock_get.assert_called_once_with(
             url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
-            headers=HEADERS,
-            verify=self.connector._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         )
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
+    )
     def test_is_bibigrid_available_when_request_exception(self, mock_get):
         # Arrange
         mock_get.side_effect = requests.RequestException("Could not connect")
@@ -173,11 +178,12 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertFalse(result)
         mock_get.assert_called_once_with(
             url=f"{self.connector._BIBIGRID_EP}/bibigrid/requirements",
-            headers=HEADERS,
-            verify=self.connector._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         )
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.delete")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.delete"
+    )
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     def test_terminate_cluster(self, mock_logger_info, mock_delete):
         # Arrange
@@ -192,16 +198,14 @@ class TestBibigridConnector(unittest.TestCase):
         result = self.connector.terminate_cluster(cluster_id)
 
         # Assert
-        mock_delete.assert_called_once_with(
-            url=expected_url,
-            headers=HEADERS,
-            verify=self.connector._PRODUCTION,
-        )
+        mock_delete.assert_called_once_with(url=expected_url, timeout=DEFAULT_TIMEOUT)
         mock_logger_info.assert_any_call(f"Terminate cluster: {cluster_id}")
         mock_logger_info.assert_any_call(expected_response)
         self.assertEqual(result, expected_response)
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.post")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.post"
+    )
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     def test_start_cluster(self, mock_logger_info, mock_post):
         public_key = "fake_public_key"
@@ -271,14 +275,15 @@ class TestBibigridConnector(unittest.TestCase):
         # Assertions
         mock_post.assert_called_once_with(
             url=self.connector._BIBIGRID_EP + "/bibigrid/create",
-            headers=HEADERS,
             json=full_body,
-            verify=self.connector._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         )
 
         self.assertEqual(result, ClusterMessage(cluster_id="123", message="started"))
 
-    @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.requests.get")
+    @patch(
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
+    )
     def test_get_cluster_state(self, mock_requests_get):
         # Arrange
         cluster_id = "123"
@@ -306,8 +311,7 @@ class TestBibigridConnector(unittest.TestCase):
         # Assert
         mock_requests_get.assert_called_once_with(
             url=f"{self.connector._BIBIGRID_EP}/bibigrid/state/{cluster_id}",
-            headers=HEADERS,
-            verify=self.connector._PRODUCTION,
+            timeout=DEFAULT_TIMEOUT,
         )
         mock_response.json.assert_called_once()
         mock_response.raise_for_status.assert_called_once()

@@ -263,6 +263,13 @@ class Iface(object):
     def is_bibigrid_available(self):
         pass
 
+    def is_openstack_connection_available(self):
+        """
+        Health check for OpenStack connection.
+        Returns true if the connection is still working, false otherwise.
+
+        """
+
     def detach_ip_from_server(self, server_id, floating_ip):
         """
         Parameters:
@@ -657,6 +664,13 @@ class Iface(object):
         Returns: {'maxTotalVolumes': maxTotalVolumes, 'maxTotalVolumeGigabytes': maxTotalVolumeGigabytes,
                   'maxTotalInstances': maxTotalInstances, 'totalRamUsed': totalRamUsed,
                  'totalInstancesUsed': totalInstancesUsed}
+
+        """
+
+    def get_flavor_resources(self):
+        """
+        Get Flavor Resources from external exporter.
+        Returns: List of FlavorResource instances.
 
         """
 
@@ -1877,6 +1891,42 @@ class Client(Iface):
         raise TApplicationException(
             TApplicationException.MISSING_RESULT,
             "is_bibigrid_available failed: unknown result",
+        )
+
+    def is_openstack_connection_available(self):
+        """
+        Health check for OpenStack connection.
+        Returns true if the connection is still working, false otherwise.
+
+        """
+        self.send_is_openstack_connection_available()
+        return self.recv_is_openstack_connection_available()
+
+    def send_is_openstack_connection_available(self):
+        self._oprot.writeMessageBegin(
+            "is_openstack_connection_available", TMessageType.CALL, self._seqid
+        )
+        args = is_openstack_connection_available_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_is_openstack_connection_available(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = is_openstack_connection_available_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "is_openstack_connection_available failed: unknown result",
         )
 
     def detach_ip_from_server(self, server_id, floating_ip):
@@ -3625,6 +3675,42 @@ class Client(Iface):
             TApplicationException.MISSING_RESULT, "get_limits failed: unknown result"
         )
 
+    def get_flavor_resources(self):
+        """
+        Get Flavor Resources from external exporter.
+        Returns: List of FlavorResource instances.
+
+        """
+        self.send_get_flavor_resources()
+        return self.recv_get_flavor_resources()
+
+    def send_get_flavor_resources(self):
+        self._oprot.writeMessageBegin(
+            "get_flavor_resources", TMessageType.CALL, self._seqid
+        )
+        args = get_flavor_resources_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_flavor_resources(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_flavor_resources_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "get_flavor_resources failed: unknown result",
+        )
+
     def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
         """
         Parameters:
@@ -4291,6 +4377,9 @@ class Processor(Iface, TProcessor):
         self._processMap["is_bibigrid_available"] = (
             Processor.process_is_bibigrid_available
         )
+        self._processMap["is_openstack_connection_available"] = (
+            Processor.process_is_openstack_connection_available
+        )
         self._processMap["detach_ip_from_server"] = (
             Processor.process_detach_ip_from_server
         )
@@ -4370,6 +4459,9 @@ class Processor(Iface, TProcessor):
         self._processMap["stop_server"] = Processor.process_stop_server
         self._processMap["create_snapshot"] = Processor.process_create_snapshot
         self._processMap["get_limits"] = Processor.process_get_limits
+        self._processMap["get_flavor_resources"] = (
+            Processor.process_get_flavor_resources
+        )
         self._processMap["start_cluster"] = Processor.process_start_cluster
         self._processMap["terminate_cluster"] = Processor.process_terminate_cluster
         self._processMap["delete_image"] = Processor.process_delete_image
@@ -5187,6 +5279,31 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("is_bibigrid_available", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_is_openstack_connection_available(self, seqid, iprot, oprot):
+        args = is_openstack_connection_available_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = is_openstack_connection_available_result()
+        try:
+            result.success = self._handler.is_openstack_connection_available()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("is_openstack_connection_available", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -6389,6 +6506,31 @@ class Processor(Iface, TProcessor):
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
         oprot.writeMessageBegin("get_limits", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_get_flavor_resources(self, seqid, iprot, oprot):
+        args = get_flavor_resources_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_flavor_resources_result()
+        try:
+            result.success = self._handler.get_flavor_resources()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("get_flavor_resources", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12224,6 +12366,135 @@ class is_bibigrid_available_result(object):
 
 all_structs.append(is_bibigrid_available_result)
 is_bibigrid_available_result.thrift_spec = (
+    (
+        0,
+        TType.BOOL,
+        "success",
+        None,
+        None,
+    ),  # 0
+)
+
+
+class is_openstack_connection_available_args(object):
+    thrift_spec = None
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("is_openstack_connection_available_args")
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(is_openstack_connection_available_args)
+is_openstack_connection_available_args.thrift_spec = ()
+
+
+class is_openstack_connection_available_result(object):
+    """
+    Attributes:
+     - success
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+    ):
+        self.success = success
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.BOOL:
+                    self.success = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("is_openstack_connection_available_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.BOOL, 0)
+            oprot.writeBool(self.success)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(is_openstack_connection_available_result)
+is_openstack_connection_available_result.thrift_spec = (
     (
         0,
         TType.BOOL,
@@ -20817,6 +21088,144 @@ get_limits_result.thrift_spec = (
 )
 
 
+class get_flavor_resources_args(object):
+    thrift_spec = None
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_flavor_resources_args")
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_flavor_resources_args)
+get_flavor_resources_args.thrift_spec = ()
+
+
+class get_flavor_resources_result(object):
+    """
+    Attributes:
+     - success
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+    ):
+        self.success = success
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    _etype420, _size417 = iprot.readListBegin()
+                    for _i421 in range(_size417):
+                        _elem422 = FlavorResource()
+                        _elem422.read(iprot)
+                        self.success.append(_elem422)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_flavor_resources_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.LIST, 0)
+            oprot.writeListBegin(TType.STRUCT, len(self.success))
+            for iter423 in self.success:
+                iter423.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_flavor_resources_result)
+get_flavor_resources_result.thrift_spec = (
+    (
+        0,
+        TType.LIST,
+        "success",
+        (TType.STRUCT, [FlavorResource, None], False),
+        None,
+    ),  # 0
+)
+
+
 class start_cluster_args(object):
     """
     Attributes:
@@ -20857,14 +21266,14 @@ class start_cluster_args(object):
             if fid == 1:
                 if ftype == TType.LIST:
                     self.public_keys = []
-                    _etype420, _size417 = iprot.readListBegin()
-                    for _i421 in range(_size417):
-                        _elem422 = (
+                    _etype427, _size424 = iprot.readListBegin()
+                    for _i428 in range(_size424):
+                        _elem429 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.public_keys.append(_elem422)
+                        self.public_keys.append(_elem429)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -20877,11 +21286,11 @@ class start_cluster_args(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.worker_instances = []
-                    _etype426, _size423 = iprot.readListBegin()
-                    for _i427 in range(_size423):
-                        _elem428 = ClusterInstance()
-                        _elem428.read(iprot)
-                        self.worker_instances.append(_elem428)
+                    _etype433, _size430 = iprot.readListBegin()
+                    for _i434 in range(_size430):
+                        _elem435 = ClusterInstance()
+                        _elem435.read(iprot)
+                        self.worker_instances.append(_elem435)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -20907,9 +21316,9 @@ class start_cluster_args(object):
         if self.public_keys is not None:
             oprot.writeFieldBegin("public_keys", TType.LIST, 1)
             oprot.writeListBegin(TType.STRING, len(self.public_keys))
-            for iter429 in self.public_keys:
+            for iter436 in self.public_keys:
                 oprot.writeString(
-                    iter429.encode("utf-8") if sys.version_info[0] == 2 else iter429
+                    iter436.encode("utf-8") if sys.version_info[0] == 2 else iter436
                 )
             oprot.writeListEnd()
             oprot.writeFieldEnd()
@@ -20920,8 +21329,8 @@ class start_cluster_args(object):
         if self.worker_instances is not None:
             oprot.writeFieldBegin("worker_instances", TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.worker_instances))
-            for iter430 in self.worker_instances:
-                iter430.write(oprot)
+            for iter437 in self.worker_instances:
+                iter437.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.metadata is not None:
@@ -21967,19 +22376,19 @@ class attach_volume_to_server_result(object):
             if fid == 0:
                 if ftype == TType.MAP:
                     self.success = {}
-                    _ktype432, _vtype433, _size431 = iprot.readMapBegin()
-                    for _i435 in range(_size431):
-                        _key436 = (
+                    _ktype439, _vtype440, _size438 = iprot.readMapBegin()
+                    for _i442 in range(_size438):
+                        _key443 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val437 = (
+                        _val444 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.success[_key436] = _val437
+                        self.success[_key443] = _val444
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -22009,12 +22418,12 @@ class attach_volume_to_server_result(object):
         if self.success is not None:
             oprot.writeFieldBegin("success", TType.MAP, 0)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-            for kiter438, viter439 in self.success.items():
+            for kiter445, viter446 in self.success.items():
                 oprot.writeString(
-                    kiter438.encode("utf-8") if sys.version_info[0] == 2 else kiter438
+                    kiter445.encode("utf-8") if sys.version_info[0] == 2 else kiter445
                 )
                 oprot.writeString(
-                    viter439.encode("utf-8") if sys.version_info[0] == 2 else viter439
+                    viter446.encode("utf-8") if sys.version_info[0] == 2 else viter446
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -22307,19 +22716,19 @@ class create_volume_args(object):
             elif fid == 3:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    _ktype441, _vtype442, _size440 = iprot.readMapBegin()
-                    for _i444 in range(_size440):
-                        _key445 = (
+                    _ktype448, _vtype449, _size447 = iprot.readMapBegin()
+                    for _i451 in range(_size447):
+                        _key452 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val446 = (
+                        _val453 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.metadata[_key445] = _val446
+                        self.metadata[_key452] = _val453
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -22351,12 +22760,12 @@ class create_volume_args(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 3)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter447, viter448 in self.metadata.items():
+            for kiter454, viter455 in self.metadata.items():
                 oprot.writeString(
-                    kiter447.encode("utf-8") if sys.version_info[0] == 2 else kiter447
+                    kiter454.encode("utf-8") if sys.version_info[0] == 2 else kiter454
                 )
                 oprot.writeString(
-                    viter448.encode("utf-8") if sys.version_info[0] == 2 else viter448
+                    viter455.encode("utf-8") if sys.version_info[0] == 2 else viter455
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -22568,19 +22977,19 @@ class create_volume_by_source_volume_args(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    _ktype450, _vtype451, _size449 = iprot.readMapBegin()
-                    for _i453 in range(_size449):
-                        _key454 = (
+                    _ktype457, _vtype458, _size456 = iprot.readMapBegin()
+                    for _i460 in range(_size456):
+                        _key461 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val455 = (
+                        _val462 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.metadata[_key454] = _val455
+                        self.metadata[_key461] = _val462
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -22617,12 +23026,12 @@ class create_volume_by_source_volume_args(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 2)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter456, viter457 in self.metadata.items():
+            for kiter463, viter464 in self.metadata.items():
                 oprot.writeString(
-                    kiter456.encode("utf-8") if sys.version_info[0] == 2 else kiter456
+                    kiter463.encode("utf-8") if sys.version_info[0] == 2 else kiter463
                 )
                 oprot.writeString(
-                    viter457.encode("utf-8") if sys.version_info[0] == 2 else viter457
+                    viter464.encode("utf-8") if sys.version_info[0] == 2 else viter464
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
@@ -22842,19 +23251,19 @@ class create_volume_by_volume_snap_args(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.metadata = {}
-                    _ktype459, _vtype460, _size458 = iprot.readMapBegin()
-                    for _i462 in range(_size458):
-                        _key463 = (
+                    _ktype466, _vtype467, _size465 = iprot.readMapBegin()
+                    for _i469 in range(_size465):
+                        _key470 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        _val464 = (
+                        _val471 = (
                             iprot.readString().decode("utf-8", errors="replace")
                             if sys.version_info[0] == 2
                             else iprot.readString()
                         )
-                        self.metadata[_key463] = _val464
+                        self.metadata[_key470] = _val471
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -22891,12 +23300,12 @@ class create_volume_by_volume_snap_args(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.MAP, 2)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.metadata))
-            for kiter465, viter466 in self.metadata.items():
+            for kiter472, viter473 in self.metadata.items():
                 oprot.writeString(
-                    kiter465.encode("utf-8") if sys.version_info[0] == 2 else kiter465
+                    kiter472.encode("utf-8") if sys.version_info[0] == 2 else kiter472
                 )
                 oprot.writeString(
-                    viter466.encode("utf-8") if sys.version_info[0] == 2 else viter466
+                    viter473.encode("utf-8") if sys.version_info[0] == 2 else viter473
                 )
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
