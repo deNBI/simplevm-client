@@ -64,6 +64,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  string start_server(string flavor_name, string image_name, string public_key, string servername,  metadata,  volume_ids_path_new,  volume_ids_path_attach,  additional_owner_keys,  additional_user_keys, string research_environment,  additional_security_group_ids, string slurm_version, string metadata_token, string metadata_endpoint, string additional_script)"
     )
     print("  bool is_bibigrid_available()")
+    print("  bool is_openstack_connection_available()")
     print("  void detach_ip_from_server(string server_id, string floating_ip)")
     print(
         "  string start_server_with_custom_key(string flavor_name, string image_name, string servername,  metadata, string research_environment,  volume_ids_path_new,  volume_ids_path_attach,  additional_security_group_ids,  additional_owner_keys,  additional_user_keys, string metadata_token, string metadata_endpoint, string additional_script)"
@@ -91,6 +92,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("   add_user_to_backend(i64 backend_id, string user_id)")
     print("   get_users_from_backend(i64 backend_id)")
     print("   delete_user_from_backend(i64 backend_id, string user_id)")
+    print("  Backend activate_auth_for_backend(i64 backend_id)")
+    print("  Backend deactivate_auth_for_backend(i64 backend_id)")
     print("   get_allowed_templates()")
     print("   get_servers()")
     print("   get_servers_by_ids( server_ids)")
@@ -117,6 +120,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
         "  string create_snapshot(string openstack_id, string name, string username,  base_tags, string description)"
     )
     print("   get_limits()")
+    print("   get_flavor_resources()")
     print(
         "  ClusterMessage start_cluster( public_keys, ClusterInstance master_instance,  worker_instances, ClusterInstanceMetadata metadata)"
     )
@@ -481,6 +485,12 @@ elif cmd == "is_bibigrid_available":
         sys.exit(1)
     pp.pprint(client.is_bibigrid_available())
 
+elif cmd == "is_openstack_connection_available":
+    if len(args) != 0:
+        print("is_openstack_connection_available requires 0 args")
+        sys.exit(1)
+    pp.pprint(client.is_openstack_connection_available())
+
 elif cmd == "detach_ip_from_server":
     if len(args) != 2:
         print("detach_ip_from_server requires 2 args")
@@ -677,6 +687,26 @@ elif cmd == "delete_user_from_backend":
         client.delete_user_from_backend(
             eval(args[0]),
             args[1],
+        )
+    )
+
+elif cmd == "activate_auth_for_backend":
+    if len(args) != 1:
+        print("activate_auth_for_backend requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.activate_auth_for_backend(
+            eval(args[0]),
+        )
+    )
+
+elif cmd == "deactivate_auth_for_backend":
+    if len(args) != 1:
+        print("deactivate_auth_for_backend requires 1 args")
+        sys.exit(1)
+    pp.pprint(
+        client.deactivate_auth_for_backend(
+            eval(args[0]),
         )
     )
 
@@ -883,6 +913,12 @@ elif cmd == "get_limits":
         print("get_limits requires 0 args")
         sys.exit(1)
     pp.pprint(client.get_limits())
+
+elif cmd == "get_flavor_resources":
+    if len(args) != 0:
+        print("get_flavor_resources requires 0 args")
+        sys.exit(1)
+    pp.pprint(client.get_flavor_resources())
 
 elif cmd == "start_cluster":
     if len(args) != 4:

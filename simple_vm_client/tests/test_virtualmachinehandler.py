@@ -416,6 +416,18 @@ class TestVirtualMachineHandler(unittest.TestCase):
             backend_id=OPENSTACK_ID, user_id=USERNAME
         )
 
+    def test_activate_auth_for_backend(self):
+        self.handler.activate_auth_for_backend(backend_id=OPENSTACK_ID)
+        self.handler.forc_connector.activate_auth_for_backend.assert_called_once_with(
+            backend_id=OPENSTACK_ID
+        )
+
+    def test_deactivate_auth_for_backend(self):
+        self.handler.deactivate_auth_for_backend(backend_id=OPENSTACK_ID)
+        self.handler.forc_connector.deactivate_auth_for_backend.assert_called_once_with(
+            backend_id=OPENSTACK_ID
+        )
+
     def test_get_allowed_templates(self):
         self.handler.get_allowed_templates()
         self.handler.forc_connector.template.get_allowed_templates.assert_called_once()
@@ -642,6 +654,20 @@ class TestVirtualMachineHandler(unittest.TestCase):
     def test_is_bibigrid_available(self):
         self.handler.is_bibigrid_available()
         self.handler.bibigrid_connector.is_bibigrid_available.assert_called_once()
+
+    def test_is_openstack_connection_available_success(self):
+        self.handler.openstack_connector.get_limits.return_value = {"test": "value"}
+        result = self.handler.is_openstack_connection_available()
+        self.assertTrue(result)
+        self.handler.openstack_connector.get_limits.assert_called_once()
+
+    def test_is_openstack_connection_available_failure(self):
+        self.handler.openstack_connector.get_limits.side_effect = Exception(
+            "Connection failed"
+        )
+        result = self.handler.is_openstack_connection_available()
+        self.assertFalse(result)
+        self.handler.openstack_connector.get_limits.assert_called_once()
 
     #  def test_get_cluster_info(self):
     #     self.handler.get_cluster_info(cluster_id=OPENSTACK_ID)

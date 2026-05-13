@@ -89,3 +89,14 @@ metadata_server:
   use_https: False
   host: simplevm_metadata_server
   port: 8000
+
+flavor_resource_exporter:
+  activated: True
+  # If flavor resource exporter is activated -- defaults to False
+  endpoint_url: https://exporter.bi.denbi.de:9070
+  # URL of the external endpoint that returns flavor resource data in JSON format
+  # Username and password must be set via environment variables:
+  #   FLAVOR_RESOURCE_EXPORTER_USERNAME
+  #   FLAVOR_RESOURCE_EXPORTER_PASSWORD
+  timeout: 30
+  # Request timeout in seconds

@@ -1,5 +1,5 @@
 exclude: "^docs/|/migrations/"
-default_stages: [ commit ]
+default_stages: [ pre-commit ]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -40,6 +40,13 @@ repos:
       - id: flake8
         args: [ "--config=setup.cfg" ]
         additional_dependencies: [ flake8-isort ]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        args: ["--no-banner"]
+        stages: [post-commit]
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:

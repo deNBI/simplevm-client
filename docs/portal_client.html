@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css"/>
+<title>Thrift module: portal_client</title></head><body>
+<div class="container-fluid">
+<h1>Thrift module: portal_client</h1>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Module</th><th>Services</th><th>Data types</th><th>Constants</th></tr></thead><tbody>
+<tr>
+<td>portal_client</td><td><a href="#Svc_VirtualMachineService">VirtualMachineService</a><br/>
+<ul>
+<li><a href="#Fn_VirtualMachineService_activate_auth_for_backend">activate_auth_for_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_add_cluster_machine">add_cluster_machine</a></li>
+<li><a href="#Fn_VirtualMachineService_add_default_security_groups_to_server">add_default_security_groups_to_server</a></li>
+<li><a href="#Fn_VirtualMachineService_add_metadata_to_server">add_metadata_to_server</a></li>
+<li><a href="#Fn_VirtualMachineService_add_project_security_group_to_server">add_project_security_group_to_server</a></li>
+<li><a href="#Fn_VirtualMachineService_add_research_environment_security_group">add_research_environment_security_group</a></li>
+<li><a href="#Fn_VirtualMachineService_add_udp_security_group">add_udp_security_group</a></li>
+<li><a href="#Fn_VirtualMachineService_add_user_to_backend">add_user_to_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_attach_volume_to_server">attach_volume_to_server</a></li>
+<li><a href="#Fn_VirtualMachineService_create_and_deploy_playbook">create_and_deploy_playbook</a></li>
+<li><a href="#Fn_VirtualMachineService_create_backend">create_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_create_snapshot">create_snapshot</a></li>
+<li><a href="#Fn_VirtualMachineService_create_volume">create_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_create_volume_by_source_volume">create_volume_by_source_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_create_volume_by_volume_snap">create_volume_by_volume_snap</a></li>
+<li><a href="#Fn_VirtualMachineService_create_volume_snapshot">create_volume_snapshot</a></li>
+<li><a href="#Fn_VirtualMachineService_deactivate_auth_for_backend">deactivate_auth_for_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_backend">delete_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_image">delete_image</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_keypair">delete_keypair</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_security_group_rule">delete_security_group_rule</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_server">delete_server</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_user_from_backend">delete_user_from_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_volume">delete_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_delete_volume_snapshot">delete_volume_snapshot</a></li>
+<li><a href="#Fn_VirtualMachineService_detach_ip_from_server">detach_ip_from_server</a></li>
+<li><a href="#Fn_VirtualMachineService_detach_volume">detach_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_exist_server">exist_server</a></li>
+<li><a href="#Fn_VirtualMachineService_get_allowed_templates">get_allowed_templates</a></li>
+<li><a href="#Fn_VirtualMachineService_get_backend_by_id">get_backend_by_id</a></li>
+<li><a href="#Fn_VirtualMachineService_get_backends">get_backends</a></li>
+<li><a href="#Fn_VirtualMachineService_get_backends_by_owner">get_backends_by_owner</a></li>
+<li><a href="#Fn_VirtualMachineService_get_backends_by_template">get_backends_by_template</a></li>
+<li><a href="#Fn_VirtualMachineService_get_calculation_values">get_calculation_values</a></li>
+<li><a href="#Fn_VirtualMachineService_get_client_version">get_client_version</a></li>
+<li><a href="#Fn_VirtualMachineService_get_cluster_info">get_cluster_info</a></li>
+<li><a href="#Fn_VirtualMachineService_get_cluster_log">get_cluster_log</a></li>
+<li><a href="#Fn_VirtualMachineService_get_cluster_state">get_cluster_state</a></li>
+<li><a href="#Fn_VirtualMachineService_get_cluster_supported_ubuntu_os_versions">get_cluster_supported_ubuntu_os_versions</a></li>
+<li><a href="#Fn_VirtualMachineService_get_flavors">get_flavors</a></li>
+<li><a href="#Fn_VirtualMachineService_get_forc_access_url">get_forc_access_url</a></li>
+<li><a href="#Fn_VirtualMachineService_get_gateway_ip">get_gateway_ip</a></li>
+<li><a href="#Fn_VirtualMachineService_get_image">get_image</a></li>
+<li><a href="#Fn_VirtualMachineService_get_images">get_images</a></li>
+<li><a href="#Fn_VirtualMachineService_get_keypair_public_key_by_name">get_keypair_public_key_by_name</a></li>
+<li><a href="#Fn_VirtualMachineService_get_limits">get_limits</a></li>
+<li><a href="#Fn_VirtualMachineService_get_playbook_logs">get_playbook_logs</a></li>
+<li><a href="#Fn_VirtualMachineService_get_private_images">get_private_images</a></li>
+<li><a href="#Fn_VirtualMachineService_get_public_images">get_public_images</a></li>
+<li><a href="#Fn_VirtualMachineService_get_security_group_id_by_name">get_security_group_id_by_name</a></li>
+<li><a href="#Fn_VirtualMachineService_get_server">get_server</a></li>
+<li><a href="#Fn_VirtualMachineService_get_server_by_unique_name">get_server_by_unique_name</a></li>
+<li><a href="#Fn_VirtualMachineService_get_server_console">get_server_console</a></li>
+<li><a href="#Fn_VirtualMachineService_get_servers">get_servers</a></li>
+<li><a href="#Fn_VirtualMachineService_get_servers_by_bibigrid_id">get_servers_by_bibigrid_id</a></li>
+<li><a href="#Fn_VirtualMachineService_get_servers_by_ids">get_servers_by_ids</a></li>
+<li><a href="#Fn_VirtualMachineService_get_users_from_backend">get_users_from_backend</a></li>
+<li><a href="#Fn_VirtualMachineService_get_vm_ports">get_vm_ports</a></li>
+<li><a href="#Fn_VirtualMachineService_get_volume">get_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_get_volume_snapshot">get_volume_snapshot</a></li>
+<li><a href="#Fn_VirtualMachineService_get_volumes_by_ids">get_volumes_by_ids</a></li>
+<li><a href="#Fn_VirtualMachineService_has_forc">has_forc</a></li>
+<li><a href="#Fn_VirtualMachineService_import_keypair">import_keypair</a></li>
+<li><a href="#Fn_VirtualMachineService_is_bibigrid_available">is_bibigrid_available</a></li>
+<li><a href="#Fn_VirtualMachineService_is_metadata_server_available">is_metadata_server_available</a></li>
+<li><a href="#Fn_VirtualMachineService_is_version">is_version</a></li>
+<li><a href="#Fn_VirtualMachineService_open_port_range_for_vm_in_project">open_port_range_for_vm_in_project</a></li>
+<li><a href="#Fn_VirtualMachineService_reboot_hard_server">reboot_hard_server</a></li>
+<li><a href="#Fn_VirtualMachineService_reboot_soft_server">reboot_soft_server</a></li>
+<li><a href="#Fn_VirtualMachineService_remove_metadata_server_data">remove_metadata_server_data</a></li>
+<li><a href="#Fn_VirtualMachineService_remove_security_groups_from_server">remove_security_groups_from_server</a></li>
+<li><a href="#Fn_VirtualMachineService_rescue_server">rescue_server</a></li>
+<li><a href="#Fn_VirtualMachineService_resize_volume">resize_volume</a></li>
+<li><a href="#Fn_VirtualMachineService_resume_server">resume_server</a></li>
+<li><a href="#Fn_VirtualMachineService_scale_up_cluster">scale_up_cluster</a></li>
+<li><a href="#Fn_VirtualMachineService_set_metadata_server_data">set_metadata_server_data</a></li>
+<li><a href="#Fn_VirtualMachineService_start_cluster">start_cluster</a></li>
+<li><a href="#Fn_VirtualMachineService_start_server">start_server</a></li>
+<li><a href="#Fn_VirtualMachineService_start_server_with_custom_key">start_server_with_custom_key</a></li>
+<li><a href="#Fn_VirtualMachineService_stop_server">stop_server</a></li>
+<li><a href="#Fn_VirtualMachineService_terminate_cluster">terminate_cluster</a></li>
+<li><a href="#Fn_VirtualMachineService_unrescue_server">unrescue_server</a></li>
+</ul>
+</td>
+<td><a href="#Struct_Backend">Backend</a><br/>
+<a href="#Struct_BackendNotFoundException">BackendNotFoundException</a><br/>
+<a href="#Struct_ClusterInfo">ClusterInfo</a><br/>
+<a href="#Struct_ClusterInstance">ClusterInstance</a><br/>
+<a href="#Struct_ClusterInstanceMetadata">ClusterInstanceMetadata</a><br/>
+<a href="#Struct_ClusterLog">ClusterLog</a><br/>
+<a href="#Struct_ClusterMessage">ClusterMessage</a><br/>
+<a href="#Struct_ClusterNotFoundException">ClusterNotFoundException</a><br/>
+<a href="#Struct_ClusterState">ClusterState</a><br/>
+<a href="#Struct_ClusterVolume">ClusterVolume</a><br/>
+<a href="#Struct_ClusterWorker">ClusterWorker</a><br/>
+<a href="#Struct_CondaPackage">CondaPackage</a><br/>
+<a href="#Struct_DefaultException">DefaultException</a><br/>
+<a href="#Struct_Flavor">Flavor</a><br/>
+<a href="#Struct_FlavorNotFoundException">FlavorNotFoundException</a><br/>
+<a href="#Struct_Image">Image</a><br/>
+<a href="#Struct_ImageNotFoundException">ImageNotFoundException</a><br/>
+<a href="#Struct_MetadataServerNotAllowedException">MetadataServerNotAllowedException</a><br/>
+<a href="#Struct_MetadataServerNotAvailableException">MetadataServerNotAvailableException</a><br/>
+<a href="#Struct_MetadataUser">MetadataUser</a><br/>
+<a href="#Struct_MetadataUserData">MetadataUserData</a><br/>
+<a href="#Struct_NameAlreadyUsedException">NameAlreadyUsedException</a><br/>
+<a href="#Struct_OpenStackConflictException">OpenStackConflictException</a><br/>
+<a href="#Struct_PlaybookNotFoundException">PlaybookNotFoundException</a><br/>
+<a href="#Struct_PlaybookResult">PlaybookResult</a><br/>
+<a href="#Struct_ResearchEnvironmentTemplate">ResearchEnvironmentTemplate</a><br/>
+<a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a><br/>
+<a href="#Struct_ResourceNotFoundException">ResourceNotFoundException</a><br/>
+<a href="#Struct_SecurityGroupNotFoundException">SecurityGroupNotFoundException</a><br/>
+<a href="#Struct_SecurityGroupRuleNotFoundException">SecurityGroupRuleNotFoundException</a><br/>
+<a href="#Struct_ServerNotFoundException">ServerNotFoundException</a><br/>
+<a href="#Struct_Snapshot">Snapshot</a><br/>
+<a href="#Struct_SnapshotNotFoundException">SnapshotNotFoundException</a><br/>
+<a href="#Struct_TemplateNotFoundException">TemplateNotFoundException</a><br/>
+<a href="#Struct_VM">VM</a><br/>
+<a href="#Struct_VirtualMachineServerMetadata">VirtualMachineServerMetadata</a><br/>
+<a href="#Struct_Volume">Volume</a><br/>
+<a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a><br/>
+<a href="#Typedef_int">int</a><br/>
+</td>
+<td><code><a href="#Const_VERSION">VERSION</a></code><br/>
+</td>
+</tr></tbody></table>
+<hr/><h2 id="Constants">Constants</h2>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Constant</th><th>Type</th><th>Value</th></tr></thead><tbody>
+<tr id="Const_VERSION"><td><code>VERSION</code></td><td><code>string</code></td><td><code>"1.0.0"</code></td></tr><tr><td colspan="3"><blockquote><pre>The Version of the Portal-Client
+</pre><br/></blockquote></td></tr></tbody></table><hr/><h2 id="Typedefs">Type declarations</h2>
+<div class="definition"><h3 id="Typedef_int">Typedef: int</h3>
+<p><strong>Base type:</strong>&nbsp;<code>i32</code></p>
+</div>
+<hr/><h2 id="Structs">Data structures</h2>
+<div class="definition"><h3 id="Struct_MetadataUser">Struct: MetadataUser</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>user_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>public_keys</td><td><code>list&lt;<code>string</code>&gt;</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>unix_name</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_MetadataUserData">Struct: MetadataUserData</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>2</td><td>data</td><td><code>map&lt;<code>string</code>, <code><a href="#Struct_MetadataUser">MetadataUser</a></code>&gt;</code></td><td></td><td>required</td><td><code>{  }</code></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_VirtualMachineServerMetadata">Struct: VirtualMachineServerMetadata</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>ip</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>hashed_auth_token</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>userdata</td><td><code><a href="#Struct_MetadataUserData">MetadataUserData</a></code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_Backend">Struct: Backend</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>id</td><td><code>i64</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>owner</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>location_url</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>4</td><td>template</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>5</td><td>template_version</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>6</td><td>auth_enabled</td><td><code>bool</code></td><td></td><td>optional</td><td><code>true</code></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ResearchEnvironmentTemplate">Struct: ResearchEnvironmentTemplate</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>template_name</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>2</td><td>title</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>description</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>4</td><td>logo_url</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>info_url</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>port</td><td><code>i32</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>7</td><td>incompatible_versions</td><td><code>list&lt;<code>string</code>&gt;</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>8</td><td>is_maintained</td><td><code>bool</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>9</td><td>information_for_display</td><td><code>map&lt;<code>string</code>, <code>string</code>&gt;</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>10</td><td>min_ram</td><td><code><a href="#Typedef_int">int</a></code></td><td></td><td>optional</td><td><code>0</code></td></tr>
+<tr><td>11</td><td>min_cores</td><td><code><a href="#Typedef_int">int</a></code></td><td></td><td>optional</td><td><code>0</code></td></tr>
+<tr><td>12</td><td>securitygroup_name</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_CondaPackage">Struct: CondaPackage</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>build</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>2</td><td>build_number</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>name</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>4</td><td>version</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>home</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_Volume">Struct: Volume</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>id</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>2</td><td>name</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>description</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>4</td><td>status</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>created_at</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>device</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>7</td><td>size</td><td><code><a href="#Typedef_int">int</a></code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>8</td><td>server_id</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_Snapshot">Struct: Snapshot</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>id</td><td><code>string</code></td><td>The OpenStack ID of the snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>2</td><td>name</td><td><code>string</code></td><td>The name of the snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>description</td><td><code>string</code></td><td>The description of the snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>4</td><td>status</td><td><code>string</code></td><td>The status of the snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>created_at</td><td><code>string</code></td><td>The time the snapshot was created
+</td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>size</td><td><code><a href="#Typedef_int">int</a></code></td><td>The size in GB of the snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>7</td><td>volume_id</td><td><code>string</code></td><td>The OpenStack id of the snapshot source volume
+</td><td>optional</td><td></td></tr>
+</tbody></table><br/><pre>This Struct defines a volume Snapshot.
+</pre><br/></div><div class="definition"><h3 id="Struct_Flavor">Struct: Flavor</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>vcpus</td><td><code>i32</code></td><td>The vcpus of the flavor
+</td><td>required</td><td></td></tr>
+<tr><td>2</td><td>ram</td><td><code>i32</code></td><td>The ram of the flavor
+</td><td>required</td><td></td></tr>
+<tr><td>3</td><td>disk</td><td><code>i32</code></td><td>The disk of the flavor
+</td><td>required</td><td></td></tr>
+<tr><td>4</td><td>name</td><td><code>string</code></td><td>The name of the flavor
+</td><td>required</td><td></td></tr>
+<tr><td>5</td><td>description</td><td><code>string</code></td><td>The description of the flavor
+</td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>ephemeral_disk</td><td><code>i32</code></td><td>The ephemeral disk space of the flavor
+</td><td>optional</td><td></td></tr>
+</tbody></table><br/><pre>This Struct defines a Flavor.
+</pre><br/></div><div class="definition"><h3 id="Struct_Image">Struct: Image</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>name</td><td><code>string</code></td><td>The name of the image
+</td><td>required</td><td></td></tr>
+<tr><td>2</td><td>min_disk</td><td><code>i32</code></td><td>The min_diks of the image
+</td><td>required</td><td></td></tr>
+<tr><td>3</td><td>min_ram</td><td><code>i32</code></td><td>The min_ram of the image
+</td><td>required</td><td></td></tr>
+<tr><td>4</td><td>status</td><td><code>string</code></td><td>The status of the image
+</td><td>required</td><td></td></tr>
+<tr><td>5</td><td>created_at</td><td><code>string</code></td><td>The creation time of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>updated_at</td><td><code>string</code></td><td>The updated time of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>7</td><td>openstack_id</td><td><code>string</code></td><td>The openstack_id the image
+</td><td>required</td><td></td></tr>
+<tr><td>8</td><td>description</td><td><code>string</code></td><td>The description of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>9</td><td>tags</td><td><code>list&lt;<code>string</code>&gt;</code></td><td>List of tags from image
+</td><td>required</td><td></td></tr>
+<tr><td>10</td><td>is_snapshot</td><td><code>bool</code></td><td>If the Image is a snapshot
+</td><td>optional</td><td></td></tr>
+<tr><td>11</td><td>os_version</td><td><code>string</code></td><td>OS version of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>12</td><td>os_distro</td><td><code>string</code></td><td>OS distro of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>13</td><td>title</td><td><code>string</code></td><td>Title of the image
+</td><td>optional</td><td></td></tr>
+<tr><td>14</td><td>slurm_version</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/><pre>This Struct defines an Image.
+</pre><br/></div><div class="definition"><h3 id="Struct_VM">Struct: VM</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>flavor</td><td><code><a href="#Struct_Flavor">Flavor</a></code></td><td>The flavor of the VM
+</td><td>optional</td><td></td></tr>
+<tr><td>2</td><td>image</td><td><code><a href="#Struct_Image">Image</a></code></td><td>The image of the VM
+</td><td>optional</td><td></td></tr>
+<tr><td>3</td><td>metadata</td><td><code>map&lt;<code>string</code>, <code>string</code>&gt;</code></td><td>The metadata of the VM
+</td><td>optional</td><td></td></tr>
+<tr><td>4</td><td>project_id</td><td><code>string</code></td><td>The project_id of the VM
+</td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>keyname</td><td><code>string</code></td><td>The keyname from the public key of the VM
+</td><td>required</td><td></td></tr>
+<tr><td>6</td><td>openstack_id</td><td><code>string</code></td><td>The openstack_id of the VM
+</td><td>required</td><td></td></tr>
+<tr><td>7</td><td>name</td><td><code>string</code></td><td>The name of the VM
+</td><td>required</td><td></td></tr>
+<tr><td>8</td><td>created_at</td><td><code>string</code></td><td>The the creation time of the VM
+</td><td>required</td><td></td></tr>
+<tr><td>9</td><td>floating_ip</td><td><code>string</code></td><td>The floating ip of the VM
+</td><td>optional</td><td></td></tr>
+<tr><td>10</td><td>fixed_ip</td><td><code>string</code></td><td>The fixed ips of the VM
+</td><td>required</td><td></td></tr>
+<tr><td>11</td><td>task_state</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>12</td><td>vm_state</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/><pre>This Struct defines a VirtualMachine.
+</pre><br/></div><div class="definition"><h3 id="Struct_ClusterInstanceMetadata">Struct: ClusterInstanceMetadata</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>user_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>project_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>project_name</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterInstance">Struct: ClusterInstance</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>type</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>image</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterVolume">Struct: ClusterVolume</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>openstack_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>permanent</td><td><code>bool</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>exists</td><td><code>bool</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>4</td><td>size</td><td><code><a href="#Typedef_int">int</a></code></td><td></td><td>required</td><td></td></tr>
+<tr><td>5</td><td>type</td><td><code>string</code></td><td></td><td>optional</td><td><code>"ext4"</code></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterWorker">Struct: ClusterWorker</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>type</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>image</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>count</td><td><code><a href="#Typedef_int">int</a></code></td><td></td><td>required</td><td></td></tr>
+<tr><td>4</td><td>onDemand</td><td><code>bool</code></td><td></td><td>optional</td><td><code>false</code></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterMessage">Struct: ClusterMessage</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>cluster_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterInfo">Struct: ClusterInfo</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>cluster_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>ready</td><td><code>bool</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterState">Struct: ClusterState</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>cluster_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>message</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>state</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>4</td><td>ssh_user</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>5</td><td>floating_ip</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+<tr><td>6</td><td>last_changed</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterLog">Struct: ClusterLog</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>2</td><td>cluster_id</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+<tr><td>3</td><td>log</td><td><code>string</code></td><td></td><td>required</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_PlaybookResult">Struct: PlaybookResult</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>status</td><td><code><a href="#Typedef_int">int</a></code></td><td>The exit status code of the run
+</td><td>required</td><td></td></tr>
+<tr><td>2</td><td>stdout</td><td><code>string</code></td><td>The standard logs of the run
+</td><td>required</td><td></td></tr>
+<tr><td>3</td><td>stderr</td><td><code>string</code></td><td>The error logs of the run
+</td><td>required</td><td></td></tr>
+</tbody></table><br/><pre>This Struct defines the result of a playbook run.
+</pre><br/></div><div class="definition"><h3 id="Struct_MetadataServerNotAvailableException">Exception: MetadataServerNotAvailableException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_MetadataServerNotAllowedException">Exception: MetadataServerNotAllowedException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ResourceNotFoundException">Exception: ResourceNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Name already used.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>resource_type</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ResourceNotAvailableException">Exception: ResourceNotAvailableException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Name already used.
+</td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_TemplateNotFoundException">Exception: TemplateNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Name already used.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>template</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_NameAlreadyUsedException">Exception: NameAlreadyUsedException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>@ Name already used.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ServerNotFoundException">Exception: ServerNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Server not found.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_SecurityGroupNotFoundException">Exception: SecurityGroupNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Server not found.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_SecurityGroupRuleNotFoundException">Exception: SecurityGroupRuleNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td>Server not found.
+</td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_FlavorNotFoundException">Exception: FlavorNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_VolumeNotFoundException">Exception: VolumeNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_SnapshotNotFoundException">Exception: SnapshotNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ImageNotFoundException">Exception: ImageNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_ClusterNotFoundException">Exception: ClusterNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_BackendNotFoundException">Exception: BackendNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_PlaybookNotFoundException">Exception: PlaybookNotFoundException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>name_or_id</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_DefaultException">Exception: DefaultException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/></div><div class="definition"><h3 id="Struct_OpenStackConflictException">Exception: OpenStackConflictException</h3>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></tr></thead><tbody>
+<tr><td>1</td><td>message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</tbody></table><br/><pre>Conflict with request (e.g. while vm is in create image task)
+</pre><br/></div><hr/><h2 id="Services">Services</h2>
+<h3 id="Svc_VirtualMachineService">Service: VirtualMachineService</h3>
+<pre>This VirtualMachiine service deploys methods for creating,deleting,stopping etc. VirtualMachines in Openstack.
+</pre><br/><div class="definition"><h4 id="Fn_VirtualMachineService_is_version">Function: VirtualMachineService.is_version</h4>
+<pre><code>bool</code> is_version(<code>double</code> version)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_client_version">Function: VirtualMachineService.get_client_version</h4>
+<pre><code>string</code> get_client_version()
+</pre><pre>Get Client version.
+Returns Version of the client
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_gateway_ip">Function: VirtualMachineService.get_gateway_ip</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> get_gateway_ip()
+</pre><pre>Gets the gateway ip.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_calculation_values">Function: VirtualMachineService.get_calculation_values</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> get_calculation_values()
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_import_keypair">Function: VirtualMachineService.import_keypair</h4>
+<pre><code>string</code> import_keypair(<code>string</code> keyname,
+                      <code>string</code> public_key)
+</pre><pre>Import Key to openstack.
+Returns : keypair
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_import_keypair">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>keyname</td><td>Name for the keypair
+</td></tr>
+<tr><td>public_key</td><td>The public key
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_vm_ports">Function: VirtualMachineService.get_vm_ports</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> get_vm_ports(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Get Ip and Port of server
+Returns:  {'IP': ip, 'PORT': port,'UDP':udp}
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_get_vm_ports">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of server
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_udp_security_group">Function: VirtualMachineService.add_udp_security_group</h4>
+<pre><code>void</code> add_udp_security_group(<code>string</code> server_id)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Adds udp security group to a server
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_add_udp_security_group">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>server_id</td><td>OpenStack id of the server
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_research_environment_security_group">Function: VirtualMachineService.add_research_environment_security_group</h4>
+<pre><code>void</code> add_research_environment_security_group(<code>string</code> server_id,
+                                             <code>string</code> security_group_name)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Adds template security group to a server
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_add_research_environment_security_group">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>server_id</td><td>OpenStack id of the server
+</td></tr>
+<tr><td>security_group_name</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_project_security_group_to_server">Function: VirtualMachineService.add_project_security_group_to_server</h4>
+<pre><code>void</code> add_project_security_group_to_server(<code>string</code> server_id,
+                                          <code>string</code> project_name,
+                                          <code>string</code> project_id)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><br/><h4 id="Parameters_VirtualMachineService_add_project_security_group_to_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>server_id</td><td>OpenStack id of the server
+</td></tr>
+<tr><td>project_name</td><td></td></tr>
+<tr><td>project_id</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_metadata_to_server">Function: VirtualMachineService.add_metadata_to_server</h4>
+<pre><code>void</code> add_metadata_to_server(<code>string</code> openstack_id,
+                            <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Add metadata to a server.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_flavors">Function: VirtualMachineService.get_flavors</h4>
+<pre><code>list&lt;<code><a href="#Struct_Flavor">Flavor</a></code>&gt;</code> get_flavors()
+</pre><pre>Get Flavors.
+Returns: List of flavor instances.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_images">Function: VirtualMachineService.get_images</h4>
+<pre><code>list&lt;<code><a href="#Struct_Image">Image</a></code>&gt;</code> get_images()
+</pre><pre>Get Images.
+Returns: List of Image instances.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_public_images">Function: VirtualMachineService.get_public_images</h4>
+<pre><code>list&lt;<code><a href="#Struct_Image">Image</a></code>&gt;</code> get_public_images()
+</pre><pre>Get Images.
+Returns: List of public Image instances.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_private_images">Function: VirtualMachineService.get_private_images</h4>
+<pre><code>list&lt;<code><a href="#Struct_Image">Image</a></code>&gt;</code> get_private_images()
+</pre><pre>Get Images.
+Returns: List of private Image instances.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_image">Function: VirtualMachineService.get_image</h4>
+<pre><code><a href="#Struct_Image">Image</a></code> get_image(<code>string</code> openstack_id,
+                <code>bool</code> ignore_not_active)
+    throws <code><a href="#Struct_ImageNotFoundException">ImageNotFoundException</a></code>
+</pre><pre>Get an image with tag.
+Returns: image.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_volume">Function: VirtualMachineService.get_volume</h4>
+<pre><code><a href="#Struct_Volume">Volume</a></code> get_volume(<code>string</code> volume_id)
+    throws <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_volumes_by_ids">Function: VirtualMachineService.get_volumes_by_ids</h4>
+<pre><code>list&lt;<code><a href="#Struct_Volume">Volume</a></code>&gt;</code> get_volumes_by_ids(<code>list&lt;<code>string</code>&gt;</code> volume_ids)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_resize_volume">Function: VirtualMachineService.resize_volume</h4>
+<pre><code>void</code> resize_volume(<code>string</code> volume_id,
+                   <code><a href="#Typedef_int">int</a></code> size)
+    throws <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_open_port_range_for_vm_in_project">Function: VirtualMachineService.open_port_range_for_vm_in_project</h4>
+<pre><code>string</code> open_port_range_for_vm_in_project(<code><a href="#Typedef_int">int</a></code> range_start,
+                                         <code><a href="#Typedef_int">int</a></code> range_stop,
+                                         <code>string</code> openstack_id,
+                                         <code>string</code> ethertype = "IPv4",
+                                         <code>string</code> protocol = "TCP")
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Creates/Updates a security group for a vm with a specific port range for a project
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_security_group_rule">Function: VirtualMachineService.delete_security_group_rule</h4>
+<pre><code>void</code> delete_security_group_rule(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_SecurityGroupRuleNotFoundException">SecurityGroupRuleNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_remove_security_groups_from_server">Function: VirtualMachineService.remove_security_groups_from_server</h4>
+<pre><code>void</code> remove_security_groups_from_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_SecurityGroupRuleNotFoundException">SecurityGroupRuleNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_server">Function: VirtualMachineService.delete_server</h4>
+<pre><code>void</code> delete_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Delete server.
+Returns: True if deleted, False if not
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_delete_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server.
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_rescue_server">Function: VirtualMachineService.rescue_server</h4>
+<pre><code>void</code> rescue_server(<code>string</code> openstack_id,
+                   <code>string</code> admin_pass,
+                   <code>string</code> image_ref)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><br/><h4 id="Parameters_VirtualMachineService_rescue_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server.
+</td></tr>
+<tr><td>admin_pass</td><td></td></tr>
+<tr><td>image_ref</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_unrescue_server">Function: VirtualMachineService.unrescue_server</h4>
+<pre><code>void</code> unrescue_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><br/><h4 id="Parameters_VirtualMachineService_unrescue_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server.
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_start_server">Function: VirtualMachineService.start_server</h4>
+<pre><code>string</code> start_server(<code>string</code> flavor_name,
+                    <code>string</code> image_name,
+                    <code>string</code> public_key,
+                    <code>string</code> servername,
+                    <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata,
+                    <code>list&lt;<code>map&lt;<code>string</code>, <code>string</code>&gt;</code>&gt;</code> volume_ids_path_new,
+                    <code>list&lt;<code>map&lt;<code>string</code>, <code>string</code>&gt;</code>&gt;</code> volume_ids_path_attach,
+                    <code>list&lt;<code>string</code>&gt;</code> additional_owner_keys,
+                    <code>list&lt;<code>string</code>&gt;</code> additional_user_keys,
+                    <code>string</code> research_environment,
+                    <code>list&lt;<code>string</code>&gt;</code> additional_security_group_ids,
+                    <code>string</code> slurm_version,
+                    <code>string</code> metadata_token,
+                    <code>string</code> metadata_endpoint,
+                    <code>string</code> additional_script)
+    throws <code><a href="#Struct_NameAlreadyUsedException">NameAlreadyUsedException</a></code>, <code><a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a></code>, <code><a href="#Struct_ImageNotFoundException">ImageNotFoundException</a></code>, <code><a href="#Struct_FlavorNotFoundException">FlavorNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><br/><h4 id="Parameters_VirtualMachineService_start_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>flavor_name</td><td>Name of the  Flavor to use.
+</td></tr>
+<tr><td>image_name</td><td>Name of the image to use.
+</td></tr>
+<tr><td>public_key</td><td>Public Key to use
+</td></tr>
+<tr><td>servername</td><td>Name for the new server
+</td></tr>
+<tr><td>metadata</td><td>Metadata for the new instance
+</td></tr>
+<tr><td>volume_ids_path_new</td><td></td></tr>
+<tr><td>volume_ids_path_attach</td><td></td></tr>
+<tr><td>additional_owner_keys</td><td></td></tr>
+<tr><td>additional_user_keys</td><td></td></tr>
+<tr><td>research_environment</td><td></td></tr>
+<tr><td>additional_security_group_ids</td><td></td></tr>
+<tr><td>slurm_version</td><td></td></tr>
+<tr><td>metadata_token</td><td></td></tr>
+<tr><td>metadata_endpoint</td><td></td></tr>
+<tr><td>additional_script</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_is_bibigrid_available">Function: VirtualMachineService.is_bibigrid_available</h4>
+<pre><code>bool</code> is_bibigrid_available()
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_detach_ip_from_server">Function: VirtualMachineService.detach_ip_from_server</h4>
+<pre><code>void</code> detach_ip_from_server(<code>string</code> server_id,
+                           <code>string</code> floating_ip)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_start_server_with_custom_key">Function: VirtualMachineService.start_server_with_custom_key</h4>
+<pre><code>string</code> start_server_with_custom_key(<code>string</code> flavor_name,
+                                    <code>string</code> image_name,
+                                    <code>string</code> servername,
+                                    <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata,
+                                    <code>string</code> research_environment,
+                                    <code>list&lt;<code>map&lt;<code>string</code>, <code>string</code>&gt;</code>&gt;</code> volume_ids_path_new,
+                                    <code>list&lt;<code>map&lt;<code>string</code>, <code>string</code>&gt;</code>&gt;</code> volume_ids_path_attach,
+                                    <code>list&lt;<code>string</code>&gt;</code> additional_security_group_ids,
+                                    <code>list&lt;<code>string</code>&gt;</code> additional_owner_keys,
+                                    <code>list&lt;<code>string</code>&gt;</code> additional_user_keys,
+                                    <code>string</code> metadata_token,
+                                    <code>string</code> metadata_endpoint,
+                                    <code>string</code> additional_script)
+    throws <code><a href="#Struct_NameAlreadyUsedException">NameAlreadyUsedException</a></code>, <code><a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a></code>, <code><a href="#Struct_ImageNotFoundException">ImageNotFoundException</a></code>, <code><a href="#Struct_FlavorNotFoundException">FlavorNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Start a new server with custom key for ansible.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_start_server_with_custom_key">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>flavor_name</td><td>Name of the  Flavor to use.
+</td></tr>
+<tr><td>image_name</td><td>Name of the image to use.
+</td></tr>
+<tr><td>servername</td><td>Name for the new server
+</td></tr>
+<tr><td>metadata</td><td>Metadata for the new instance
+</td></tr>
+<tr><td>research_environment</td><td></td></tr>
+<tr><td>volume_ids_path_new</td><td></td></tr>
+<tr><td>volume_ids_path_attach</td><td></td></tr>
+<tr><td>additional_security_group_ids</td><td></td></tr>
+<tr><td>additional_owner_keys</td><td></td></tr>
+<tr><td>additional_user_keys</td><td></td></tr>
+<tr><td>metadata_token</td><td></td></tr>
+<tr><td>metadata_endpoint</td><td></td></tr>
+<tr><td>additional_script</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_exist_server">Function: VirtualMachineService.exist_server</h4>
+<pre><code>bool</code> exist_server(<code>string</code> name)
+</pre><pre>Check if there is an instance with name
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_and_deploy_playbook">Function: VirtualMachineService.create_and_deploy_playbook</h4>
+<pre><code><a href="#Typedef_int">int</a></code> create_and_deploy_playbook(<code>string</code> public_key,
+                               <code>string</code> openstack_id,
+                               <code>list&lt;<code><a href="#Struct_CondaPackage">CondaPackage</a></code>&gt;</code> conda_packages,
+                               <code>string</code> research_environment_template,
+                               <code>list&lt;<code>string</code>&gt;</code> apt_packages,
+                               <code>bool</code> create_only_backend,
+                               <code>string</code> base_url)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Create and deploy an  ansible playbook
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_playbook_logs">Function: VirtualMachineService.get_playbook_logs</h4>
+<pre><code><a href="#Struct_PlaybookResult">PlaybookResult</a></code> get_playbook_logs(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_PlaybookNotFoundException">PlaybookNotFoundException</a></code>
+</pre><pre>Get the logs from a playbook run
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_has_forc">Function: VirtualMachineService.has_forc</h4>
+<pre><code>bool</code> has_forc()
+</pre><pre>Get boolean if client has backend url configured
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_forc_access_url">Function: VirtualMachineService.get_forc_access_url</h4>
+<pre><code>string</code> get_forc_access_url()
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_backend">Function: VirtualMachineService.create_backend</h4>
+<pre><code><a href="#Struct_Backend">Backend</a></code> create_backend(<code>string</code> owner,
+                       <code>string</code> user_path,
+                       <code>string</code> template,
+                       <code>string</code> upstream_url)
+    throws <code><a href="#Struct_TemplateNotFoundException">TemplateNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Create a backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_backends">Function: VirtualMachineService.get_backends</h4>
+<pre><code>list&lt;<code><a href="#Struct_Backend">Backend</a></code>&gt;</code> get_backends()
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Get all backends
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_backends_by_owner">Function: VirtualMachineService.get_backends_by_owner</h4>
+<pre><code>list&lt;<code><a href="#Struct_Backend">Backend</a></code>&gt;</code> get_backends_by_owner(<code>string</code> owner)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Get all backends by owner
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_backends_by_template">Function: VirtualMachineService.get_backends_by_template</h4>
+<pre><code>list&lt;<code><a href="#Struct_Backend">Backend</a></code>&gt;</code> get_backends_by_template(<code>string</code> template)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Get all backends by template
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_backend_by_id">Function: VirtualMachineService.get_backend_by_id</h4>
+<pre><code><a href="#Struct_Backend">Backend</a></code> get_backend_by_id(<code>i64</code> id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Get a backend by id
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_set_metadata_server_data">Function: VirtualMachineService.set_metadata_server_data</h4>
+<pre><code>void</code> set_metadata_server_data(<code>string</code> ip,
+                              <code><a href="#Struct_VirtualMachineServerMetadata">VirtualMachineServerMetadata</a></code> metadata)
+    throws <code><a href="#Struct_MetadataServerNotAvailableException">MetadataServerNotAvailableException</a></code>, <code><a href="#Struct_MetadataServerNotAllowedException">MetadataServerNotAllowedException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_remove_metadata_server_data">Function: VirtualMachineService.remove_metadata_server_data</h4>
+<pre><code>void</code> remove_metadata_server_data(<code>string</code> ip)
+    throws <code><a href="#Struct_MetadataServerNotAvailableException">MetadataServerNotAvailableException</a></code>, <code><a href="#Struct_MetadataServerNotAllowedException">MetadataServerNotAllowedException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_is_metadata_server_available">Function: VirtualMachineService.is_metadata_server_available</h4>
+<pre><code>bool</code> is_metadata_server_available()
+    throws <code><a href="#Struct_MetadataServerNotAvailableException">MetadataServerNotAvailableException</a></code>, <code><a href="#Struct_MetadataServerNotAllowedException">MetadataServerNotAllowedException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_backend">Function: VirtualMachineService.delete_backend</h4>
+<pre><code>void</code> delete_backend(<code>i64</code> id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Delete a backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_user_to_backend">Function: VirtualMachineService.add_user_to_backend</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> add_user_to_backend(<code>i64</code> backend_id,
+                                      <code>string</code> user_id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Add a user to a backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_users_from_backend">Function: VirtualMachineService.get_users_from_backend</h4>
+<pre><code>list&lt;<code>string</code>&gt;</code> get_users_from_backend(<code>i64</code> backend_id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Get users from a backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_user_from_backend">Function: VirtualMachineService.delete_user_from_backend</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> delete_user_from_backend(<code>i64</code> backend_id,
+                                           <code>string</code> user_id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Delete user from a backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_activate_auth_for_backend">Function: VirtualMachineService.activate_auth_for_backend</h4>
+<pre><code><a href="#Struct_Backend">Backend</a></code> activate_auth_for_backend(<code>i64</code> backend_id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Activate Authentification for backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_deactivate_auth_for_backend">Function: VirtualMachineService.deactivate_auth_for_backend</h4>
+<pre><code><a href="#Struct_Backend">Backend</a></code> deactivate_auth_for_backend(<code>i64</code> backend_id)
+    throws <code><a href="#Struct_BackendNotFoundException">BackendNotFoundException</a></code>
+</pre><pre>Deactivate Authentification for backend
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_allowed_templates">Function: VirtualMachineService.get_allowed_templates</h4>
+<pre><code>list&lt;<code><a href="#Struct_ResearchEnvironmentTemplate">ResearchEnvironmentTemplate</a></code>&gt;</code> get_allowed_templates()
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_servers">Function: VirtualMachineService.get_servers</h4>
+<pre><code>list&lt;<code><a href="#Struct_VM">VM</a></code>&gt;</code> get_servers()
+</pre><pre>Get all servers.
+Returns: List of server instances.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_servers_by_ids">Function: VirtualMachineService.get_servers_by_ids</h4>
+<pre><code>list&lt;<code><a href="#Struct_VM">VM</a></code>&gt;</code> get_servers_by_ids(<code>list&lt;<code>string</code>&gt;</code> server_ids)
+</pre><pre>* Get list of servers by ids
+   *
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_cluster_supported_ubuntu_os_versions">Function: VirtualMachineService.get_cluster_supported_ubuntu_os_versions</h4>
+<pre><code>list&lt;<code>string</code>&gt;</code> get_cluster_supported_ubuntu_os_versions()
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_servers_by_bibigrid_id">Function: VirtualMachineService.get_servers_by_bibigrid_id</h4>
+<pre><code>list&lt;<code><a href="#Struct_VM">VM</a></code>&gt;</code> get_servers_by_bibigrid_id(<code>string</code> bibigrid_id)
+</pre><pre>* Get servers by bibigrid cluster id.
+   *
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_security_group_id_by_name">Function: VirtualMachineService.get_security_group_id_by_name</h4>
+<pre><code>string</code> get_security_group_id_by_name(<code>string</code> name)
+    throws <code><a href="#Struct_SecurityGroupNotFoundException">SecurityGroupNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_scale_up_cluster">Function: VirtualMachineService.scale_up_cluster</h4>
+<pre><code>map&lt;<code>string</code>, <code>list&lt;<code>string</code>&gt;</code>&gt;</code> scale_up_cluster(<code>string</code> cluster_id,
+                                         <code>string</code> image_name,
+                                         <code>string</code> flavor_name,
+                                         <code><a href="#Typedef_int">int</a></code> count,
+                                         <code>list&lt;<code>string</code>&gt;</code> names,
+                                         <code><a href="#Typedef_int">int</a></code> start_idx,
+                                         <code><a href="#Typedef_int">int</a></code> batch_idx)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_cluster_machine">Function: VirtualMachineService.add_cluster_machine</h4>
+<pre><code>string</code> add_cluster_machine(<code>string</code> cluster_id,
+                           <code>string</code> cluster_user,
+                           <code>string</code> cluster_group_id,
+                           <code>string</code> image_name,
+                           <code>string</code> flavor_name,
+                           <code>string</code> name,
+                           <code>string</code> key_name,
+                           <code><a href="#Typedef_int">int</a></code> batch_idx,
+                           <code><a href="#Typedef_int">int</a></code> worker_idx)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_cluster_info">Function: VirtualMachineService.get_cluster_info</h4>
+<pre><code><a href="#Struct_ClusterInfo">ClusterInfo</a></code> get_cluster_info(<code>string</code> cluster_id)
+    throws <code><a href="#Struct_ClusterNotFoundException">ClusterNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_cluster_log">Function: VirtualMachineService.get_cluster_log</h4>
+<pre><code><a href="#Struct_ClusterLog">ClusterLog</a></code> get_cluster_log(<code>string</code> cluster_id)
+    throws <code><a href="#Struct_ClusterNotFoundException">ClusterNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_cluster_state">Function: VirtualMachineService.get_cluster_state</h4>
+<pre><code><a href="#Struct_ClusterState">ClusterState</a></code> get_cluster_state(<code>string</code> cluster_id)
+    throws <code><a href="#Struct_ClusterNotFoundException">ClusterNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_keypair_public_key_by_name">Function: VirtualMachineService.get_keypair_public_key_by_name</h4>
+<pre><code>string</code> get_keypair_public_key_by_name(<code>string</code> key_name)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_keypair">Function: VirtualMachineService.delete_keypair</h4>
+<pre><code>void</code> delete_keypair(<code>string</code> key_name)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_add_default_security_groups_to_server">Function: VirtualMachineService.add_default_security_groups_to_server</h4>
+<pre><code>void</code> add_default_security_groups_to_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_server_console">Function: VirtualMachineService.get_server_console</h4>
+<pre><code>string</code> get_server_console(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_server">Function: VirtualMachineService.get_server</h4>
+<pre><code><a href="#Struct_VM">VM</a></code> get_server(<code>string</code> openstack_id,
+              <code>bool</code> no_connection)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><pre>Get a Server.
+Returns: A server instance.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_get_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server.
+</td></tr>
+<tr><td>no_connection</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_server_by_unique_name">Function: VirtualMachineService.get_server_by_unique_name</h4>
+<pre><code><a href="#Struct_VM">VM</a></code> get_server_by_unique_name(<code>string</code> unique_name,
+                             <code>bool</code> no_connection)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>
+</pre><br/><h4 id="Parameters_VirtualMachineService_get_server_by_unique_name">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>unique_name</td><td>Id of the server.
+</td></tr>
+<tr><td>no_connection</td><td></td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_stop_server">Function: VirtualMachineService.stop_server</h4>
+<pre><code>void</code> stop_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Stop a Server.
+Returns: True if stopped, False if not.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_stop_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server.
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_snapshot">Function: VirtualMachineService.create_snapshot</h4>
+<pre><code>string</code> create_snapshot(<code>string</code> openstack_id,
+                       <code>string</code> name,
+                       <code>string</code> username,
+                       <code>list&lt;<code>string</code>&gt;</code> base_tags,
+                       <code>string</code> description)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Create Snapshot.
+Returns: Id of new Snapshot
+
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_create_snapshot">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server
+</td></tr>
+<tr><td>name</td><td>Name of new Snapshot
+</td></tr>
+<tr><td>username</td><td>unique username of the user who requested creation of Snapshot
+</td></tr>
+<tr><td>base_tags</td><td>Tags with which the servers image is also tagged ( for connection information at the webapp)
+</td></tr>
+<tr><td>description</td><td>Description of the new snapshot
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_limits">Function: VirtualMachineService.get_limits</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> get_limits()
+</pre><pre>Get Limits of OpenStack Projekt from client.
+Returns: {'maxTotalVolumes': maxTotalVolumes, 'maxTotalVolumeGigabytes': maxTotalVolumeGigabytes,
+          'maxTotalInstances': maxTotalInstances, 'totalRamUsed': totalRamUsed,
+         'totalInstancesUsed': totalInstancesUsed}
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_start_cluster">Function: VirtualMachineService.start_cluster</h4>
+<pre><code><a href="#Struct_ClusterMessage">ClusterMessage</a></code> start_cluster(<code>list&lt;<code>string</code>&gt;</code> public_keys,
+                             <code><a href="#Struct_ClusterInstance">ClusterInstance</a></code> master_instance,
+                             <code>list&lt;<code><a href="#Struct_ClusterWorker">ClusterWorker</a></code>&gt;</code> worker_instances,
+                             <code><a href="#Struct_ClusterInstanceMetadata">ClusterInstanceMetadata</a></code> metadata,
+                             <code><a href="#Struct_ClusterVolume">ClusterVolume</a></code> shared_volume)
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_terminate_cluster">Function: VirtualMachineService.terminate_cluster</h4>
+<pre><code>void</code> terminate_cluster(<code>string</code> cluster_id)
+    throws <code><a href="#Struct_ClusterNotFoundException">ClusterNotFoundException</a></code>
+</pre></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_image">Function: VirtualMachineService.delete_image</h4>
+<pre><code>void</code> delete_image(<code>string</code> image_id)
+    throws <code><a href="#Struct_ImageNotFoundException">ImageNotFoundException</a></code>
+</pre><pre>Delete Image.
+Return: True if deleted, False if not
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_delete_image">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>image_id</td><td>Id of image
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_detach_volume">Function: VirtualMachineService.detach_volume</h4>
+<pre><code>void</code> detach_volume(<code>string</code> volume_id,
+                   <code>string</code> server_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>, <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>
+</pre><pre>Delete volume attachment
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_detach_volume">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>volume_id</td><td>Id of the attached volume
+</td></tr>
+<tr><td>server_id</td><td>Id of the server where the volume is attached
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_volume">Function: VirtualMachineService.delete_volume</h4>
+<pre><code>void</code> delete_volume(<code>string</code> volume_id)
+    throws <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>, <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>
+</pre><pre>Delete volume.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_attach_volume_to_server">Function: VirtualMachineService.attach_volume_to_server</h4>
+<pre><code>map&lt;<code>string</code>, <code>string</code>&gt;</code> attach_volume_to_server(<code>string</code> openstack_id,
+                                          <code>string</code> volume_id)
+    throws <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Attach volume to server.
+Returns:  True if attached, False if not
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_attach_volume_to_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of server
+</td></tr>
+<tr><td>volume_id</td><td>Id of volume
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_resume_server">Function: VirtualMachineService.resume_server</h4>
+<pre><code>void</code> resume_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Resume Server.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_resume_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_volume">Function: VirtualMachineService.create_volume</h4>
+<pre><code><a href="#Struct_Volume">Volume</a></code> create_volume(<code>string</code> volume_name,
+                     <code><a href="#Typedef_int">int</a></code> volume_storage,
+                     <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a></code>
+</pre><pre>Create volume.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_create_volume">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>volume_name</td><td>Name of volume
+</td></tr>
+<tr><td>volume_storage</td><td>Diskspace in GB for new volume
+</td></tr>
+<tr><td>metadata</td><td>Metadata for the new volume
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_volume_by_source_volume">Function: VirtualMachineService.create_volume_by_source_volume</h4>
+<pre><code><a href="#Struct_Volume">Volume</a></code> create_volume_by_source_volume(<code>string</code> volume_name,
+                                      <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata,
+                                      <code>string</code> source_volume_id)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a></code>
+</pre><pre>Create volume by source volume.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_create_volume_by_source_volume">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>volume_name</td><td>Name of volume
+</td></tr>
+<tr><td>metadata</td><td>Metadata for the new volume
+</td></tr>
+<tr><td>source_volume_id</td><td>ID of source volume
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_volume_by_volume_snap">Function: VirtualMachineService.create_volume_by_volume_snap</h4>
+<pre><code><a href="#Struct_Volume">Volume</a></code> create_volume_by_volume_snap(<code>string</code> volume_name,
+                                    <code>map&lt;<code>string</code>, <code>string</code>&gt;</code> metadata,
+                                    <code>string</code> volume_snap_id)
+    throws <code><a href="#Struct_DefaultException">DefaultException</a></code>, <code><a href="#Struct_ResourceNotAvailableException">ResourceNotAvailableException</a></code>
+</pre><pre>Create volume by volume snapshot.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_create_volume_by_volume_snap">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>volume_name</td><td>Name of volume
+</td></tr>
+<tr><td>metadata</td><td>Metadata for the new volume
+</td></tr>
+<tr><td>volume_snap_id</td><td>ID of volume snapshot
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_create_volume_snapshot">Function: VirtualMachineService.create_volume_snapshot</h4>
+<pre><code>string</code> create_volume_snapshot(<code>string</code> volume_id,
+                              <code>string</code> name,
+                              <code>string</code> description)
+    throws <code><a href="#Struct_VolumeNotFoundException">VolumeNotFoundException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Create volume snapshot.
+Returns: ID of created snapshot
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_create_volume_snapshot">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>volume_id</td><td>ID of source volume
+</td></tr>
+<tr><td>name</td><td>Name for the volume snapshot
+</td></tr>
+<tr><td>description</td><td>Description for the volume snapshot
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_get_volume_snapshot">Function: VirtualMachineService.get_volume_snapshot</h4>
+<pre><code><a href="#Struct_Snapshot">Snapshot</a></code> get_volume_snapshot(<code>string</code> name_or_id)
+    throws <code><a href="#Struct_ResourceNotFoundException">ResourceNotFoundException</a></code>
+</pre><pre>Get volume snapshot.
+Returns: Snapshot object of volume snapshot
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_get_volume_snapshot">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>name_or_id</td><td>Name or ID of volume snapshot
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_delete_volume_snapshot">Function: VirtualMachineService.delete_volume_snapshot</h4>
+<pre><code>void</code> delete_volume_snapshot(<code>string</code> snapshot_id)
+    throws <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>, <code><a href="#Struct_DefaultException">DefaultException</a></code>
+</pre><pre>Delete volume snapshot.
+</pre><br/></div><div class="definition"><h4 id="Fn_VirtualMachineService_reboot_hard_server">Function: VirtualMachineService.reboot_hard_server</h4>
+<pre><code>void</code> reboot_hard_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Reboot server.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_reboot_hard_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server
+</td></tr>
+</tbody></table></div><div class="definition"><h4 id="Fn_VirtualMachineService_reboot_soft_server">Function: VirtualMachineService.reboot_soft_server</h4>
+<pre><code>void</code> reboot_soft_server(<code>string</code> openstack_id)
+    throws <code><a href="#Struct_ServerNotFoundException">ServerNotFoundException</a></code>, <code><a href="#Struct_OpenStackConflictException">OpenStackConflictException</a></code>
+</pre><pre>Reboot server.
+</pre><br/><br/><h4 id="Parameters_VirtualMachineService_reboot_soft_server">Parameters</h4>
+<table class="table-bordered table-striped table-condensed"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>openstack_id</td><td>Id of the server
+</td></tr>
+</tbody></table></div></div></body></html>
