@@ -323,7 +323,7 @@ class ForcConnector:
                 location_url=data["location_url"],
                 template=data["template"],
                 template_version=data["template_version"],
-                auth_enabled=data["auth_enabled"],
+                auth_enabled=data.get("auth_enabled",True),
             )
             return new_backend
 
