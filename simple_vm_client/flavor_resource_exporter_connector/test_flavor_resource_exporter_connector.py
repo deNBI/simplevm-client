@@ -239,6 +239,74 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
 
     @patch("builtins.open")
     @patch("yaml.load")
+    def test_init_enabled_without_basic_auth(self, mock_yaml_load, mock_open):
+        """Test that connector is enabled without basic auth credentials when configured."""
+        mock_open.return_value.__enter__ = lambda self: self
+        mock_open.return_value.__exit__ = lambda self, *args: None
+        mock_open.return_value.read = lambda: "test"
+
+        mock_yaml_load.return_value = {
+            "flavor_resource_exporter": {
+                "activated": True,
+                "endpoint_url": "http://example.com",
+                "use_basic_auth": False,
+            }
+        }
+
+        connector = FlavorResourceExporterConnector("config.yml")
+        self.assertTrue(connector.enabled)
+        self.assertFalse(connector.use_basic_auth)
+        self.assertTrue(connector.is_available())
+
+    @patch("requests.Session.get")
+    @patch("builtins.open")
+    @patch("yaml.load")
+    def test_fetch_flavor_resources_no_auth(self, mock_yaml_load, mock_open, mock_get):
+        """Test fetching resources without basic auth when configured."""
+        mock_open.return_value.__enter__ = lambda self: self
+        mock_open.return_value.__exit__ = lambda self, *args: None
+        mock_open.return_value.read = lambda: "test"
+
+        mock_yaml_load.return_value = {
+            "flavor_resource_exporter": {
+                "activated": True,
+                "endpoint_url": "http://example.com/flavors",
+                "use_basic_auth": False,
+            }
+        }
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = []
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        connector = FlavorResourceExporterConnector("config.yml")
+        connector.fetch_flavor_resources()
+
+        mock_get.assert_called_once()
+        self.assertIsNone(connector.session.auth)
+
+    @patch("builtins.open")
+    @patch("yaml.load")
+    def test_is_available_without_basic_auth(self, mock_yaml_load, mock_open):
+        """Test is_available returns True when basic auth is disabled and connector is configured."""
+        mock_open.return_value.__enter__ = lambda self: self
+        mock_open.return_value.__exit__ = lambda self, *args: None
+        mock_open.return_value.read = lambda: "test"
+
+        mock_yaml_load.return_value = {
+            "flavor_resource_exporter": {
+                "activated": True,
+                "endpoint_url": "http://example.com",
+                "use_basic_auth": False,
+            }
+        }
+
+        connector = FlavorResourceExporterConnector("config.yml")
+        self.assertTrue(connector.is_available())
+
+    @patch("builtins.open")
+    @patch("yaml.load")
     def test_is_available_missing_password(self, mock_yaml_load, mock_open):
         """Test is_available returns False when password is missing."""
         os.environ["FLAVOR_RESOURCE_EXPORTER_USERNAME"] = "testuser"
