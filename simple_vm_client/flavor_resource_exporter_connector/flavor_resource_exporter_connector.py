@@ -34,6 +34,7 @@ class FlavorResourceExporterConnector:
         self.endpoint_url: str = ""
         self.timeout: int = 30
         self.enabled: bool = False
+        self.use_basic_auth: bool = True
 
         self.load_config(config_file=config_file)
         self._check_credentials()
@@ -93,6 +94,7 @@ class FlavorResourceExporterConnector:
 
                 self.endpoint_url = resource_config.get("endpoint_url", "")
                 self.timeout = resource_config.get("timeout", 30)
+                self.use_basic_auth = resource_config.get("use_basic_auth", True)
 
                 if not self.endpoint_url:
                     logger.warning(
@@ -214,10 +216,17 @@ class FlavorResourceExporterConnector:
     def _check_credentials(self) -> None:
         """Check if basic auth credentials are available.
 
-        Connector is only enabled if username and password are available via env.
+        Connector is only enabled if username and password are available via env,
+        unless basic auth is disabled via config.
         Password is loaded here to ensure it happens after config loading.
         """
         if not self.enabled:
+            return
+
+        if not self.use_basic_auth:
+            logger.info("Basic auth is disabled for Flavor Resource Exporter")
+            self.username = ""
+            self.password = ""
             return
 
         # Load username and password from env
@@ -242,6 +251,7 @@ class FlavorResourceExporterConnector:
         return (
             self.enabled
             and bool(self.endpoint_url)
-            and bool(self.username)
-            and bool(self.password)
+            and (
+                not self.use_basic_auth or (bool(self.username) and bool(self.password))
+            )
         )
