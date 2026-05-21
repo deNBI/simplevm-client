@@ -99,4 +99,5 @@ flavor_resource_exporter:
   #   FLAVOR_RESOURCE_EXPORTER_USERNAME
   #   FLAVOR_RESOURCE_EXPORTER_PASSWORD
   timeout: 30
+  use_basic_auth: true
   # Request timeout in seconds
