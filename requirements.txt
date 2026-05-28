@@ -17,6 +17,6 @@ sympy==1.14.0
 colorama==0.4.6
 gevent==26.5.0
 types-redis==4.6.0.20241004
-oslo.utils==10.0.1
+oslo.utils==10.1.0
 passlib==1.7.4
 apscheduler==3.11.2
