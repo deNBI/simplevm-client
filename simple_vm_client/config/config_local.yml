@@ -53,6 +53,8 @@ openstack:
   # IP address of the OpenStack gateway.
   network: portalexternalnetwork
   # Name or identifier of the openstack network
+  compute_api_version: 2.96
+  # nova api version
 
 # Bibigrid configuration
 bibigrid:

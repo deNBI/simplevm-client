@@ -182,7 +182,7 @@ class OpenStackConnector:
             if "compute_api_version" in cfg["openstack"]:
                 self.NOVA_MICROVERSION = cfg["openstack"]["compute_api_version"]
                 logger.debug(
-                    "Using custom compute API version",
+                    "Using compute API version",
                     extra={"api_version": self.NOVA_MICROVERSION},
                 )
 
@@ -194,6 +194,7 @@ class OpenStackConnector:
                     "gateway_ip": self.GATEWAY_IP,
                     "production": self.PRODUCTION,
                     "threads": self.THREADS,
+                    "compute_api_version": self.NOVA_MICROVERSION,
                 },
             )
 
