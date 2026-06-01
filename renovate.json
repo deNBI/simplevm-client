@@ -51,6 +51,11 @@
   "assignees": [
     "team:portal-dev"
   ],
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ]
+  },
   "branchPrefix": "deps/",
   "bumpVersion": "minor",
   "commitBodyTable": true,
