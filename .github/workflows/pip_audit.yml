@@ -7,7 +7,7 @@ on:
 
 jobs:
   pip-audit:
-    runs-on: self-hosted
+    runs-on: uubuntu-latest
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
