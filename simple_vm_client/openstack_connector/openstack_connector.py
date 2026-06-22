@@ -128,6 +128,7 @@ class OpenStackConnector:
                 pool_connections=pool_size,
                 pool_maxsize=pool_size,
                 max_retries=3,
+                pool_block=True,
             )
 
             sess = session.Session(auth=auth, timeout=30)
