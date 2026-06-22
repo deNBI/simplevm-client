@@ -49,9 +49,7 @@ class BibigridConnector:
         )
 
         adapter = HTTPAdapter(
-            pool_connections=20,
-            pool_maxsize=20,
-            max_retries=retry,
+            pool_connections=20, pool_maxsize=20, max_retries=retry, pool_block=True
         )
 
         session.mount("http://", adapter)

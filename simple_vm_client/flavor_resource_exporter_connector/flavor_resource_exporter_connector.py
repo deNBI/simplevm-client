@@ -53,9 +53,7 @@ class FlavorResourceExporterConnector:
         )
 
         adapter = HTTPAdapter(
-            pool_connections=10,
-            pool_maxsize=10,
-            max_retries=retry,
+            pool_connections=10, pool_maxsize=10, max_retries=retry, pool_block=True
         )
 
         session.mount("http://", adapter)

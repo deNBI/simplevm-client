@@ -128,6 +128,7 @@ class OpenStackConnector:
                 pool_connections=pool_size,
                 pool_maxsize=pool_size,
                 max_retries=3,
+                pool_block=True,
             )
 
             sess = session.Session(auth=auth, timeout=30)
@@ -1052,7 +1053,7 @@ class OpenStackConnector:
             extra={"name_or_id": name_or_id, "slurm_version": slurm_version},
         )
 
-        logger.info(f"Get Imagedsadsadas {name_or_id}")
+        logger.info(f"Get Image {name_or_id}")
 
         try:
             image = self.openstack_connection.get_image(name_or_id=name_or_id)
