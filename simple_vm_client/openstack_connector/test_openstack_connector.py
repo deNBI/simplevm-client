@@ -183,6 +183,7 @@ class TestOpenStackConnector(unittest.TestCase):
             self.openstack_connector.GATEWAY_SECURITY_GROUP_ID = (
                 "dedasdasdasdadew1231231"
             )
+            self.openstack_connector.NOVA_MICROVERSION = "2.1"
             with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
                 temp_file.write(CONFIG_DATA)
 
@@ -196,6 +197,7 @@ class TestOpenStackConnector(unittest.TestCase):
             openstack_connector = OpenStackConnector(None, None)
             openstack_connector.openstack_connection = self.mock_openstack_connection
             openstack_connector.DEFAULT_SECURITY_GROUPS = DEFAULT_SECURITY_GROUPS
+            openstack_connector.NOVA_MICROVERSION = "2.1"
 
         return openstack_connector
 
