@@ -42,7 +42,7 @@
   "pre-commit": {
     "enabled": true
   },
-  "baseBranches": [
+  "baseBranchPatterns": [
     "dev"
   ],
   "reviewers": [
