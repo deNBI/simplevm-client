@@ -1,20 +1,20 @@
-FROM python:3.14.6-slim-bookworm
-RUN echo "deb https://deb.debian.org/debian/ stable main" > /etc/apt/sources.list
-RUN apt-get update -y \
-    && apt-get upgrade -y \
-    && apt-get install -y build-essential python3-openstackclient \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.14.6-alpine3.24
 
-WORKDIR /code
+# Install build dependencies needed for compiling Python packages
+RUN apk add --no-cache --virtual .build-deps \
+        build-base \
+        libffi-dev \
+        openssl-dev \
+        musl-dev
 
 # Copy requirements and install them first to leverage Docker cache
-COPY requirements.txt /code
-RUN pip install -r requirements.txt
+COPY requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir -r /code/requirements.txt openstackclient
 
-COPY requirements.yml /code
+# Copy requirements.yml and install ansible roles
+COPY requirements.yml /code/requirements.yml
 COPY ansible.cfg /etc/ansible/
-RUN ansible-galaxy install -r requirements.yml
+RUN ansible-galaxy install -r /code/requirements.yml
 
 # Copy the entire project
 COPY . /code
