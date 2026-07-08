@@ -1,5 +1,7 @@
 name: build-image
-on: pull_request
+on:
+    pull_request:
+    workflow_dispatch:
 jobs:
     build-test:
         runs-on: ubuntu-latest
