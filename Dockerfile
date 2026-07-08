@@ -1,4 +1,4 @@
-FROM python:3.14-bookworm-slim
+FROM python:3.14.6-slim-bookworm
 RUN echo "deb https://deb.debian.org/debian/ stable main" > /etc/apt/sources.list
 RUN apt-get update -y \
     && apt-get upgrade -y \
