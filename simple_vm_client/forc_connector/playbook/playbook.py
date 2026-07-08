@@ -89,7 +89,7 @@ class Playbook(object):
         self.inventory.close()
 
         # Timeout tracking
-        self.IDLE_TIMEOUT = 10 * 60  # 10 minutes
+        self.IDLE_TIMEOUT = 20 * 60  # 15 minutes
         self._start_time = None
         self._last_log_size_stdout = 0
         self._last_log_size_stderr = 0

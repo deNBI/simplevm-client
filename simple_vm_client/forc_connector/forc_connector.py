@@ -553,6 +553,7 @@ class ForcConnector:
                 logger.info(ForcConnector.active_playbooks)
                 playbook = ForcConnector.active_playbooks[openstack_id]
                 playbook.check_status(openstack_id)
+
             status = self.redis_connection.hget(openstack_id, "status").decode("utf-8")
             logger.info(f"VM {openstack_id} Playbook status -> {status}")
 
