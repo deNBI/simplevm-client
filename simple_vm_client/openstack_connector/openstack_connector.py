@@ -13,6 +13,8 @@ from uuid import uuid4
 
 import sympy
 import yaml
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from keystoneauth1 import session
 from keystoneauth1.identity import v3
 from keystoneauth1.identity.v3 import application_credential
@@ -2598,6 +2600,26 @@ class OpenStackConnector:
         )
         return security_groups
 
+    def generate_keypair(self, bits: int = 4096) -> tuple[str, str]:
+        logger.debug("Generating local keypair", extra={"bits": bits})
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=bits,
+        )
+        private_key_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.OpenSSH,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode("utf-8")
+
+        public_key = private_key.public_key()
+        public_key_openssh = public_key.public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH,
+        ).decode("utf-8")
+        logger.info("Keypair generated successfully", extra={"bits": bits})
+        return private_key_pem, public_key_openssh
+
     def start_server_with_playbook(
         self,
         flavor_name: str,
@@ -2639,12 +2661,11 @@ class OpenStackConnector:
             flavor: Flavor = self.get_flavor(name_or_id=flavor_name)
             network: Network = self.get_network()
 
+            private_key, public_key = self.generate_keypair(4096)
             key_creation: Keypair = self.openstack_connection.create_keypair(
-                name=servername
+                name=servername, public_key=public_key
             )
             key_name = key_creation.name
-
-            private_key = key_creation.private_key
 
             volumes = self._get_volumes_machines_start(
                 volume_ids_path_new=volume_ids_path_new,

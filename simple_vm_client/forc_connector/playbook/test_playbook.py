@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
@@ -42,6 +43,14 @@ class TestPlaybook(unittest.TestCase):
             playbook.research_environment_template = None
             playbook.cloud_site = DEFAULT_CLOUD_SITE
             playbook.playbook_exec_name: str = "generic_playbook.yml"
+            playbook._start_time = None
+            playbook._last_log_size_stdout = 0
+            playbook._last_log_size_stderr = 0
+            playbook.IDLE_TIMEOUT = 60 * 60
+            playbook.log_file_stdout = MagicMock()
+            playbook.log_file_stdout.name = "/tmp/log_stdout"
+            playbook.log_file_stderr = MagicMock()
+            playbook.log_file_stderr.name = "/tmp/log_stderr"
 
             playbook.directory = TemporaryDirectory(dir=f"{playbook.playbooks_dir}")
         return playbook
@@ -146,6 +155,7 @@ class TestPlaybook(unittest.TestCase):
         openstack_id = "your_openstack_id"
 
         instance = self.init_playbook()
+        instance._start_time = None  # Not set yet (run_it not called)
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -220,6 +230,57 @@ class TestPlaybook(unittest.TestCase):
             f"Playbook for (openstack_id) {openstack_id} is successful."
         )
         self.assertEqual(result, 0)
+
+    @patch("simple_vm_client.forc_connector.playbook.playbook.os.path.getsize")
+    def test_check_status_idle_timeout(self, mock_getsize):
+        # Arrange
+        openstack_id = "your_openstack_id"
+
+        instance = self.init_playbook()
+        instance._start_time = time.time() - 7200  # 2 hours ago
+        instance._last_log_size_stdout = 0
+        instance._last_log_size_stderr = 0
+        instance.redis = MagicMock()
+
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_process.returncode = -15
+        instance.process = mock_process
+        mock_getsize.side_effect = [0, 0]  # No log growth
+
+        # Act
+        result = instance.check_status(openstack_id)
+
+        # Assert
+        mock_process.terminate.assert_called_once()
+        instance.redis.hset.assert_called_once_with(
+            openstack_id, "status", VmTaskStates.PLAYBOOK_FAILED.value
+        )
+        self.assertEqual(result, -1)
+
+    @patch("os.path.getsize")
+    def test_check_status_not_idle(self, mock_getsize):
+        # Arrange
+        openstack_id = "your_openstack_id"
+
+        instance = self.init_playbook()
+        instance._start_time = time.time() - 7200  # 2 hours ago
+        instance._last_log_size_stdout = 0
+        instance._last_log_size_stderr = 0
+        instance.redis = MagicMock()
+
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        instance.process = mock_process
+        mock_getsize.side_effect = [100, 0]  # Log grew
+
+        # Act
+        result = instance.check_status(openstack_id)
+
+        # Assert
+        mock_process.terminate.assert_not_called()
+        instance.redis.hset.assert_not_called()
+        self.assertEqual(result, 3)
 
     @patch("simple_vm_client.forc_connector.playbook.playbook.logger")
     @patch("simple_vm_client.forc_connector.playbook.playbook.subprocess.Popen")

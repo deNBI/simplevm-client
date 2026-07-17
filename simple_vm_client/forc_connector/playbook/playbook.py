@@ -2,6 +2,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import time
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import redis
@@ -86,6 +87,12 @@ class Playbook(object):
         )
         self.inventory.write(inventory_string)
         self.inventory.close()
+
+        # Timeout tracking
+        self.IDLE_TIMEOUT = 20 * 60  # 15 minutes
+        self._start_time = None
+        self._last_log_size_stdout = 0
+        self._last_log_size_stderr = 0
 
     def copy_and_init_change_keys(self, public_key) -> None:
         shutil.copy(
@@ -312,6 +319,9 @@ class Playbook(object):
         )
 
     def run_it(self) -> None:
+        self._start_time = time.time()
+        self._last_log_size_stdout = 0
+        self._last_log_size_stderr = 0
         command_string = f"/usr/local/bin/ansible-playbook -v -i {self.inventory.name} {self.directory.name}/{self.playbook_exec_name}"
         command_string = shlex.split(command_string)  # type: ignore
         logger.info(f"Run Playbook for {self.playbook_exec_name} - [{command_string}]")
@@ -324,13 +334,51 @@ class Playbook(object):
 
     def check_status(self, openstack_id: str) -> int:
         logger.info(f"Check Status Playbook for VM {openstack_id}")
+
+        # Check idle timeout before process poll
         done = self.process.poll()
         logger.info(f"Status Playbook for VM {openstack_id}: {done}")
 
         if done is None:
-            logger.info(
-                f"Playbook for (openstack_id) {openstack_id} still in progress."
-            )
+            # Process still running — check for idle (no log growth)
+            if self._start_time is not None:
+                elapsed = time.time() - self._start_time
+                try:
+                    current_stdout_size = os.path.getsize(self.log_file_stdout.name)
+                    current_stderr_size = os.path.getsize(self.log_file_stderr.name)
+                except OSError:
+                    current_stdout_size = 0
+                    current_stderr_size = 0
+
+                if (
+                    current_stdout_size == self._last_log_size_stdout
+                    and current_stderr_size == self._last_log_size_stderr
+                ):
+                    # No log growth
+                    if elapsed > self.IDLE_TIMEOUT:
+                        logger.warning(
+                            f"Playbook for (openstack_id) {openstack_id} is stuck "
+                            f"(idle for {elapsed:.0f}s > {self.IDLE_TIMEOUT}s). Terminating."
+                        )
+                        self.process.terminate()
+                        self.returncode = self.process.returncode
+                        self.process.wait()
+                        self.redis.hset(
+                            openstack_id, "status", VmTaskStates.PLAYBOOK_FAILED.value
+                        )
+                        return -1
+                else:
+                    # Logs grew — update tracked sizes
+                    self._last_log_size_stdout = current_stdout_size
+                    self._last_log_size_stderr = current_stderr_size
+                    logger.info(
+                        f"Playbook for (openstack_id) {openstack_id} still in progress "
+                        f"(elapsed: {elapsed:.0f}s)."
+                    )
+            else:
+                logger.info(
+                    f"Playbook for (openstack_id) {openstack_id} still in progress."
+                )
             return 3
         elif done != 0:
             logger.info(f"Playbook for (openstack_id) {openstack_id} has failed.")
