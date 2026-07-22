@@ -30,6 +30,7 @@ BIOCONDA = "bioconda"
 
 class ForcConnector:
     active_playbooks: dict[str, Playbook] = {}
+    TOTAL_TIMEOUT = 30 * 60  # 30 minutes
 
     def __init__(self, config_file: str):
         logger.info("Initializing Forc Connector")
@@ -323,7 +324,7 @@ class ForcConnector:
                 location_url=data["location_url"],
                 template=data["template"],
                 template_version=data["template_version"],
-                auth_enabled=data.get("auth_enabled",True),
+                auth_enabled=data.get("auth_enabled", True),
             )
             return new_backend
 
@@ -485,6 +486,30 @@ class ForcConnector:
             playbook = ForcConnector.active_playbooks[openstack_id]
             status, stdout, stderr = playbook.get_logs()
             logger.warning(f" Playbook logs {openstack_id} status: {status}")
+
+            # Check total timeout
+            playbook_start = self.redis_connection.hget(
+                openstack_id, "playbook_start_time"
+            )
+            if playbook_start is None:
+                # First check — store start time
+                self.redis_connection.hset(
+                    openstack_id, "playbook_start_time", str(time.time())
+                )
+            else:
+                elapsed = time.time() - float(playbook_start)
+                if elapsed > self.TOTAL_TIMEOUT:
+                    logger.error(
+                        f"Playbook for (openstack_id) {openstack_id} exceeded total timeout "
+                        f"({elapsed:.0f}s > {self.TOTAL_TIMEOUT}s). Failing."
+                    )
+                    playbook.stop(openstack_id)
+                    self.redis_connection.hset(
+                        openstack_id, "status", VmTaskStates.PLAYBOOK_FAILED.value
+                    )
+                    ForcConnector.active_playbooks.pop(openstack_id)
+                    return PlaybookResult(status=-1, stdout="", stderr="")
+
             vm_status = self.redis_connection.hget(openstack_id, "status").decode(
                 "utf-8"
             )
@@ -528,6 +553,7 @@ class ForcConnector:
                 logger.info(ForcConnector.active_playbooks)
                 playbook = ForcConnector.active_playbooks[openstack_id]
                 playbook.check_status(openstack_id)
+
             status = self.redis_connection.hget(openstack_id, "status").decode("utf-8")
             logger.info(f"VM {openstack_id} Playbook status -> {status}")
 

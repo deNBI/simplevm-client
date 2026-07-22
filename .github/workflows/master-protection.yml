@@ -11,10 +11,10 @@ jobs:
     steps:
 
       - name: Workflow run cleanup action
-        uses: rokroskar/workflow-run-cleanup-action@v0.3.3
+        uses: rokroskar/workflow-run-cleanup-action@ee1451b869ba1e381729b3d40489997021f0d562 # v0.3.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Check Tag
         run: |
