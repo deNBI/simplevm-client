@@ -5,6 +5,7 @@ import os
 import socket
 import sys
 import threading
+import time
 import urllib
 import urllib.parse
 from contextlib import closing
@@ -65,6 +66,8 @@ lock_access = threading.Lock()
 
 
 class OpenStackConnector:
+    CACHE_TTL = 600
+
     def __init__(self, config_file: str):
         # Config FIle Data
         logger.info(
@@ -151,6 +154,11 @@ class OpenStackConnector:
         except Exception as e:
             logger.error("Client failed authentication at Openstack!")
             raise ConnectionError("Client failed authentication at Openstack") from e
+
+        self._image_cache = {}
+        self._image_cache_lock = threading.Lock()
+        self._flavor_cache = {}
+        self._flavor_cache_lock = threading.Lock()
 
         self.DEACTIVATE_UPGRADES_SCRIPT = self.create_deactivate_update_script()
 
@@ -506,9 +514,7 @@ class OpenStackConnector:
                 flavor = server.flavor
                 if flavor and not flavor.get("name"):
                     if not flavors.get(flavor.id):
-                        openstack_flavor = self.openstack_connection.get_flavor(
-                            flavor.id
-                        )
+                        openstack_flavor = self._get_raw_flavor(flavor.id)
                         flavors[flavor.id] = openstack_flavor
                         server.flavor = openstack_flavor
                     else:
@@ -517,7 +523,7 @@ class OpenStackConnector:
                 image = server.image
                 if image and not image.get("name"):
                     if not images.get(image.id):
-                        openstack_image = self.openstack_connection.get_image(image.id)
+                        openstack_image = self._get_raw_image(image.id)
                         images[image.id] = openstack_image
                         server.image = openstack_image
                     else:
@@ -555,7 +561,7 @@ class OpenStackConnector:
             flavor = server.flavor
             if flavor and not flavor.get("name"):
                 if not flavors.get(flavor.id):
-                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    openstack_flavor = self._get_raw_flavor(flavor.id)
                     flavors[flavor.id] = openstack_flavor
                     server.flavor = openstack_flavor
                 else:
@@ -564,7 +570,7 @@ class OpenStackConnector:
             image = server.image
             if image and not image.get("name"):
                 if not image.get(image.id):
-                    openstack_image = self.openstack_connection.get_image(image.id)
+                    openstack_image = self._get_raw_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
                 else:
@@ -840,9 +846,7 @@ class OpenStackConnector:
     def get_flavor(self, name_or_id: str, ignore_error: bool = False) -> Flavor:
         logger.debug("Fetching flavor", extra={"name_or_id": name_or_id})
         try:
-            flavor: Flavor = self.openstack_connection.get_flavor(
-                name_or_id=name_or_id, get_extra=True
-            )
+            flavor: Flavor = self._get_raw_flavor(name_or_id)
 
             if flavor is None:
                 logger.warning("Flavor not found", extra={"name_or_id": name_or_id})
@@ -904,9 +908,7 @@ class OpenStackConnector:
                 flavor = server.flavor
                 if not flavor.get("name"):
                     if not flavors.get(flavor.id):
-                        openstack_flavor = self.openstack_connection.get_flavor(
-                            flavor.id
-                        )
+                        openstack_flavor = self._get_raw_flavor(flavor.id)
                         flavors[flavor.id] = openstack_flavor
                         server.flavor = openstack_flavor
                     else:
@@ -915,7 +917,7 @@ class OpenStackConnector:
                 image = server.image
                 if not image.get("name"):
                     if not images.get(image.id):
-                        openstack_image = self.openstack_connection.get_image(image.id)
+                        openstack_image = self._get_raw_image(image.id)
                         images[image.id] = openstack_image
                         server.image = openstack_image
                     else:
@@ -1042,6 +1044,54 @@ class OpenStackConnector:
             )
         return max(images, key=lambda img: img.created_at)
 
+    def _get_raw_image(self, name_or_id: str) -> Image:
+        """Fetch image from OpenStack with caching."""
+        now = time.time()
+        with self._image_cache_lock:
+            if name_or_id in self._image_cache:
+                timestamp, image = self._image_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for image {name_or_id}")
+                    return image
+
+        logger.debug(f"Cache miss for image {name_or_id}, fetching from OpenStack")
+        try:
+            image = self.openstack_connection.get_image(name_or_id=name_or_id)
+            if image:
+                with self._image_cache_lock:
+                    self._image_cache[name_or_id] = (now, image)
+                    if image.id != name_or_id:
+                        self._image_cache[image.id] = (now, image)
+            return image
+        except Exception as e:
+            logger.error(f"Error in _get_raw_image for {name_or_id}: {e}")
+            raise
+
+    def _get_raw_flavor(self, name_or_id: str) -> Flavor:
+        """Fetch flavor from OpenStack with caching."""
+        now = time.time()
+        with self._flavor_cache_lock:
+            if name_or_id in self._flavor_cache:
+                timestamp, flavor = self._flavor_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for flavor {name_or_id}")
+                    return flavor
+
+        logger.debug(f"Cache miss for flavor {name_or_id}, fetching from OpenStack")
+        try:
+            flavor = self.openstack_connection.get_flavor(
+                name_or_id=name_or_id, get_extra=True
+            )
+            if flavor:
+                with self._flavor_cache_lock:
+                    self._flavor_cache[name_or_id] = (now, flavor)
+                    if flavor.id != name_or_id:
+                        self._flavor_cache[flavor.id] = (now, flavor)
+            return flavor
+        except Exception as e:
+            logger.error(f"Error in _get_raw_flavor for {name_or_id}: {e}")
+            raise
+
     def get_image(
         self,
         name_or_id: str,
@@ -1056,10 +1106,10 @@ class OpenStackConnector:
             extra={"name_or_id": name_or_id, "slurm_version": slurm_version},
         )
 
-        logger.info(f"Get Image {name_or_id}")
+        logger.debug(f"Get Image {name_or_id}")
 
         try:
-            image = self.openstack_connection.get_image(name_or_id=name_or_id)
+            image = self._get_raw_image(name_or_id=name_or_id)
         except DuplicateResource:
             logger.warning(
                 f"Multiple images found with name '{name_or_id}'. "
