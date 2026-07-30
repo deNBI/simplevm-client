@@ -1141,7 +1141,7 @@ class OpenStackConnector:
         logger.debug(f"Cache miss for image {name_or_id}, fetching from OpenStack")
         try:
             image = self.openstack_connection.get_image(name_or_id=name_or_id)
-            if image:
+            if image and image.status == "active":
                 with self._image_cache_lock:
                     self._image_cache[name_or_id] = (now, image)
                     if image.id != name_or_id:

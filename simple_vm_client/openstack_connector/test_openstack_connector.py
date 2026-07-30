@@ -404,6 +404,23 @@ class TestOpenStackConnector(unittest.TestCase):
         # SDK should only be called once
         self.mock_openstack_connection.get_image.assert_called_once()
 
+    def test_get_image_inactive_not_cached(self):
+        self.mock_openstack_connection.get_image.return_value = INACTIVE_IMAGE
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_image(
+            INACTIVE_IMAGE.id, ignore_not_active=True
+        )
+        # Second call - should still be a cache miss
+        result2 = self.openstack_connector.get_image(
+            INACTIVE_IMAGE.id, ignore_not_active=True
+        )
+
+        self.assertEqual(result1, INACTIVE_IMAGE)
+        self.assertEqual(result2, INACTIVE_IMAGE)
+        # SDK should be called twice because it's not cached
+        self.assertEqual(self.mock_openstack_connection.get_image.call_count, 2)
+
     def test_get_network_caching(self):
         fake_network = fakes.generate_fake_resource(Network)
         self.mock_openstack_connection.get_network.return_value = fake_network
