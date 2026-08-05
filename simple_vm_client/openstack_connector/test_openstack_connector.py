@@ -184,6 +184,18 @@ class TestOpenStackConnector(unittest.TestCase):
                 "dedasdasdasdadew1231231"
             )
             self.openstack_connector.NOVA_MICROVERSION = "2.1"
+            # Initialize caches since __init__ is patched
+            self.openstack_connector._image_cache = {}
+            self.openstack_connector._image_cache_lock = mock.MagicMock()
+            self.openstack_connector._flavor_cache = {}
+            self.openstack_connector._flavor_cache_lock = mock.MagicMock()
+            self.openstack_connector._network_cache = {}
+            self.openstack_connector._network_cache_lock = mock.MagicMock()
+            self.openstack_connector._sg_cache = {}
+            self.openstack_connector._sg_cache_lock = mock.MagicMock()
+            self.openstack_connector._limits_cache = {}
+            self.openstack_connector._limits_cache_lock = mock.MagicMock()
+
             with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
                 temp_file.write(CONFIG_DATA)
 
@@ -378,6 +390,89 @@ class TestOpenStackConnector(unittest.TestCase):
             extra={"name_or_id": EXPECTED_IMAGE.id, "slurm_version": None},
         )
         self.assertEqual(result, EXPECTED_IMAGE)
+
+    def test_get_image_caching(self):
+        self.mock_openstack_connection.get_image.return_value = EXPECTED_IMAGE
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_image(EXPECTED_IMAGE.id)
+        # Second call - cache hit
+        result2 = self.openstack_connector.get_image(EXPECTED_IMAGE.id)
+
+        self.assertEqual(result1, EXPECTED_IMAGE)
+        self.assertEqual(result2, EXPECTED_IMAGE)
+        # SDK should only be called once
+        self.mock_openstack_connection.get_image.assert_called_once()
+
+    def test_get_image_inactive_not_cached(self):
+        self.mock_openstack_connection.get_image.return_value = INACTIVE_IMAGE
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_image(
+            INACTIVE_IMAGE.id, ignore_not_active=True
+        )
+        # Second call - should still be a cache miss
+        result2 = self.openstack_connector.get_image(
+            INACTIVE_IMAGE.id, ignore_not_active=True
+        )
+
+        self.assertEqual(result1, INACTIVE_IMAGE)
+        self.assertEqual(result2, INACTIVE_IMAGE)
+        # SDK should be called twice because it's not cached
+        self.assertEqual(self.mock_openstack_connection.get_image.call_count, 2)
+
+    def test_get_network_caching(self):
+        fake_network = fakes.generate_fake_resource(Network)
+        self.mock_openstack_connection.get_network.return_value = fake_network
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_network()
+        # Second call - cache hit
+        result2 = self.openstack_connector.get_network()
+
+        self.assertEqual(result1, fake_network)
+        self.assertEqual(result2, fake_network)
+        self.mock_openstack_connection.get_network.assert_called_once()
+
+    def test_get_security_group_caching(self):
+        fake_sg = fakes.generate_fake_resource(security_group.SecurityGroup)
+        self.mock_openstack_connection.get_security_group.return_value = fake_sg
+
+        # First call - cache miss
+        result1 = self.openstack_connector._get_raw_security_group(fake_sg.id)
+        # Second call - cache hit
+        result2 = self.openstack_connector._get_raw_security_group(fake_sg.id)
+
+        self.assertEqual(result1, fake_sg)
+        self.assertEqual(result2, fake_sg)
+        self.mock_openstack_connection.get_security_group.assert_called_once()
+
+    def test_get_limits_caching(self):
+        self.mock_openstack_connection.get_compute_limits.return_value = {
+            "max_total_cores": 10,
+            "max_total_instances": 5,
+            "max_total_ram_size": 2048,
+            "total_cores_used": 2,
+            "total_instances_used": 1,
+            "total_ram_used": 512,
+        }
+        self.mock_openstack_connection.get_volume_limits.return_value = {
+            "absolute": {
+                "max_total_volumes": 100,
+                "max_total_volume_gigabytes": 1000,
+                "total_volumes_used": 10,
+                "total_gigabytes_used": 100,
+            }
+        }
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_limits()
+        # Second call - cache hit
+        result2 = self.openstack_connector.get_limits()
+
+        self.assertEqual(result1, result2)
+        self.mock_openstack_connection.get_compute_limits.assert_called_once()
+        self.mock_openstack_connection.get_volume_limits.assert_called_once()
 
     @patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     def test_get_image_not_found_exception(self, mock_logger_debug):
@@ -1425,6 +1520,20 @@ class TestOpenStackConnector(unittest.TestCase):
             name_or_id=expected_flavor.name, get_extra=True
         )
 
+    def test_get_flavor_caching(self):
+        expected_flavor = fakes.generate_fake_resource(flavor.Flavor)
+        self.mock_openstack_connection.get_flavor.return_value = expected_flavor
+
+        # First call - cache miss
+        result1 = self.openstack_connector.get_flavor(expected_flavor.name)
+        # Second call - cache hit
+        result2 = self.openstack_connector.get_flavor(expected_flavor.name)
+
+        self.assertEqual(result1, expected_flavor)
+        self.assertEqual(result2, expected_flavor)
+        # SDK should only be called once
+        self.mock_openstack_connection.get_flavor.assert_called_once()
+
     @mock.patch("simple_vm_client.openstack_connector.openstack_connector.logger.debug")
     def test_get_flavors(self, mock_logger_debug):
         # Replace with the actual flavors you want to simulate
@@ -1566,7 +1675,7 @@ class TestOpenStackConnector(unittest.TestCase):
         with self.assertRaises(DefaultException):
             self.openstack_connector.delete_image(fake_image.id)
         mock_logger_error.assert_called_once_with(
-            f"Failed to delete image",
+            "Failed to delete image",
             extra={"image_id": fake_image.id, "error": mock.ANY},
             exc_info=True,
         )

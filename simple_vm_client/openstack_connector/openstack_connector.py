@@ -5,6 +5,7 @@ import os
 import socket
 import sys
 import threading
+import time
 import urllib
 import urllib.parse
 from contextlib import closing
@@ -65,6 +66,8 @@ lock_access = threading.Lock()
 
 
 class OpenStackConnector:
+    CACHE_TTL = 600
+
     def __init__(self, config_file: str):
         # Config FIle Data
         logger.info(
@@ -94,7 +97,16 @@ class OpenStackConnector:
         self.USE_APPLICATION_CREDENTIALS: bool = False
         self.NOVA_MICROVERSION = "2.1"
         self.THREADS = 32
-
+        self._image_cache = {}
+        self._image_cache_lock = threading.Lock()
+        self._flavor_cache = {}
+        self._flavor_cache_lock = threading.Lock()
+        self._network_cache = {}
+        self._network_cache_lock = threading.Lock()
+        self._sg_cache = {}
+        self._sg_cache_lock = threading.Lock()
+        self._limits_cache = {}
+        self._limits_cache_lock = threading.Lock()
         self.load_env_config()
         logger.info(f"Loading config file: {config_file}")
         self.load_config_yml(config_file)
@@ -506,9 +518,7 @@ class OpenStackConnector:
                 flavor = server.flavor
                 if flavor and not flavor.get("name"):
                     if not flavors.get(flavor.id):
-                        openstack_flavor = self.openstack_connection.get_flavor(
-                            flavor.id
-                        )
+                        openstack_flavor = self._get_raw_flavor(flavor.id)
                         flavors[flavor.id] = openstack_flavor
                         server.flavor = openstack_flavor
                     else:
@@ -517,7 +527,7 @@ class OpenStackConnector:
                 image = server.image
                 if image and not image.get("name"):
                     if not images.get(image.id):
-                        openstack_image = self.openstack_connection.get_image(image.id)
+                        openstack_image = self._get_raw_image(image.id)
                         images[image.id] = openstack_image
                         server.image = openstack_image
                     else:
@@ -555,7 +565,7 @@ class OpenStackConnector:
             flavor = server.flavor
             if flavor and not flavor.get("name"):
                 if not flavors.get(flavor.id):
-                    openstack_flavor = self.openstack_connection.get_flavor(flavor.id)
+                    openstack_flavor = self._get_raw_flavor(flavor.id)
                     flavors[flavor.id] = openstack_flavor
                     server.flavor = openstack_flavor
                 else:
@@ -564,7 +574,7 @@ class OpenStackConnector:
             image = server.image
             if image and not image.get("name"):
                 if not image.get(image.id):
-                    openstack_image = self.openstack_connection.get_image(image.id)
+                    openstack_image = self._get_raw_image(image.id)
                     images[image.id] = openstack_image
                     server.image = openstack_image
                 else:
@@ -693,9 +703,7 @@ class OpenStackConnector:
     def get_network(self) -> Network:
         logger.debug("Fetching network", extra={"network_name": self.NETWORK})
         try:
-            network: Network = self.openstack_connection.get_network(
-                name_or_id=self.NETWORK
-            )
+            network: Network = self._get_raw_network(name_or_id=self.NETWORK)
             if network is None:
                 logger.error("Network not found", extra={"network_name": self.NETWORK})
                 raise Exception(f"Network {self.NETWORK} not found!")
@@ -840,9 +848,7 @@ class OpenStackConnector:
     def get_flavor(self, name_or_id: str, ignore_error: bool = False) -> Flavor:
         logger.debug("Fetching flavor", extra={"name_or_id": name_or_id})
         try:
-            flavor: Flavor = self.openstack_connection.get_flavor(
-                name_or_id=name_or_id, get_extra=True
-            )
+            flavor: Flavor = self._get_raw_flavor(name_or_id)
 
             if flavor is None:
                 logger.warning("Flavor not found", extra={"name_or_id": name_or_id})
@@ -904,9 +910,7 @@ class OpenStackConnector:
                 flavor = server.flavor
                 if not flavor.get("name"):
                     if not flavors.get(flavor.id):
-                        openstack_flavor = self.openstack_connection.get_flavor(
-                            flavor.id
-                        )
+                        openstack_flavor = self._get_raw_flavor(flavor.id)
                         flavors[flavor.id] = openstack_flavor
                         server.flavor = openstack_flavor
                     else:
@@ -915,7 +919,7 @@ class OpenStackConnector:
                 image = server.image
                 if not image.get("name"):
                     if not images.get(image.id):
-                        openstack_image = self.openstack_connection.get_image(image.id)
+                        openstack_image = self._get_raw_image(image.id)
                         images[image.id] = openstack_image
                         server.image = openstack_image
                     else:
@@ -1042,6 +1046,136 @@ class OpenStackConnector:
             )
         return max(images, key=lambda img: img.created_at)
 
+    def _get_raw_network(self, name_or_id: str) -> Network:
+        """Fetch network from OpenStack with caching."""
+        now = time.time()
+        with self._network_cache_lock:
+            if name_or_id in self._network_cache:
+                timestamp, network = self._network_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for network {name_or_id}")
+                    return network
+
+        logger.debug(f"Cache miss for network {name_or_id}, fetching from OpenStack")
+        try:
+            network = self.openstack_connection.get_network(name_or_id=name_or_id)
+            if network:
+                with self._network_cache_lock:
+                    self._network_cache[name_or_id] = (now, network)
+                    if network.id != name_or_id:
+                        self._network_cache[network.id] = (now, network)
+            return network
+        except Exception as e:
+            logger.error(f"Error in _get_raw_network for {name_or_id}: {e}")
+            raise
+
+    def _get_raw_security_group(self, name_or_id: str) -> SecurityGroup:
+        """Fetch security group from OpenStack with caching."""
+        now = time.time()
+        with self._sg_cache_lock:
+            if name_or_id in self._sg_cache:
+                timestamp, sg = self._sg_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for security group {name_or_id}")
+                    return sg
+
+        logger.debug(
+            f"Cache miss for security group {name_or_id}, fetching from OpenStack"
+        )
+        try:
+            sg = self.openstack_connection.get_security_group(name_or_id=name_or_id)
+            if sg:
+                with self._sg_cache_lock:
+                    self._sg_cache[name_or_id] = (now, sg)
+                    if sg.id != name_or_id:
+                        self._sg_cache[sg.id] = (now, sg)
+            return sg
+        except Exception as e:
+            logger.error(f"Error in _get_raw_security_group for {name_or_id}: {e}")
+            raise
+
+    def _get_raw_limits(self) -> dict[str, str]:
+        """Fetch OpenStack limits with caching."""
+        now = time.time()
+        with self._limits_cache_lock:
+            if "current" in self._limits_cache:
+                timestamp, limits = self._limits_cache["current"]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug("Cache hit for limits")
+                    return limits
+
+        logger.debug("Cache miss for limits, fetching from OpenStack")
+        try:
+            compute_limits = self.openstack_connection.get_compute_limits()
+            volume_limits = self.openstack_connection.get_volume_limits()["absolute"]
+            limits = {**compute_limits, **volume_limits}
+            result = {
+                "cores_limit": str(limits["max_total_cores"]),
+                "vms_limit": str(limits["max_total_instances"]),
+                "ram_limit": str(math.ceil(limits["max_total_ram_size"] / 1024)),
+                "current_used_cores": str(limits["total_cores_used"]),
+                "current_used_vms": str(limits["total_instances_used"]),
+                "current_used_ram": str(math.ceil(limits["total_ram_used"] / 1024)),
+                "volume_counter_limit": str(limits["max_total_volumes"]),
+                "volume_storage_limit": str(limits["max_total_volume_gigabytes"]),
+                "current_used_volumes": str(limits["total_volumes_used"]),
+                "current_used_volume_storage": str(limits["total_gigabytes_used"]),
+            }
+            with self._limits_cache_lock:
+                self._limits_cache["current"] = (now, result)
+            return result
+        except Exception as e:
+            logger.error(f"Error in _get_raw_limits: {e}")
+            raise
+
+    def _get_raw_image(self, name_or_id: str) -> Image:
+        """Fetch image from OpenStack with caching."""
+        now = time.time()
+        with self._image_cache_lock:
+            if name_or_id in self._image_cache:
+                timestamp, image = self._image_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for image {name_or_id}")
+                    return image
+
+        logger.debug(f"Cache miss for image {name_or_id}, fetching from OpenStack")
+        try:
+            image = self.openstack_connection.get_image(name_or_id=name_or_id)
+            if image and image.status == "active":
+                with self._image_cache_lock:
+                    self._image_cache[name_or_id] = (now, image)
+                    if image.id != name_or_id:
+                        self._image_cache[image.id] = (now, image)
+            return image
+        except Exception as e:
+            logger.error(f"Error in _get_raw_image for {name_or_id}: {e}")
+            raise
+
+    def _get_raw_flavor(self, name_or_id: str) -> Flavor:
+        """Fetch flavor from OpenStack with caching."""
+        now = time.time()
+        with self._flavor_cache_lock:
+            if name_or_id in self._flavor_cache:
+                timestamp, flavor = self._flavor_cache[name_or_id]
+                if now - timestamp < self.CACHE_TTL:
+                    logger.debug(f"Cache hit for flavor {name_or_id}")
+                    return flavor
+
+        logger.debug(f"Cache miss for flavor {name_or_id}, fetching from OpenStack")
+        try:
+            flavor = self.openstack_connection.get_flavor(
+                name_or_id=name_or_id, get_extra=True
+            )
+            if flavor:
+                with self._flavor_cache_lock:
+                    self._flavor_cache[name_or_id] = (now, flavor)
+                    if flavor.id != name_or_id:
+                        self._flavor_cache[flavor.id] = (now, flavor)
+            return flavor
+        except Exception as e:
+            logger.error(f"Error in _get_raw_flavor for {name_or_id}: {e}")
+            raise
+
     def get_image(
         self,
         name_or_id: str,
@@ -1056,10 +1190,10 @@ class OpenStackConnector:
             extra={"name_or_id": name_or_id, "slurm_version": slurm_version},
         )
 
-        logger.info(f"Get Image {name_or_id}")
+        logger.debug(f"Get Image {name_or_id}")
 
         try:
-            image = self.openstack_connection.get_image(name_or_id=name_or_id)
+            image = self._get_raw_image(name_or_id=name_or_id)
         except DuplicateResource:
             logger.warning(
                 f"Multiple images found with name '{name_or_id}'. "
@@ -1414,9 +1548,7 @@ class OpenStackConnector:
             "Checking for default SimpleVM SSH Security Group",
             extra={"security_group": self.DEFAULT_SECURITY_GROUP_NAME},
         )
-        sec = self.openstack_connection.get_security_group(
-            name_or_id=self.DEFAULT_SECURITY_GROUP_NAME
-        )
+        sec = self._get_raw_security_group(name_or_id=self.DEFAULT_SECURITY_GROUP_NAME)
         if not sec:
             logger.info(
                 "Default SimpleVM SSH Security group not found - creating",
@@ -1546,9 +1678,7 @@ class OpenStackConnector:
             "Creating new security group",
             extra={"name_or_id": name, "description": description},
         )
-        sec: SecurityGroup = self.openstack_connection.get_security_group(
-            name_or_id=name
-        )
+        sec: SecurityGroup = self._get_raw_security_group(name_or_id=name)
         if sec:
             logger.debug(
                 "Security group already exists",
@@ -1700,9 +1830,7 @@ class OpenStackConnector:
             "Fetching research environment security group",
             extra={"security_group_name": security_group_name},
         )
-        security_group = self.openstack_connection.get_security_group(
-            name_or_id=security_group_name
-        )
+        security_group = self._get_raw_security_group(name_or_id=security_group_name)
         if not security_group:
             logger.warning(
                 "Research environment security group not found",
@@ -1729,7 +1857,7 @@ class OpenStackConnector:
             "Checking for research environment security group",
             extra={"security_group_name": resenv_metadata.securitygroup_name},
         )
-        sec = self.openstack_connection.get_security_group(
+        sec = self._get_raw_security_group(
             name_or_id=resenv_metadata.securitygroup_name
         )
         if sec:
@@ -1773,9 +1901,7 @@ class OpenStackConnector:
             "Fetching security group ID by name",
             extra={"security_group_name": security_group_name},
         )
-        sec = self.openstack_connection.get_security_group(
-            name_or_id=security_group_name
-        )
+        sec = self._get_raw_security_group(name_or_id=security_group_name)
         if not sec:
             logger.error(
                 "Security group not found",
@@ -1797,7 +1923,7 @@ class OpenStackConnector:
         logger.debug(
             "Checking for VM security group", extra={"server_id": openstack_id}
         )
-        sec = self.openstack_connection.get_security_group(name_or_id=openstack_id)
+        sec = self._get_raw_security_group(name_or_id=openstack_id)
         if sec:
             logger.debug(
                 "VM security group already exists",
@@ -1830,9 +1956,7 @@ class OpenStackConnector:
                 "Checking for project security group",
                 extra={"project_name": project_name, "project_id": project_id},
             )
-            sec = self.openstack_connection.get_security_group(
-                name_or_id=security_group_name
-            )
+            sec = self._get_raw_security_group(name_or_id=security_group_name)
             if sec:
                 logger.debug(
                     "Project security group already exists",
@@ -1870,43 +1994,7 @@ class OpenStackConnector:
             return new_security_group["id"]
 
     def get_limits(self) -> dict[str, str]:
-        logger.debug("Fetching OpenStack limits")
-        try:
-            # Retrieve compute and volume limits
-            compute_limits = self.openstack_connection.get_compute_limits()
-            volume_limits = self.openstack_connection.get_volume_limits()["absolute"]
-
-            # Merge compute and volume limits into a single dictionary
-            limits = {**compute_limits, **volume_limits}
-            result = {
-                "cores_limit": str(limits["max_total_cores"]),
-                "vms_limit": str(limits["max_total_instances"]),
-                "ram_limit": str(math.ceil(limits["max_total_ram_size"] / 1024)),
-                "current_used_cores": str(limits["total_cores_used"]),
-                "current_used_vms": str(limits["total_instances_used"]),
-                "current_used_ram": str(math.ceil(limits["total_ram_used"] / 1024)),
-                "volume_counter_limit": str(limits["max_total_volumes"]),
-                "volume_storage_limit": str(limits["max_total_volume_gigabytes"]),
-                "current_used_volumes": str(limits["total_volumes_used"]),
-                "current_used_volume_storage": str(limits["total_gigabytes_used"]),
-            }
-            logger.debug(
-                "Limits fetched successfully",
-                extra={
-                    "vm_limit": result["vms_limit"],
-                    "vm_used": result["current_used_vms"],
-                    "cores_limit": result["cores_limit"],
-                    "cores_used": result["current_used_cores"],
-                },
-            )
-            return result
-        except Exception as e:
-            logger.error(
-                "Error fetching OpenStack limits",
-                extra={"error": str(e)},
-                exc_info=True,
-            )
-            raise
+        return self._get_raw_limits()
 
     def exist_server(self, name: str) -> bool:
         logger.debug("Checking if server exists", extra={"server_name": name})
@@ -2149,9 +2237,7 @@ class OpenStackConnector:
     def _delete_security_groups_if_not_used(self, security_groups: list[SecurityGroup]):
         if security_groups is not None:
             for sg in security_groups:
-                sec = self.openstack_connection.get_security_group(
-                    name_or_id=sg["name"]
-                )
+                sec = self._get_raw_security_group(name_or_id=sg["name"])
                 if sg[
                     "name"
                 ] != self.DEFAULT_SECURITY_GROUP_NAME and not self.is_security_group_in_use(
@@ -2181,9 +2267,7 @@ class OpenStackConnector:
 
         if security_groups is not None:
             for sg in security_groups:
-                sec = self.openstack_connection.get_security_group(
-                    name_or_id=sg["name"]
-                )
+                sec = self._get_raw_security_group(name_or_id=sg["name"])
                 logger.debug(
                     "Removing security group from server",
                     extra={"server_id": server.id, "security_group_id": sec.id},
@@ -2589,9 +2673,7 @@ class OpenStackConnector:
             )
         if additional_security_group_ids:
             for security_id in additional_security_group_ids:
-                sec = self.openstack_connection.get_security_group(
-                    name_or_id=security_id
-                )
+                sec = self._get_raw_security_group(name_or_id=security_id)
                 if sec:
                     security_groups.append(sec["id"])
         logger.debug(
@@ -2771,9 +2853,7 @@ class OpenStackConnector:
         security_group_id = self.get_or_create_project_security_group(
             project_name=project_name, project_id=project_id
         )
-        security_group = self.openstack_connection.get_security_group(
-            name_or_id=security_group_id
-        )
+        security_group = self._get_raw_security_group(name_or_id=security_group_id)
         if self._is_security_group_already_added_to_server(
             server=server, security_group_name=security_group.name
         ):
@@ -2827,7 +2907,7 @@ class OpenStackConnector:
         logger.debug("Setting up UDP security group", extra={"server_id": server_id})
         server = self.get_server(openstack_id=server_id)
         sec_name = server.name + "_udp"
-        existing_sec = self.openstack_connection.get_security_group(name_or_id=sec_name)
+        existing_sec = self._get_raw_security_group(name_or_id=sec_name)
         if existing_sec:
             logger.debug(
                 "UDP Security group already exists", extra={"security_group": sec_name}
