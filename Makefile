@@ -35,6 +35,14 @@ dev-build-d: ## Build and Start the docker-compose.dev.yml
 dev: ## Build and Start the docker-compose.dev.yml
 	docker compose -f docker-compose.dev.yml up
 
+dev-down: ## Stop and remove the docker-compose.dev.yml stack
+	docker compose -f docker-compose.dev.yml down
+
+dev-stop: ## Stop the docker-compose.dev.yml stack
+	docker compose -f docker-compose.dev.yml stop
+
+
+
 dev-build-bibigrid: ## Build and Start the docker-compose.dev.yml with bibigrid
 	docker compose -f docker-compose.dev.bibigrid.yml up --build
 
@@ -81,4 +89,24 @@ VOLUME_ID ?=
 run_benchmark:
 	docker exec -i simplevm-client python3 benchmark/test_service.py --volume-id $(VOLUME_ID) --num-requests $(NUM_REQUESTS) --max-concurrent-requests $(MAX_CONCURRENT_REQUESTS)
 
-.PHONY: help lint  docs thrift_py
+
+multicloud-build: ## Build and Start the docker-compose.dev.multicloud.yml
+	docker compose -f docker-compose.dev.multicloud.yml up --build
+
+multicloud-d: ## Build and Start the docker-compose.dev.multicloud.yml in background
+	docker compose -f docker-compose.dev.multicloud.yml up -d
+
+multicloud-build-d: ## Build and Start the docker-compose.dev.multicloud.yml in background
+	docker compose -f docker-compose.dev.multicloud.yml up --build -d
+
+multicloud: ## Build and Start the docker-compose.dev.multicloud.yml
+	docker compose -f docker-compose.dev.multicloud.yml up
+
+multicloud-down: ## Stop and remove the docker-compose.dev.multicloud.yml stack
+	docker compose -f docker-compose.dev.multicloud.yml down
+
+multicloud-stop: ## Stop the docker-compose.dev.multicloud.yml stack
+	docker compose -f docker-compose.dev.multicloud.yml stop
+
+
+.PHONY: help lint docs thrift_py multicloud multicloud-build multicloud-d multicloud-build-d multicloud-down multicloud-stop dev-down dev-stop

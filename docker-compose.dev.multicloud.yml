@@ -1,0 +1,127 @@
+services:
+  simplevm-client-bielefeld:
+    container_name: simplevm-client-bielefeld
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 9090:9090
+    env_file:
+      - .env.bielefeld
+    environment:
+      - TERM=xterm-256color
+    tty: true
+    volumes:
+      - ./simple_vm_client/config/config_local_bielefeld.yml:/code/simple_vm_client/config.yml
+    command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
+    networks:
+      - portal
+
+  client_redis_bielefeld:
+    container_name: simplevm_client_redis_bielefeld
+    image: redis:8.8.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+
+  simplevm_bibigrid_bielefeld:
+    container_name: simplevm_bibigrid_bielefeld
+    image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
+    volumes:
+      - ./clouds-bielefeld.yaml:/root/.config/bibigrid/clouds.yaml
+    expose:
+      - "9123"
+    networks:
+      - portal
+
+  simplevm_metadata_server_bielefeld:
+    container_name: simplevm_metadata_server_bielefeld
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.2
+    ports:
+      - "8008:8000"
+    depends_on:
+      - simplevm_metadata_server_redis_bielefeld
+    environment:
+      - METADATA_WRITE_TOKEN
+      - METADATA_PORT=8000
+      - METADATA_HOST=0.0.0.0
+    networks:
+      - portal
+    restart: unless-stopped
+
+  simplevm_metadata_server_redis_bielefeld:
+    container_name: simplevm_metadata_server_redis_bielefeld
+    image: redis:8.8.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+    restart: unless-stopped
+
+  simplevm-client-giessen:
+    container_name: simplevm-client-giessen
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 30000:9090
+    env_file:
+      - .env.giessen
+    environment:
+      - TERM=xterm-256color
+    tty: true
+    volumes:
+      - ./simple_vm_client/config/config_local_giessen.yml:/code/simple_vm_client/config.yml
+    command: python3 VirtualMachineServer.py /code/simple_vm_client/config.yml
+    networks:
+      - portal
+
+  client_redis_giessen:
+    container_name: simplevm_client_redis_giessen
+    image: redis:8.8.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+
+  simplevm_bibigrid_giessen:
+    container_name: simplevm_bibigrid_giessen
+    image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
+    volumes:
+      - ./clouds-giessen.yaml:/root/.config/bibigrid/clouds.yaml
+    expose:
+      - "9123"
+    networks:
+      - portal
+
+  simplevm_metadata_server_giessen:
+    container_name: simplevm_metadata_server_giessen
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.2
+    ports:
+      - "8009:8000"
+    depends_on:
+      - simplevm_metadata_server_redis_giessen
+    environment:
+      - METADATA_WRITE_TOKEN
+      - METADATA_PORT=8000
+      - METADATA_HOST=0.0.0.0
+    networks:
+      - portal
+    restart: unless-stopped
+
+  simplevm_metadata_server_redis_giessen:
+    container_name: simplevm_metadata_server_redis_giessen
+    image: redis:8.8.0
+    expose:
+      - "6379"
+    networks:
+      - portal
+    restart: unless-stopped
+
+networks:
+  portal:
+    name: portal
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1440
