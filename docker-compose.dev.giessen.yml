@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - ${CLIENT_PORT}:9090
+      - ${CLIENT_PORT}:9091
     env_file:
       - .env.dev.giessen
     environment:
