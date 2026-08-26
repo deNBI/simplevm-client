@@ -467,15 +467,26 @@ service VirtualMachineService {
     /** OpenStack id of the server*/
     1:string server_id,2:string security_group_name)
 
-    throws (1:DefaultException r,2:ServerNotFoundException s
+    throws (1:SecurityGroupNotFoundException r,2:ServerNotFoundException s
 
     )
+     /**
+    * Adds security group with specific id to a server
+    */
+    void add_security_group_to_server(
+    /** OpenStack id of the server*/
+    1:string server_id,2:string security_group_id)
+
+    throws (1:SecurityGroupNotFoundException r,2:ServerNotFoundException s
+
+    )
+
 
     void add_project_security_group_to_server(
     /** OpenStack id of the server*/
     1:string server_id,2:string project_name, 3:string project_id)
 
-    throws (1:DefaultException r,2:ServerNotFoundException s
+    throws (1:SecurityGroupNotFoundException r,2:ServerNotFoundException s
 
     )
 
