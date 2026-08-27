@@ -87,6 +87,16 @@ class Iface(object):
 
         """
 
+    def add_security_group_to_server(self, server_id, security_group_id):
+        """
+        Adds security group with specific id to a server
+
+        Parameters:
+         - server_id: OpenStack id of the server
+         - security_group_id
+
+        """
+
     def add_project_security_group_to_server(self, server_id, project_name, project_id):
         """
         Parameters:
@@ -1122,6 +1132,46 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = add_research_environment_security_group_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.r is not None:
+            raise result.r
+        if result.s is not None:
+            raise result.s
+        return
+
+    def add_security_group_to_server(self, server_id, security_group_id):
+        """
+        Adds security group with specific id to a server
+
+        Parameters:
+         - server_id: OpenStack id of the server
+         - security_group_id
+
+        """
+        self.send_add_security_group_to_server(server_id, security_group_id)
+        self.recv_add_security_group_to_server()
+
+    def send_add_security_group_to_server(self, server_id, security_group_id):
+        self._oprot.writeMessageBegin(
+            "add_security_group_to_server", TMessageType.CALL, self._seqid
+        )
+        args = add_security_group_to_server_args()
+        args.server_id = server_id
+        args.security_group_id = security_group_id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_add_security_group_to_server(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = add_security_group_to_server_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.r is not None:
@@ -4347,6 +4397,9 @@ class Processor(Iface, TProcessor):
         self._processMap["add_research_environment_security_group"] = (
             Processor.process_add_research_environment_security_group
         )
+        self._processMap["add_security_group_to_server"] = (
+            Processor.process_add_security_group_to_server
+        )
         self._processMap["add_project_security_group_to_server"] = (
             Processor.process_add_project_security_group_to_server
         )
@@ -4707,7 +4760,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except DefaultException as r:
+        except SecurityGroupNotFoundException as r:
             msg_type = TMessageType.REPLY
             result.r = r
         except ServerNotFoundException as s:
@@ -4730,6 +4783,39 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_add_security_group_to_server(self, seqid, iprot, oprot):
+        args = add_security_group_to_server_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = add_security_group_to_server_result()
+        try:
+            self._handler.add_security_group_to_server(
+                args.server_id, args.security_group_id
+            )
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except SecurityGroupNotFoundException as r:
+            msg_type = TMessageType.REPLY
+            result.r = r
+        except ServerNotFoundException as s:
+            msg_type = TMessageType.REPLY
+            result.s = s
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("add_security_group_to_server", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_add_project_security_group_to_server(self, seqid, iprot, oprot):
         args = add_project_security_group_to_server_args()
         args.read(iprot)
@@ -4742,7 +4828,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except DefaultException as r:
+        except SecurityGroupNotFoundException as r:
             msg_type = TMessageType.REPLY
             result.r = r
         except ServerNotFoundException as s:
@@ -8350,7 +8436,7 @@ class add_research_environment_security_group_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.r = DefaultException.read(iprot)
+                    self.r = SecurityGroupNotFoundException.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -8403,7 +8489,221 @@ add_research_environment_security_group_result.thrift_spec = (
         1,
         TType.STRUCT,
         "r",
-        [DefaultException, None],
+        [SecurityGroupNotFoundException, None],
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRUCT,
+        "s",
+        [ServerNotFoundException, None],
+        None,
+    ),  # 2
+)
+
+
+class add_security_group_to_server_args(object):
+    """
+    Attributes:
+     - server_id: OpenStack id of the server
+     - security_group_id
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        server_id=None,
+        security_group_id=None,
+    ):
+        self.server_id = server_id
+        self.security_group_id = security_group_id
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.server_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.security_group_id = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("add_security_group_to_server_args")
+        if self.server_id is not None:
+            oprot.writeFieldBegin("server_id", TType.STRING, 1)
+            oprot.writeString(
+                self.server_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.server_id
+            )
+            oprot.writeFieldEnd()
+        if self.security_group_id is not None:
+            oprot.writeFieldBegin("security_group_id", TType.STRING, 2)
+            oprot.writeString(
+                self.security_group_id.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.security_group_id
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(add_security_group_to_server_args)
+add_security_group_to_server_args.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "server_id",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "security_group_id",
+        "UTF8",
+        None,
+    ),  # 2
+)
+
+
+class add_security_group_to_server_result(object):
+    """
+    Attributes:
+     - r
+     - s
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        r=None,
+        s=None,
+    ):
+        self.r = r
+        self.s = s
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.r = SecurityGroupNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.s = ServerNotFoundException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("add_security_group_to_server_result")
+        if self.r is not None:
+            oprot.writeFieldBegin("r", TType.STRUCT, 1)
+            self.r.write(oprot)
+            oprot.writeFieldEnd()
+        if self.s is not None:
+            oprot.writeFieldBegin("s", TType.STRUCT, 2)
+            self.s.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(add_security_group_to_server_result)
+add_security_group_to_server_result.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRUCT,
+        "r",
+        [SecurityGroupNotFoundException, None],
         None,
     ),  # 1
     (
@@ -8591,7 +8891,7 @@ class add_project_security_group_to_server_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.r = DefaultException.read(iprot)
+                    self.r = SecurityGroupNotFoundException.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -8644,7 +8944,7 @@ add_project_security_group_to_server_result.thrift_spec = (
         1,
         TType.STRUCT,
         "r",
-        [DefaultException, None],
+        [SecurityGroupNotFoundException, None],
         None,
     ),  # 1
     (
