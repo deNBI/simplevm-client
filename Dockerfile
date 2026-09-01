@@ -1,4 +1,4 @@
-FROM python:3.14.7-alpine3.24
+FROM python:3.14.7-alpine3.24@sha256:3f818d6811ff5f3f2b5e5d836df3d25c2dd2e588d3b4981338a8ba17e422f74f
 
 # Install SSH client and build dependencies needed for compiling Python packages
 RUN apk add --no-cache \
