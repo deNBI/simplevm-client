@@ -37,7 +37,7 @@ services:
 
   simplevm_metadata_server_bielefeld:
     container_name: simplevm_metadata_server_bielefeld
-    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.2
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.4
     ports:
       - "8008:8000"
     depends_on:
@@ -97,7 +97,7 @@ services:
 
   simplevm_metadata_server_giessen:
     container_name: simplevm_metadata_server_giessen
-    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.2
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.4
     ports:
       - "8009:8000"
     depends_on:

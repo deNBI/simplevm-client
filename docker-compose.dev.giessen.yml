@@ -28,7 +28,7 @@ services:
 
   simplevm_metadata_server:
     container_name: simplevm_metadata_server
-    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.2
+    image: oci.bi.denbi.de/simplevm/simplevm-metadata-server:2.0.4
     ports:
       - "8008:8008"
     depends_on:
