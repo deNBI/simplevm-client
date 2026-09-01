@@ -7,7 +7,8 @@ RUN apk add --no-cache \
         build-base \
         libffi-dev \
         openssl-dev \
-        musl-dev
+        musl-dev \
+        git
 
 # Copy requirements and install them first to leverage Docker cache
 COPY requirements.txt /code/requirements.txt
