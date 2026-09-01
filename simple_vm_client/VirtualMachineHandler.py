@@ -408,6 +408,13 @@ class VirtualMachineHandler(Iface):
             server_id=server_id, security_group_name=security_group_name
         )
 
+    def add_security_group_to_server(
+        self, server_id: str, security_group_id: str
+    ) -> None:
+        return self.openstack_connector.add_security_group_to_server(
+            server_id=server_id, security_group_id=security_group_id
+        )
+
     def add_project_security_group_to_server(
         self, server_id: str, project_name: str, project_id: str
     ) -> None:

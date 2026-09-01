@@ -447,6 +447,55 @@ class TestOpenStackConnector(unittest.TestCase):
         self.assertEqual(result2, fake_sg)
         self.mock_openstack_connection.get_security_group.assert_called_once()
 
+    def test_get_raw_security_group_by_name_caching(self):
+        # Test that both name and ID are cached
+        fake_sg = fakes.generate_fake_resource(security_group.SecurityGroup)
+        sg_name = "test-sg-name"
+        fake_sg.name = sg_name
+        self.mock_openstack_connection.get_security_group.return_value = fake_sg
+
+        # First call by name (Cache Miss)
+        result1 = self.openstack_connector._get_raw_security_group(sg_name)
+        # Second call by ID (Should be a Cache Hit!)
+        result2 = self.openstack_connector._get_raw_security_group(fake_sg.id)
+
+        self.assertEqual(result1, fake_sg)
+        self.assertEqual(result2, fake_sg)
+        self.mock_openstack_connection.get_security_group.assert_called_once()
+
+    def test_get_raw_security_group_not_found(self):
+        # Test behavior when security group is not found
+        self.mock_openstack_connection.get_security_group.return_value = None
+
+        result = self.openstack_connector._get_raw_security_group("non-existent")
+
+        self.assertIsNone(result)
+        self.mock_openstack_connection.get_security_group.assert_called_once()
+
+    @mock.patch("time.time")
+    def test_get_raw_security_group_cache_expiration(self, mock_time):
+        # Test that cache is refreshed after TTL expires
+        fake_sg = fakes.generate_fake_resource(security_group.SecurityGroup)
+        self.mock_openstack_connection.get_security_group.return_value = fake_sg
+
+        # Initial time
+        mock_time.return_value = 1000.0
+        self.openstack_connector._get_raw_security_group(fake_sg.id)
+
+        # Time jump, but still within TTL (600s)
+        mock_time.return_value = 1500.0
+        self.openstack_connector._get_raw_security_group(fake_sg.id)
+        self.assertEqual(
+            self.mock_openstack_connection.get_security_group.call_count, 1
+        )
+
+        # Time jump beyond TTL
+        mock_time.return_value = 2000.0
+        self.openstack_connector._get_raw_security_group(fake_sg.id)
+        self.assertEqual(
+            self.mock_openstack_connection.get_security_group.call_count, 2
+        )
+
     def test_get_limits_caching(self):
         self.mock_openstack_connection.get_compute_limits.return_value = {
             "max_total_cores": 10,
@@ -1976,7 +2025,7 @@ class TestOpenStackConnector(unittest.TestCase):
             image=fake_image.id,
             flavor=fake_flavor.id,
             network=[fake_network.id],
-            key_name=servername,
+            key_name=server.name,
             meta=metadata,
             volumes=["volume1", "volume2"],
             userdata="userdata",
@@ -2002,7 +2051,7 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         self.openstack_connector.openstack_connection.create_keypair.assert_called_once_with(
-            name=servername
+            name=servername, public_key=mock.ANY
         )
 
         mock_get_volumes.assert_called_once_with(
@@ -2013,7 +2062,8 @@ class TestOpenStackConnector(unittest.TestCase):
         mock_delete_keypair.assert_called_once_with(key_name=server_keypair.name)
 
         # Check the result
-        self.assertEqual(result, (server.id, server_keypair.private_key))
+        self.assertEqual(result[0], server.id)
+        self.assertTrue(result[1].startswith("-----BEGIN OPENSSH PRIVATE KEY-----"))
 
         # Verify logging
         mock_logger_info.assert_any_call(
@@ -2126,15 +2176,17 @@ class TestOpenStackConnector(unittest.TestCase):
         fake_project_security_group = fakes.generate_fake_resource(
             security_group.SecurityGroup
         )
+        additional_sg1 = fakes.generate_fake_resource(security_group.SecurityGroup)
+        additional_sg2 = fakes.generate_fake_resource(security_group.SecurityGroup)
         mock_get_default_security_groups.return_value = [fake_default_security_group.id]
         mock_get_research_env_sg.return_value = "research_env_sg"
         mock_get_project_sg.return_value = fake_project_security_group.id
         self.openstack_connector.openstack_connection.get_security_group.side_effect = [
-            {"id": "additional_sg1"},
-            {"id": "additional_sg2"},
+            additional_sg1,
+            additional_sg2,
         ]
         # Set necessary input parameters
-        additional_security_group_ids = ["additional_sg1", "additional_sg2"]
+        additional_security_group_ids = [additional_sg1.id, additional_sg2.id]
         project_name = "mock_project"
         project_id = "mock_project_id"
         research_environment_metadata = MagicMock()
@@ -2158,15 +2210,16 @@ class TestOpenStackConnector(unittest.TestCase):
         )
 
         self.openstack_connector.openstack_connection.get_security_group.assert_has_calls(
-            [call(name_or_id="additional_sg1"), call(name_or_id="additional_sg2")]
+            [call(name_or_id=additional_sg1.id), call(name_or_id=additional_sg2.id)],
+            any_order=True,
         )
         # Check the result
         expected_result = [
             "research_env_sg",
             fake_default_security_group.id,
             fake_project_security_group.id,
-            "additional_sg1",
-            "additional_sg2",
+            additional_sg1.id,
+            additional_sg2.id,
         ]
         self.assertCountEqual(result, expected_result)
 

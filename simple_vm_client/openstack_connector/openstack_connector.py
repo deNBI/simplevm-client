@@ -1836,7 +1836,7 @@ class OpenStackConnector:
                 "Research environment security group not found",
                 extra={"security_group_name": security_group_name},
             )
-            raise DefaultException(
+            raise SecurityGroupNotFoundException(
                 message=f"Security Group {security_group_name} not found"
             )
         logger.debug(
@@ -2811,6 +2811,42 @@ class OpenStackConnector:
             )
         return deactivate_update_script
 
+    def _add_sg_to_server(self, server: Server, security_group: SecurityGroup):
+        if self._is_security_group_already_added_to_server(
+            server=server, security_group_name=security_group.name
+        ):
+            logger.debug(
+                "Security group already added to server",
+                extra={"server_id": server.id, "security_group": security_group.name},
+            )
+            return
+
+        self.openstack_connection.compute.add_security_group_to_server(
+            server=server, security_group=security_group
+        )
+        logger.info(
+            "Security group added",
+            extra={"server_id": server.id, "security_group_id": security_group.id},
+        )
+
+    def add_security_group_to_server(self, server_id: str, security_group_id: str):
+        logger.info(
+            "Adding security group to server",
+            extra={"server_id": server_id, "security_group_id": security_group_id},
+        )
+        server: Server = self.get_server(openstack_id=server_id)
+        security_group = self._get_raw_security_group(name_or_id=security_group_id)
+        if not security_group:
+            logger.warning(
+                "Security group not found",
+                extra={"security_group_id": security_group_id},
+            )
+            raise SecurityGroupNotFoundException(
+                message=f"Security Group {security_group_id} not found"
+            )
+
+        self._add_sg_to_server(server, security_group)
+
     def add_research_environment_security_group(
         self, server_id: str, security_group_name: str
     ):
@@ -2822,21 +2858,7 @@ class OpenStackConnector:
         security_group: SecurityGroup = self.get_research_environment_security_group(
             security_group_name=security_group_name
         )
-        if self._is_security_group_already_added_to_server(
-            server=server, security_group_name=security_group.name
-        ):
-            logger.debug(
-                "Security group already added to server",
-                extra={"server_id": server_id, "security_group": security_group_name},
-            )
-            return
-        self.openstack_connection.compute.add_security_group_to_server(
-            server=server, security_group=security_group
-        )
-        logger.info(
-            "Research environment security group added",
-            extra={"server_id": server_id, "security_group": security_group_name},
-        )
+        self._add_sg_to_server(server, security_group)
 
     def add_project_security_group_to_server(
         self, server_id: str, project_name: str, project_id: str
@@ -2854,21 +2876,7 @@ class OpenStackConnector:
             project_name=project_name, project_id=project_id
         )
         security_group = self._get_raw_security_group(name_or_id=security_group_id)
-        if self._is_security_group_already_added_to_server(
-            server=server, security_group_name=security_group.name
-        ):
-            logger.debug(
-                "Project security group already added to server",
-                extra={"server_id": server_id, "project_name": project_name},
-            )
-            return
-        self.openstack_connection.compute.add_security_group_to_server(
-            server=server, security_group=security_group
-        )
-        logger.info(
-            "Project security group added",
-            extra={"server_id": server_id, "project_name": project_name},
-        )
+        self._add_sg_to_server(server, security_group)
 
     def add_metadata_to_server(self, server_id, metadata):
         logger.info(

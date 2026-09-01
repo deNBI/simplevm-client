@@ -35,8 +35,13 @@
       ],
       "addLabels": [
         "pin"
+      ]
+    },
+    {
+      "matchLabels": [
+        "security"
       ],
-      "enabled": false
+      "minimumReleaseAge": null
     }
   ],
   "pre-commit": {
@@ -62,5 +67,6 @@
   "branchPrefix": "deps/",
   "bumpVersion": "minor",
   "commitBodyTable": true,
-  "commitMessagePrefix": "feat(Dependencies):"
+  "commitMessagePrefix": "feat(Dependencies):",
+  "minimumReleaseAge": "3 days"
 }
