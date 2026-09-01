@@ -1,8 +1,7 @@
 {
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "helpers:pinGitHubActionDigests"
-
   ],
   "osvVulnerabilityAlerts": true,
   "packageRules": [
