@@ -20,7 +20,7 @@ services:
 
   client_redis:
     container_name: simplevm_client_redis
-    image: redis:8.8.0
+    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
     expose:
       - "6379"
     networks:
@@ -44,7 +44,7 @@ services:
   simplevm_metadata_server_redis:
     container_name: simplevm_metadata_server_redis
 
-    image: redis:8.8.0
+    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
     expose:
       - "6379"
     networks:
