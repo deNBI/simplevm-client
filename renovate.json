@@ -1,8 +1,7 @@
 {
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "helpers:pinGitHubActionDigests"
-
   ],
   "osvVulnerabilityAlerts": true,
   "packageRules": [
@@ -36,7 +35,8 @@
       ],
       "addLabels": [
         "pin"
-      ]
+      ],
+      "enabled": false
     }
   ],
   "pre-commit": {
