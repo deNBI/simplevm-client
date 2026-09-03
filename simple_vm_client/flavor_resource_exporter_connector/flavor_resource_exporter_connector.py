@@ -33,13 +33,13 @@ class FlavorResourceExporterConnector:
         self.config: dict = {}
         self.endpoint_url: str = ""
         self.timeout: int = 30
-        self.enabled: bool = False
+        self.activated: bool = False
         self.use_basic_auth: bool = True
 
         self.load_config(config_file=config_file)
         self._check_credentials()
         self.session = None
-        if self.enabled:
+        if self.activated:
             self.session = self._create_session()
 
     def _create_session(self):
@@ -84,9 +84,9 @@ class FlavorResourceExporterConnector:
                 cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
 
                 resource_config = cfg.get("flavor_resource_exporter", {})
-                self.enabled = resource_config.get("activated", False)
+                self.activated = resource_config.get("activated", False)
 
-                if not self.enabled:
+                if not self.activated:
                     logger.info("Flavor Resource Exporter is deactivated")
                     return
 
@@ -114,7 +114,7 @@ class FlavorResourceExporterConnector:
         Returns:
             List of FlavorResource objects.
         """
-        if not self.enabled:
+        if not self.activated:
             logger.info("Flavor Resource Exporter is disabled")
             return []
 
@@ -211,6 +211,27 @@ class FlavorResourceExporterConnector:
             logger.exception(f"Unexpected error parsing flavor resource: {e}")
             return None
 
+    def is_healthy(self) -> bool:
+        """Check if the flavor resource exporter is healthy.
+        Returns:
+            True if the exporter is reachable and returns a valid response, False otherwise.
+        """
+        if not self.activated:
+            return False
+        if not self.endpoint_url:
+            return False
+
+        try:
+            response = self.session.get(
+                url=f"{self.endpoint_url}/v2/flavors/",
+                timeout=(self.timeout, self.timeout),
+            )
+            response.raise_for_status()
+            return True
+        except Exception as e:
+            logger.error(f"Health check for flavor resource exporter failed: {e}")
+            return False
+
     def _check_credentials(self) -> None:
         """Check if basic auth credentials are available.
 
@@ -218,7 +239,7 @@ class FlavorResourceExporterConnector:
         unless basic auth is disabled via config.
         Password is loaded here to ensure it happens after config loading.
         """
-        if not self.enabled:
+        if not self.activated:
             return
 
         if not self.use_basic_auth:
@@ -235,7 +256,7 @@ class FlavorResourceExporterConnector:
             logger.info(
                 "Flavor Resource Exporter deactivated: credentials not available (FLAVOR_RESOURCE_EXPORTER_USERNAME/FLAVOR_RESOURCE_EXPORTER_PASSWORD)"
             )
-            self.enabled = False
+            self.activated = False
             return
 
         logger.info("Basic auth credentials available - connector enabled")
@@ -247,7 +268,7 @@ class FlavorResourceExporterConnector:
             True if configured and enabled, False otherwise.
         """
         return (
-            self.enabled
+            self.activated
             and bool(self.endpoint_url)
             and (
                 not self.use_basic_auth or (bool(self.username) and bool(self.password))

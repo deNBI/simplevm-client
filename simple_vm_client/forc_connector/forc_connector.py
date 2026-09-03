@@ -60,12 +60,12 @@ class ForcConnector:
             # Check if "bibigrid" key is present in the loaded YAML
             self.REDIS_HOST = cfg["redis"]["host"]
             self.REDIS_PORT = cfg["redis"]["port"]
-            self.forc_activated = cfg["forc"].get("activated", False)
+            self.activated = cfg["forc"].get("activated", False)
             if "forc" not in cfg:
                 # Optionally, you can log a message or take other actions here
                 logger.info("Forc configuration not found. Skipping.")
                 return
-            if not self.forc_activated:
+            if not self.activated:
                 logger.info("Forc Config available but deactivated. Skipping..")
                 return
             self.FORC_BACKEND_URL = cfg["forc"]["forc_backend_url"]
@@ -99,7 +99,7 @@ class ForcConnector:
             )
 
     def start_template_update_scheduler(self):
-        if self.forc_activated:
+        if self.activated:
             logger.info(
                 f"Setting Update Playbook Schedule to: every {self.UPDATE_TEMPLATES_SCHEDULE} hours"
             )
@@ -113,6 +113,24 @@ class ForcConnector:
                 coalesce=True,
             )
             self.scheduler.start()
+
+    def is_healthy(self) -> bool:
+        try:
+            if not self.redis_connection.ping():
+                logger.error("Health-Check FAILED: Redis is not reachable.")
+                return False
+
+            response = requests.get(
+                f"{self.FORC_BACKEND_URL}/health",
+                timeout=5,
+                headers={"X-API-KEY": self.FORC_API_KEY},
+            )
+            response.raise_for_status()
+            logger.debug("Health-Check erfolgreich: Forc is reachable.")
+            return True
+        except Exception as e:
+            logger.error(f"Health-Check FAILED: {e}")
+            return False
 
     def connect_to_redis(self) -> None:
         logger.info("Connect to redis")

@@ -33,6 +33,7 @@ class BibigridConnector:
         self._PORT_FUNCTION = ""
         self._PRODUCTION = True
         self._DEFAULT_SECURITY_GROUP_NAME: str = "defaultSimpleVM"
+        self.activated = False
 
         self.load_config_yml(config_file=config_file)
         self.session = self._create_session()
@@ -69,6 +70,7 @@ class BibigridConnector:
             if not bibigrid_cfg.get("activated", True):
                 logger.info("Bibigrid Config available but deactivated. Skipping..")
                 return
+            self.activated = True
             self._BIBIGRID_HOST = bibigrid_cfg["host"]
             self._BIBIGRID_PORT = bibigrid_cfg["port"]
             self._BIBIGRID_USE_HTTPS = bibigrid_cfg.get("https", False)
@@ -177,7 +179,7 @@ class BibigridConnector:
         else:
             raise ClusterNotFoundException(message=f"Cluster {cluster_id} not found!")
 
-    def is_bibigrid_available(self) -> bool:
+    def is_healthy(self) -> bool:
         if not self._BIBIGRID_EP:
             return False
         request_url = f"{self._BIBIGRID_EP}/bibigrid/requirements"
