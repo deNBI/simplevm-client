@@ -254,7 +254,8 @@ class FlavorResourceExporterConnector:
 
         if not self.username or not self.password:
             logger.info(
-                "Flavor Resource Exporter deactivated: credentials not available (FLAVOR_RESOURCE_EXPORTER_USERNAME/FLAVOR_RESOURCE_EXPORTER_PASSWORD)"
+                "Flavor Resource Exporter deactivated: credentials not available "
+                "(FLAVOR_RESOURCE_EXPORTER_USERNAME/FLAVOR_RESOURCE_EXPORTER_PASSWORD)"
             )
             self.activated = False
             return
