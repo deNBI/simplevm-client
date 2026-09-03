@@ -55,7 +55,14 @@ class VirtualMachineHandler(Iface):
     def get_health_status(self) -> dict:
         """
         Aggregate health status from all connectors.
-        Returns a dictionary with activation and health status for each component.
+        Returns a dictionary matching the SystemHealth struct:
+        {
+            "openstack": {"activated": bool, "healthy": bool|None},
+            "forc": {"activated": bool, "healthy": bool|None},
+            "bibigrid": {"activated": bool, "healthy": bool|None},
+            "metadata": {"activated": bool, "healthy": bool|None},
+            "gpu_exporter": {"activated": bool, "healthy": bool|None},
+        }
         """
         connectors = {
             "openstack": self.openstack_connector,

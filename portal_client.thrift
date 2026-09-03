@@ -314,6 +314,14 @@ struct ComponentHealth {
     2: optional bool healthy
 }
 
+struct SystemHealth {
+    1: required ComponentHealth openstack,
+    2: required ComponentHealth forc,
+    3: required ComponentHealth bibigrid,
+    4: required ComponentHealth metadata,
+    5: required ComponentHealth flavor_exporter
+}
+
 exception MetadataServerNotAvailableException {
     1: string message
 }
@@ -625,7 +633,7 @@ service VirtualMachineService {
     bool is_openstack_connection_available()
 
 
-    map<string, ComponentHealth> get_health_status()
+    SystemHealth get_health_status()
 
     void detach_ip_from_server(1:string server_id,2:string floating_ip) throws(1:ServerNotFoundException s)
 

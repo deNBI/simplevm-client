@@ -3554,6 +3554,136 @@ class ComponentHealth(object):
         return not (self == other)
 
 
+class SystemHealth(object):
+    """
+    Attributes:
+     - openstack
+     - forc
+     - bibigrid
+     - metadata
+     - flavor_exporter
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        openstack=None,
+        forc=None,
+        bibigrid=None,
+        metadata=None,
+        flavor_exporter=None,
+    ):
+        self.openstack = openstack
+        self.forc = forc
+        self.bibigrid = bibigrid
+        self.metadata = metadata
+        self.flavor_exporter = flavor_exporter
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.openstack = ComponentHealth()
+                    self.openstack.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.forc = ComponentHealth()
+                    self.forc.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.bibigrid = ComponentHealth()
+                    self.bibigrid.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.metadata = ComponentHealth()
+                    self.metadata.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.flavor_exporter = ComponentHealth()
+                    self.flavor_exporter.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("SystemHealth")
+        if self.openstack is not None:
+            oprot.writeFieldBegin("openstack", TType.STRUCT, 1)
+            self.openstack.write(oprot)
+            oprot.writeFieldEnd()
+        if self.forc is not None:
+            oprot.writeFieldBegin("forc", TType.STRUCT, 2)
+            self.forc.write(oprot)
+            oprot.writeFieldEnd()
+        if self.bibigrid is not None:
+            oprot.writeFieldBegin("bibigrid", TType.STRUCT, 3)
+            self.bibigrid.write(oprot)
+            oprot.writeFieldEnd()
+        if self.metadata is not None:
+            oprot.writeFieldBegin("metadata", TType.STRUCT, 4)
+            self.metadata.write(oprot)
+            oprot.writeFieldEnd()
+        if self.flavor_exporter is not None:
+            oprot.writeFieldBegin("flavor_exporter", TType.STRUCT, 5)
+            self.flavor_exporter.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.openstack is None:
+            raise TProtocolException(message="Required field openstack is unset!")
+        if self.forc is None:
+            raise TProtocolException(message="Required field forc is unset!")
+        if self.bibigrid is None:
+            raise TProtocolException(message="Required field bibigrid is unset!")
+        if self.metadata is None:
+            raise TProtocolException(message="Required field metadata is unset!")
+        if self.flavor_exporter is None:
+            raise TProtocolException(message="Required field flavor_exporter is unset!")
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class MetadataServerNotAvailableException(TException):
     """
     Attributes:
@@ -6537,6 +6667,45 @@ ComponentHealth.thrift_spec = (
         None,
         None,
     ),  # 2
+)
+all_structs.append(SystemHealth)
+SystemHealth.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRUCT,
+        "openstack",
+        [ComponentHealth, None],
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRUCT,
+        "forc",
+        [ComponentHealth, None],
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRUCT,
+        "bibigrid",
+        [ComponentHealth, None],
+        None,
+    ),  # 3
+    (
+        4,
+        TType.STRUCT,
+        "metadata",
+        [ComponentHealth, None],
+        None,
+    ),  # 4
+    (
+        5,
+        TType.STRUCT,
+        "flavor_exporter",
+        [ComponentHealth, None],
+        None,
+    ),  # 5
 )
 all_structs.append(MetadataServerNotAvailableException)
 MetadataServerNotAvailableException.thrift_spec = (
