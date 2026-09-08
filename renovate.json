@@ -1,8 +1,7 @@
 {
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "helpers:pinGitHubActionDigests"
-
   ],
   "osvVulnerabilityAlerts": true,
   "packageRules": [
@@ -37,6 +36,12 @@
       "addLabels": [
         "pin"
       ]
+    },
+    {
+      "matchLabels": [
+        "security"
+      ],
+      "minimumReleaseAge": null
     }
   ],
   "pre-commit": {
@@ -62,5 +67,6 @@
   "branchPrefix": "deps/",
   "bumpVersion": "minor",
   "commitBodyTable": true,
-  "commitMessagePrefix": "feat(Dependencies):"
+  "commitMessagePrefix": "feat(Dependencies):",
+  "minimumReleaseAge": "3 days"
 }

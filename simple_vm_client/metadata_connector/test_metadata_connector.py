@@ -96,23 +96,23 @@ def test_set_metadata_failure(connector_with_env):
     assert result is False
 
 
-def test_is_metadata_server_available_success(connector_with_env):
+def test_is_healthy_success(connector_with_env):
     mock_response = MagicMock()
     mock_response.raise_for_status.return_value = None
     mock_response.json.return_value = {"status": "ok"}
     connector_with_env.session.get.return_value = mock_response
 
-    result = connector_with_env.is_metadata_server_available()
+    result = connector_with_env.is_healthy()
 
     assert result is True
     connector_with_env.session.get.assert_called_once()
 
 
-def test_is_metadata_server_available_failure(connector_with_env):
+def test_is_healthy_failure(connector_with_env):
     connector_with_env.session.get.side_effect = requests.exceptions.ConnectionError(
         "down"
     )
 
-    result = connector_with_env.is_metadata_server_available()
+    result = connector_with_env.is_healthy()
 
     assert result is False

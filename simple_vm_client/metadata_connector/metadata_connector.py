@@ -16,11 +16,11 @@ class MetadataConnector:
     def __init__(self, config_file: str):
         logger.info("Initializing Metadata Connector")
         self.session = requests.Session()
-        self.ACTIVATED = False
+        self.activated = False
         self.METADATA_WRITE_TOKEN = None
         self.METADATA_BASE_URL = None
         self.load_config_yml(config_file)
-        self.is_metadata_server_available()
+        self.is_healthy()
 
     def load_config_yml(self, config_file: str) -> None:
         logger.info(f"Loading config file: {config_file}")
@@ -52,7 +52,7 @@ class MetadataConnector:
             )
 
             logger.info("Metadata configuration loaded")
-            self.ACTIVATED = True
+            self.activated = True
 
         self.load_env_config()
 
@@ -60,7 +60,7 @@ class MetadataConnector:
         token = os.environ.get("METADATA_WRITE_TOKEN")
         if not token:
             logger.error("Environment variable METADATA_WRITE_TOKEN is missing!")
-            self.ACTIVATED = False
+            self.activated = False
             return
 
         self.METADATA_WRITE_TOKEN = token
@@ -68,7 +68,7 @@ class MetadataConnector:
         logger.info("Metadata environment configuration loaded")
 
     def remove_metadata(self, ip: str) -> bool:
-        if not self.ACTIVATED:
+        if not self.activated:
             logger.info("Metadata server not activated. Skipping.")
             return False
 
@@ -100,7 +100,7 @@ class MetadataConnector:
         if not ip:
             logger.error("IP address not provided, cannot set metadata.")
             return False
-        if not self.ACTIVATED:
+        if not self.activated:
             logger.info("Metadata server not activated. Skipping.")
             return False
 
@@ -126,10 +126,14 @@ class MetadataConnector:
             logger.error(f"Failed to set metadata for {ip}: {e}")
         return False
 
-    def is_metadata_server_available(self) -> bool:
+    def is_healthy(self) -> bool:
+        """Check if the metadata server is healthy.
+        Returns:
+            True if the metadata server is reachable and returns a successful response, False otherwise.
+        """
         logger.info("Checking metadata server health...")
 
-        if not self.ACTIVATED:
+        if not self.activated:
             logger.info("Metadata server not activated. Skipping health check.")
             return False
 

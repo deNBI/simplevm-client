@@ -25,6 +25,7 @@ from .ttypes import (
     ClusterLog,
     ClusterMessage,
     ClusterState,
+    ComponentHealth,
     CondaPackage,
     Flavor,
     FlavorResource,
@@ -32,6 +33,7 @@ from .ttypes import (
     PlaybookResult,
     ResearchEnvironmentTemplate,
     Snapshot,
+    SystemHealth,
     VirtualMachineServerMetadata,
     Volume,
 )
@@ -47,9 +49,42 @@ class VirtualMachineHandler(Iface):
         self.openstack_connector = OpenStackConnector(config_file=config_file)
         self.bibigrid_connector = BibigridConnector(config_file=config_file)
         self.forc_connector = ForcConnector(config_file=config_file)
-        self.metadata_connetor = MetadataConnector(config_file=config_file)
+        self.metadata_connector = MetadataConnector(config_file=config_file)
         self.flavor_resource_exporter = FlavorResourceExporterConnector(
             config_file=config_file
+        )
+
+    def get_health_status(self) -> SystemHealth:
+        """
+        Aggregate health status from all connectors.
+        Returns a SystemHealth object with activation and health status for each component.
+        """
+        connectors = {
+            "openstack": self.openstack_connector,
+            "forc": self.forc_connector,
+            "bibigrid": self.bibigrid_connector,
+            "metadata": self.metadata_connector,
+            "flavor_exporter": self.flavor_resource_exporter,
+        }
+
+        health_results = {}
+        for name, connector in connectors.items():
+            activated = getattr(connector, "activated", True)
+            healthy = None
+            if activated:
+                try:
+                    healthy = connector.is_healthy()
+                except Exception as e:
+                    logger.error(f"Error checking health for {name}: {e}")
+                    healthy = False
+            health_results[name] = ComponentHealth(activated=activated, healthy=healthy)
+
+        return SystemHealth(
+            openstack=health_results["openstack"],
+            forc=health_results["forc"],
+            bibigrid=health_results["bibigrid"],
+            metadata=health_results["metadata"],
+            flavor_exporter=health_results["flavor_exporter"],
         )
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
@@ -64,14 +99,14 @@ class VirtualMachineHandler(Iface):
             self.openstack_connector.delete_server(openstack_id=k)
         raise SystemExit(0)
 
-    def is_metadata_server_available(self):
-        return self.metadata_connetor.is_metadata_server_available()
+    def is_metadata_server_healthy(self):
+        return self.metadata_connector.is_healthy()
 
     def set_metadata_server_data(self, ip: str, metadata: VirtualMachineServerMetadata):
-        return self.metadata_connetor.set_metadata(ip=ip, metadata=metadata)
+        return self.metadata_connector.set_metadata(ip=ip, metadata=metadata)
 
     def remove_metadata_server_data(self, ip: str):
-        return self.metadata_connetor.remove_metadata(ip=ip)
+        return self.metadata_connector.remove_metadata(ip=ip)
 
     def get_images(self) -> list[Image]:
         images: list[Image] = thrift_converter.os_to_thrift_images(
@@ -550,9 +585,6 @@ class VirtualMachineHandler(Iface):
                 base_url=base_url,
             )
 
-    def is_bibigrid_available(self) -> bool:
-        return self.bibigrid_connector.is_bibigrid_available()
-
     def is_openstack_connection_available(self) -> bool:
         """Check if the OpenStack connection is still working.
 
@@ -560,7 +592,6 @@ class VirtualMachineHandler(Iface):
             True if the connection is active, False otherwise.
         """
         try:
-            # Use get_limits() which is a lightweight call to verify connection
             self.openstack_connector.get_limits()
             return True
         except Exception:
