@@ -25,6 +25,7 @@ from .ttypes import (
     ClusterLog,
     ClusterMessage,
     ClusterState,
+    ComponentHealth,
     CondaPackage,
     Flavor,
     FlavorResource,
@@ -32,6 +33,7 @@ from .ttypes import (
     PlaybookResult,
     ResearchEnvironmentTemplate,
     Snapshot,
+    SystemHealth,
     VirtualMachineServerMetadata,
     Volume,
 )
@@ -52,17 +54,10 @@ class VirtualMachineHandler(Iface):
             config_file=config_file
         )
 
-    def get_health_status(self) -> dict:
+    def get_health_status(self) -> SystemHealth:
         """
         Aggregate health status from all connectors.
-        Returns a dictionary matching the SystemHealth struct:
-        {
-            "openstack": {"activated": bool, "healthy": bool|None},
-            "forc": {"activated": bool, "healthy": bool|None},
-            "bibigrid": {"activated": bool, "healthy": bool|None},
-            "metadata": {"activated": bool, "healthy": bool|None},
-            "gpu_exporter": {"activated": bool, "healthy": bool|None},
-        }
+        Returns a SystemHealth object with activation and health status for each component.
         """
         connectors = {
             "openstack": self.openstack_connector,
@@ -72,18 +67,25 @@ class VirtualMachineHandler(Iface):
             "flavor_exporter": self.flavor_resource_exporter,
         }
 
-        health_status = {}
+        health_results = {}
         for name, connector in connectors.items():
             activated = getattr(connector, "activated", True)
-            health_status[name] = {"activated": activated, "healthy": None}
+            healthy = None
             if activated:
                 try:
-                    health_status[name]["healthy"] = connector.is_healthy()
+                    healthy = connector.is_healthy()
                 except Exception as e:
                     logger.error(f"Error checking health for {name}: {e}")
-                    health_status[name]["healthy"] = False
+                    healthy = False
+            health_results[name] = ComponentHealth(activated=activated, healthy=healthy)
 
-        return health_status
+        return SystemHealth(
+            openstack=health_results["openstack"],
+            forc=health_results["forc"],
+            bibigrid=health_results["bibigrid"],
+            metadata=health_results["metadata"],
+            flavor_exporter=health_results["flavor_exporter"],
+        )
 
     def keyboard_interrupt_handler_playbooks(self) -> None:
         for k, v in self.forc_connector.active_playbooks.items():
