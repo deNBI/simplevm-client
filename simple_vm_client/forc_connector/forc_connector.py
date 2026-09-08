@@ -121,7 +121,7 @@ class ForcConnector:
                 return False
 
             response = requests.get(
-                f"{self.FORC_BACKEND_URL}/health",
+                f"{self.FORC_BACKEND_URL}health",
                 timeout=5,
                 headers={"X-API-KEY": self.FORC_API_KEY},
             )
