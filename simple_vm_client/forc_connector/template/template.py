@@ -67,6 +67,7 @@ class ResearchEnvironmentMetadata:
         is_maintained: bool = True,
         forc_versions: list[str] = [],
         incompatible_versions: list[str] = [],
+        disabled: bool = False,
     ):
         self.template_name = template_name
         self.port = port
@@ -90,6 +91,7 @@ class ResearchEnvironmentMetadata:
         self.incompatible_versions = incompatible_versions
         self.create_only_backend = create_only_backend
         self.allow_disable_auth = allow_disable_auth
+        self.disabled = disabled
 
 
 class Template(object):
@@ -231,10 +233,9 @@ class Template(object):
             self._update_loaded_templates()
 
             logger.info(f"Loaded Template Names: {self._all_templates}")
+            self._load_and_update_resenv_metadata()
 
             self._install_ansible_galaxy_requirements()
-
-            self._load_and_update_resenv_metadata()
 
             logger.info(f"Allowed Forc {self._forc_allowed}")
         except Exception:
@@ -334,9 +335,11 @@ class Template(object):
                     research_environment_metadata: ResearchEnvironmentMetadata = (
                         ResearchEnvironmentMetadata(**loaded_metadata)
                     )
-
-                    self._add_forc_allowed_template(research_environment_metadata)
-                    templates_metadata.append(research_environment_metadata)
+                    if not research_environment_metadata.disabled:
+                        self._add_forc_allowed_template(research_environment_metadata)
+                        templates_metadata.append(research_environment_metadata)
+                    else:
+                        logger.info(f"{template_metadata_name} disabled. Skipping...")
                 except Exception as e:
                     self._handle_metadata_exception(template_metadata_name, template, e)
 
