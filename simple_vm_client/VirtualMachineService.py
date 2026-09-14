@@ -280,6 +280,9 @@ class Iface(object):
 
         """
 
+    def get_health_status(self):
+        pass
+
     def detach_ip_from_server(self, server_id, floating_ip):
         """
         Parameters:
@@ -435,7 +438,7 @@ class Iface(object):
 
         """
 
-    def is_metadata_server_available(self):
+    def is_metadata_server_healthy(self):
         pass
 
     def delete_backend(self, id):
@@ -1979,6 +1982,37 @@ class Client(Iface):
             "is_openstack_connection_available failed: unknown result",
         )
 
+    def get_health_status(self):
+        self.send_get_health_status()
+        return self.recv_get_health_status()
+
+    def send_get_health_status(self):
+        self._oprot.writeMessageBegin(
+            "get_health_status", TMessageType.CALL, self._seqid
+        )
+        args = get_health_status_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_health_status(self):
+        iprot = self._iprot
+        fname, mtype, rseqid = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_health_status_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(
+            TApplicationException.MISSING_RESULT,
+            "get_health_status failed: unknown result",
+        )
+
     def detach_ip_from_server(self, server_id, floating_ip):
         """
         Parameters:
@@ -2631,20 +2665,20 @@ class Client(Iface):
             raise result.b
         return
 
-    def is_metadata_server_available(self):
-        self.send_is_metadata_server_available()
-        return self.recv_is_metadata_server_available()
+    def is_metadata_server_healthy(self):
+        self.send_is_metadata_server_healthy()
+        return self.recv_is_metadata_server_healthy()
 
-    def send_is_metadata_server_available(self):
+    def send_is_metadata_server_healthy(self):
         self._oprot.writeMessageBegin(
-            "is_metadata_server_available", TMessageType.CALL, self._seqid
+            "is_metadata_server_healthy", TMessageType.CALL, self._seqid
         )
-        args = is_metadata_server_available_args()
+        args = is_metadata_server_healthy_args()
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_is_metadata_server_available(self):
+    def recv_is_metadata_server_healthy(self):
         iprot = self._iprot
         fname, mtype, rseqid = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -2652,7 +2686,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = is_metadata_server_available_result()
+        result = is_metadata_server_healthy_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
@@ -2663,7 +2697,7 @@ class Client(Iface):
             raise result.b
         raise TApplicationException(
             TApplicationException.MISSING_RESULT,
-            "is_metadata_server_available failed: unknown result",
+            "is_metadata_server_healthy failed: unknown result",
         )
 
     def delete_backend(self, id):
@@ -4433,6 +4467,7 @@ class Processor(Iface, TProcessor):
         self._processMap["is_openstack_connection_available"] = (
             Processor.process_is_openstack_connection_available
         )
+        self._processMap["get_health_status"] = Processor.process_get_health_status
         self._processMap["detach_ip_from_server"] = (
             Processor.process_detach_ip_from_server
         )
@@ -4461,8 +4496,8 @@ class Processor(Iface, TProcessor):
         self._processMap["remove_metadata_server_data"] = (
             Processor.process_remove_metadata_server_data
         )
-        self._processMap["is_metadata_server_available"] = (
-            Processor.process_is_metadata_server_available
+        self._processMap["is_metadata_server_healthy"] = (
+            Processor.process_is_metadata_server_healthy
         )
         self._processMap["delete_backend"] = Processor.process_delete_backend
         self._processMap["add_user_to_backend"] = Processor.process_add_user_to_backend
@@ -5394,6 +5429,31 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_get_health_status(self, seqid, iprot, oprot):
+        args = get_health_status_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_health_status_result()
+        try:
+            result.success = self._handler.get_health_status()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception("TApplication exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception("Unexpected exception in handler")
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(
+                TApplicationException.INTERNAL_ERROR, "Internal error"
+            )
+        oprot.writeMessageBegin("get_health_status", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_detach_ip_from_server(self, seqid, iprot, oprot):
         args = detach_ip_from_server_args()
         args.read(iprot)
@@ -5825,13 +5885,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_is_metadata_server_available(self, seqid, iprot, oprot):
-        args = is_metadata_server_available_args()
+    def process_is_metadata_server_healthy(self, seqid, iprot, oprot):
+        args = is_metadata_server_healthy_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = is_metadata_server_available_result()
+        result = is_metadata_server_healthy_result()
         try:
-            result.success = self._handler.is_metadata_server_available()
+            result.success = self._handler.is_metadata_server_healthy()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -5851,7 +5911,7 @@ class Processor(Iface, TProcessor):
             result = TApplicationException(
                 TApplicationException.INTERNAL_ERROR, "Internal error"
             )
-        oprot.writeMessageBegin("is_metadata_server_available", msg_type, seqid)
+        oprot.writeMessageBegin("is_metadata_server_healthy", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -12805,6 +12865,136 @@ is_openstack_connection_available_result.thrift_spec = (
 )
 
 
+class get_health_status_args(object):
+    thrift_spec = None
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_health_status_args")
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_health_status_args)
+get_health_status_args.thrift_spec = ()
+
+
+class get_health_status_result(object):
+    """
+    Attributes:
+     - success
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        success=None,
+    ):
+        self.success = success
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = SystemHealth()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("get_health_status_result")
+        if self.success is not None:
+            oprot.writeFieldBegin("success", TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+all_structs.append(get_health_status_result)
+get_health_status_result.thrift_spec = (
+    (
+        0,
+        TType.STRUCT,
+        "success",
+        [SystemHealth, None],
+        None,
+    ),  # 0
+)
+
+
 class detach_ip_from_server_args(object):
     """
     Attributes:
@@ -16063,7 +16253,7 @@ remove_metadata_server_data_result.thrift_spec = (
 )
 
 
-class is_metadata_server_available_args(object):
+class is_metadata_server_healthy_args(object):
     thrift_spec = None
 
     def read(self, iprot):
@@ -16091,7 +16281,7 @@ class is_metadata_server_available_args(object):
                 oprot._fast_encode(self, [self.__class__, self.thrift_spec])
             )
             return
-        oprot.writeStructBegin("is_metadata_server_available_args")
+        oprot.writeStructBegin("is_metadata_server_healthy_args")
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -16109,11 +16299,11 @@ class is_metadata_server_available_args(object):
         return not (self == other)
 
 
-all_structs.append(is_metadata_server_available_args)
-is_metadata_server_available_args.thrift_spec = ()
+all_structs.append(is_metadata_server_healthy_args)
+is_metadata_server_healthy_args.thrift_spec = ()
 
 
-class is_metadata_server_available_result(object):
+class is_metadata_server_healthy_result(object):
     """
     Attributes:
      - success
@@ -16174,7 +16364,7 @@ class is_metadata_server_available_result(object):
                 oprot._fast_encode(self, [self.__class__, self.thrift_spec])
             )
             return
-        oprot.writeStructBegin("is_metadata_server_available_result")
+        oprot.writeStructBegin("is_metadata_server_healthy_result")
         if self.success is not None:
             oprot.writeFieldBegin("success", TType.BOOL, 0)
             oprot.writeBool(self.success)
@@ -16204,8 +16394,8 @@ class is_metadata_server_available_result(object):
         return not (self == other)
 
 
-all_structs.append(is_metadata_server_available_result)
-is_metadata_server_available_result.thrift_spec = (
+all_structs.append(is_metadata_server_healthy_result)
+is_metadata_server_healthy_result.thrift_spec = (
     (
         0,
         TType.BOOL,

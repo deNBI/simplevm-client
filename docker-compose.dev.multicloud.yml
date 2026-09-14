@@ -19,7 +19,7 @@ services:
 
   client_redis_bielefeld:
     container_name: simplevm_client_redis_bielefeld
-    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
+    image: redis:8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5
     expose:
       - "6379"
     networks:
@@ -52,7 +52,7 @@ services:
 
   simplevm_metadata_server_redis_bielefeld:
     container_name: simplevm_metadata_server_redis_bielefeld
-    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
+    image: redis:8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5
     expose:
       - "6379"
     networks:
@@ -79,7 +79,7 @@ services:
 
   client_redis_giessen:
     container_name: simplevm_client_redis_giessen
-    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
+    image: redis:8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5
     expose:
       - "6379"
     networks:
@@ -112,7 +112,7 @@ services:
 
   simplevm_metadata_server_redis_giessen:
     container_name: simplevm_metadata_server_redis_giessen
-    image: redis:8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b
+    image: redis:8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5
     expose:
       - "6379"
     networks:
