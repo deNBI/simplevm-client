@@ -32,6 +32,7 @@ from openstack.exceptions import (
     OpenStackCloudException,
     ResourceFailure,
     ResourceNotFound,
+    SDKException,
 )
 from openstack.network.v2.network import Network
 from openstack.network.v2.security_group import SecurityGroup
@@ -110,6 +111,7 @@ class OpenStackConnector:
         self.load_env_config()
         logger.info(f"Loading config file: {config_file}")
         self.load_config_yml(config_file)
+        self.activated = True
 
         try:
 
@@ -215,6 +217,17 @@ class OpenStackConnector:
 
     def _get_default_security_groups(self):
         return self.DEFAULT_SECURITY_GROUPS.copy()
+
+    def is_healthy(self):
+        try:
+            self.openstack_connection.identity.get_token()
+            logger.debug("Health-Check successful: OpenStack is reachable.")
+            return True
+
+        except SDKException as e:
+            logger.error(f"Health-Check FAILED: {e}")
+
+            return False
 
     def load_env_config(self) -> None:
         self.AUTH_URL = os.environ.get("OS_AUTH_URL")

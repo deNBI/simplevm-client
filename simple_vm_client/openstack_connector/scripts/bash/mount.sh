@@ -33,6 +33,7 @@ for id in "${volumes_new[@]}"; do
   sudo mkdir -p ${paths_new[ITER]}
   sudo chmod 777 ${paths_new[ITER]}/
   sudo mount "$id" ${paths_new[ITER]}
+  sudo chown -R ubuntu:ubuntu "${paths_new[ITER]}"
   ((ITER++))
 done
 ITER=0
