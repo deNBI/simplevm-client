@@ -1581,14 +1581,43 @@ class OpenStackConnector:
 
     def add_default_security_groups_to_server(self, openstack_id):
         logger.info(
-            "Adding default security group to server", extra={"server_id": openstack_id}
+            "Adding default security groups to server",
+            extra={"server_id": openstack_id},
         )
+
         server = self.get_server(openstack_id=openstack_id)
-        sec_group = self._get_default_security_groups()
+
+        sec_groups = list(dict.fromkeys(self._get_default_security_groups()))
+
+        existing_sec_group_names = {
+            sec_group["name"] for sec_group in server.security_groups
+        }
+
+        sec_groups = [
+            sec_group
+            for sec_group in sec_groups
+            if sec_group not in existing_sec_group_names
+        ]
+
+        if not sec_groups:
+            logger.debug(
+                "All default security groups are already assigned",
+                extra={"server_id": openstack_id},
+            )
+            return
+
         self.openstack_connection.add_server_security_groups(
-            server=server, security_groups=sec_group
+            server=server,
+            security_groups=sec_groups,
         )
-        logger.debug("Default security group added", extra={"server_id": openstack_id})
+
+        logger.debug(
+            "Default security groups added",
+            extra={
+                "server_id": openstack_id,
+                "security_groups": sec_groups,
+            },
+        )
 
     def delete_security_group_rule(self, openstack_id):
         logger.info("Deleting security group rule", extra={"rule_id": openstack_id})
