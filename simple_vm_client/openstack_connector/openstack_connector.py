@@ -2150,6 +2150,11 @@ class OpenStackConnector:
                     message=f"Instance {openstack_id} not found",
                     name_or_id=openstack_id,
                 )
+            server.ports = list(
+                self.openstack_connection.network.ports(
+                    device_id=server.id,
+                )
+            )
             if server.vm_state == VmStates.ACTIVE.value and not no_connection:
                 ssh_port, udp_port = self._calculate_vm_ports(server=server)
 
