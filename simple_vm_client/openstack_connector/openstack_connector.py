@@ -545,7 +545,11 @@ class OpenStackConnector:
                         server.image = openstack_image
                     else:
                         server.image = images.get(image.id)
-
+                server.ports = list(
+                    self.openstack_connection.network.ports(
+                        device_id=server.id,
+                    )
+                )
             return servers
         except Exception as e:
             logger.error(
@@ -592,7 +596,11 @@ class OpenStackConnector:
                     server.image = openstack_image
                 else:
                     server.image = images.get(image.id)
-
+                        server.ports = list(
+            self.openstack_connection.network.ports(
+                    device_id=server.id,
+                )
+            )
         logger.debug(
             "Servers by IDs fetch complete",
             extra={"count": len(servers), "found_ids": [s.id for s in servers]},
