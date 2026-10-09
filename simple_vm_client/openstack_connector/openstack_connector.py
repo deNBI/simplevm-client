@@ -596,10 +596,8 @@ class OpenStackConnector:
                     server.image = openstack_image
                 else:
                     server.image = images.get(image.id)
-                        server.ports = list(
-            self.openstack_connection.network.ports(
-                    device_id=server.id,
-                )
+            server.ports = list(
+                self.openstack_connection.network.ports(device_id=server.id)
             )
         logger.debug(
             "Servers by IDs fetch complete",
