@@ -116,12 +116,18 @@ def os_to_thrift_server(openstack_server: OpenStack_Server) -> VM:
         image = os_to_thrift_image(openstack_image=openstack_server.image)
     else:
         image = None
-    for values in openstack_server.addresses.values():
-        for address in values:
-            if address["OS-EXT-IPS:type"] == "floating":
-                floating_ip = address["addr"]
-            elif address["OS-EXT-IPS:type"] == "fixed":
-                fixed_ip = address["addr"]
+    ports = openstack_server.ports
+
+    active_port = next(
+        (port for port in ports if port.status == "ACTIVE"),
+        ports[0] if ports else None,
+    )
+
+    fixed_ip = (
+        active_port.fixed_ips[0]["ip_address"]
+        if active_port and active_port.fixed_ips
+        else None
+    )
     server = VM(
         flavor=flavor,
         image=image,
