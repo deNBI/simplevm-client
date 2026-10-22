@@ -17,7 +17,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## High-Level Architecture
 
+### Project Structure
+```text
+simple_vm_client/
+├── bibigrid_connector/         # Cluster management via Bibigrid
+│   └── bibigrid_connector.py
+├── config/                     # Configuration YAML files
+│   └── config.yml
+├── forc_connector/             # Research environment & playbook management
+│   ├── forc_connector.py
+│   ├── playbook/               # Playbook execution logic
+│   │   └── playbook.py
+│   └── template/               # RE templates and logic
+│       └── template.py
+├── flavor_resource_exporter_connector/ # External flavor resource fetching
+│   └── flavor_resource_exporter_connector.py
+├── metadata_connector/         # VM metadata server integration
+│   └── metadata_connector.py
+├── openstack_connector/        # Primary OpenStack SDK wrapper
+│   └── openstack_connector.py
+├── util/                       # Shared utilities
+│   ├── logger.py
+│   ├── state_enums.py
+│   └── thrift_converter.py     # OpenStack SDK -> Thrift object conversion
+├── VirtualMachineHandler.py    # Main business logic orchestrator
+├── VirtualMachineServer.py     # Thrift RPC server implementation
+├── VirtualMachineService.py    # Thrift service definition (generated)
+├── ttypes.py                   # Thrift type definitions (generated)
+└── constants.py                # Project-wide constants
+```
+
 SimpleVM Client is a Python-based integration layer that manages cloud infrastructure, primarily OpenStack, via a Thrift RPC interface.
+
 
 ### Core Components
 - **Thrift Interface (`portal_client.thrift`):** Defines the service contract (`VirtualMachineService`), data structures (`VM`, `Flavor`, `Image`), and exceptions used for communication with the Django backend.
