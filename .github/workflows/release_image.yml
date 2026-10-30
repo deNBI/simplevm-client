@@ -12,6 +12,7 @@ jobs:
       image_tag: ${{ github.ref_name }}
       dockerfile: Dockerfile
       notify_matrix: true
+      RUNS_ON: '["ubuntu-latest"]'
     secrets:
       OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
       OCI_TOKEN: ${{ secrets.OCI_TOKEN }}

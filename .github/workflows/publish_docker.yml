@@ -12,6 +12,7 @@ jobs:
     uses: denbi/portal-github-actions/.github/workflows/publish-branch-image.yml@main
     with:
       image_name: oci.bi.denbi.de/simplevm/simplevm-client
+      runs_on: '["ubuntu-latest"]'
     secrets:
       OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
       OCI_TOKEN: ${{ secrets.OCI_TOKEN }}
