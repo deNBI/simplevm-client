@@ -38,12 +38,6 @@
       ],
       "enabled": false
     },
-    {
-      "matchLabels": [
-        "security"
-      ],
-      "minimumReleaseAge": null
-    }
   ],
   "pre-commit": {
     "enabled": true
