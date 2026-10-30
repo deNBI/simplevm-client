@@ -1,4 +1,4 @@
-FROM python:3.14.7@sha256:8edbf9e42c7fb168b9c523718ed907117e6d2e60f5889c0c499bbda3a787da53
+FROM python:3.15.1@sha256:dc005c4de6908d750269a5ee683da95b4cfb5bf419f69b8e95d98d9e44bb2841
 WORKDIR /code
 
 # Copy all requirements files at once
