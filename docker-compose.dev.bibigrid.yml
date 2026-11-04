@@ -31,6 +31,7 @@ services:
     image: oci.bi.denbi.de/simplevm/bibigrid:${BIBIGRID_TAG}
     volumes:
       - ./clouds.yaml:/root/.config/bibigrid/clouds.yaml
+      - ./ansible/roles/simplevm_metadata:/app/bibigrid/resources/playbook/roles_user/simplevm_metadata
     expose:
       - "9123"
     networks:

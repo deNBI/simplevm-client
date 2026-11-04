@@ -1,0 +1,5 @@
+---
+# Default variables for simplevm_metadata role
+simplevm_metadata_config_dir: "/etc/simplevm"
+simplevm_metadata_config_file: "/etc/simplevm/metadata_config.env"
+simplevm_metadata_get_metadata_script: "/etc/simplevm/get_metadata.sh"
