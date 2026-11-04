@@ -1,7 +1,8 @@
 FROM python:3.14.10-alpine3.24@sha256:eb2c62658b8d51bff0acc408504b76521d02030de56a8a3c1e830083e89b89d2
 
 # Install SSH client and build dependencies needed for compiling Python packages
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache \
         openssh-client \
         && apk add --no-cache --virtual .build-deps \
         build-base \
