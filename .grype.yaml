@@ -1,0 +1,18 @@
+ignore:
+  # CVE-2025-60876 affects BusyBox wget URL handling.
+  # The Node application does not use BusyBox wget with untrusted URLs.
+  # Revisit when Alpine publishes a patched BusyBox package.
+  - vulnerability: CVE-2025-60876
+    package:
+      name: busybox
+      type: apk
+
+  - vulnerability: CVE-2025-60876
+    package:
+      name: busybox-binsh
+      type: apk
+
+  - vulnerability: CVE-2025-60876
+    package:
+      name: ssl_client
+      type: apk
