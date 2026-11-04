@@ -54,9 +54,9 @@ DEFAULT_TIMEOUT = (5, 30)
 
 class TestBibigridConnector(unittest.TestCase):
     @patch(
-        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.is_bibigrid_available"
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.is_healthy"
     )
-    def setUp(self, mock_is_bibigrid_available):
+    def setUp(self, mock_is_healthy):
         self.fake_config = f"""
          bibigrid:
            host: {HOST}
@@ -85,7 +85,7 @@ class TestBibigridConnector(unittest.TestCase):
         )
         self.fake_config_file.write(self.fake_config)
         self.fake_config_file.close()
-        mock_is_bibigrid_available.return_value = True
+        mock_is_healthy.return_value = True
         self.connector = BibigridConnector(config_file=self.fake_config_file.name)
 
     def tearDown(self):
@@ -93,9 +93,9 @@ class TestBibigridConnector(unittest.TestCase):
         os.remove(self.fake_config_file.name)
 
     @patch(
-        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.is_bibigrid_available"
+        "simple_vm_client.bibigrid_connector.bibigrid_connector.BibigridConnector.is_healthy"
     )
-    def test_load_config_yml(self, mock_is_bibigrid_available):
+    def test_load_config_yml(self, mock_is_healthy):
         # Instantiate BibigridConnector with the fake config
         self.connector.load_config_yml(self.fake_config_file.name)
         self.assertEqual(self.connector._BIBIGRID_HOST, HOST)
@@ -118,24 +118,24 @@ class TestBibigridConnector(unittest.TestCase):
         self.assertEqual(self.connector._BIBIGRID_EP, "https://example.com:8080")
 
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
-    def test_is_bibigrid_available_when_url_not_set(self, mock_logger_info):
+    def test_is_healthy_when_url_not_set(self, mock_logger_info):
         # Arrange
         self.connector._BIBIGRID_EP = ""
 
         # Act
-        result = self.connector.is_bibigrid_available()
+        result = self.connector.is_healthy()
 
         self.assertFalse(result)
 
     @patch(
         "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
     )
-    def test_is_bibigrid_available_when_request_succeeds(self, mock_get):
+    def test_is_healthy_when_request_succeeds(self, mock_get):
         # Arrange
         mock_get.return_value = Mock(status_code=200)
 
         # Act
-        result = self.connector.is_bibigrid_available()
+        result = self.connector.is_healthy()
 
         # Assert
         self.assertTrue(result)
@@ -147,7 +147,7 @@ class TestBibigridConnector(unittest.TestCase):
     @patch(
         "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
     )
-    def test_is_bibigrid_available_when_request_wrong_status_code(
+    def test_is_healthy_when_request_wrong_status_code(
         self,
         mock_get,
     ):
@@ -155,7 +155,7 @@ class TestBibigridConnector(unittest.TestCase):
         mock_get.return_value = Mock(status_code=500)
 
         # Act
-        result = self.connector.is_bibigrid_available()
+        result = self.connector.is_healthy()
 
         # Assert
         self.assertFalse(result)
@@ -167,12 +167,12 @@ class TestBibigridConnector(unittest.TestCase):
     @patch(
         "simple_vm_client.bibigrid_connector.bibigrid_connector.requests.Session.get"
     )
-    def test_is_bibigrid_available_when_request_exception(self, mock_get):
+    def test_is_healthy_when_request_exception(self, mock_get):
         # Arrange
         mock_get.side_effect = requests.RequestException("Could not connect")
 
         # Act
-        result = self.connector.is_bibigrid_available()
+        result = self.connector.is_healthy()
 
         # Assert
         self.assertFalse(result)
@@ -209,6 +209,8 @@ class TestBibigridConnector(unittest.TestCase):
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     def test_start_cluster(self, mock_logger_info, mock_post):
         public_key = "fake_public_key"
+        metadata_token = "fake_token"
+        metadata_endpoint = "http://fake_endpoint"
 
         # Mock the response from the requests.post call
         mock_post.return_value.json.return_value = {
@@ -222,6 +224,8 @@ class TestBibigridConnector(unittest.TestCase):
             master_instance=DEFAULT_MASTER_INSTANCE,
             worker_instances=DEFAULT_WORKER_INSTANCES,
             metadata=METADATA,
+            metadata_token=metadata_token,
+            metadata_endpoint=metadata_endpoint,
         )
         wI = []
         for wk in DEFAULT_WORKER_INSTANCES:
@@ -254,6 +258,16 @@ class TestBibigridConnector(unittest.TestCase):
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
                 "gateway": {"ip": INTERNAL_GATEWAY_IP, "portFunction": PORT_FUNCTION},
+                "userRoles": [
+                    {
+                        "hosts": ["master"],
+                        "roles": [{"name": "simplevm_metadata"}],
+                        "vars": {
+                            "simplevm_metadata_token": metadata_token,
+                            "simplevm_metadata_info_endpoint": metadata_endpoint,
+                        },
+                    }
+                ],
                 "masterInstance": {
                     "type": master_instance["type"],
                     "image": master_instance["image"],
