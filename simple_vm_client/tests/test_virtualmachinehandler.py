@@ -652,8 +652,8 @@ class TestVirtualMachineHandler(unittest.TestCase):
         )
 
     def test_is_bibigrid_available(self):
-        self.handler.is_bibigrid_available()
-        self.handler.bibigrid_connector.is_bibigrid_available.assert_called_once()
+        self.handler.get_health_status()
+        self.handler.bibigrid_connector.is_healthy.assert_called_once()
 
     def test_is_openstack_connection_available_success(self):
         self.handler.openstack_connector.get_limits.return_value = {"test": "value"}
