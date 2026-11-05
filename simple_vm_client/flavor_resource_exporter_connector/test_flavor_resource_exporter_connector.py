@@ -39,7 +39,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         }
 
         connector = FlavorResourceExporterConnector("config.yml")
-        self.assertFalse(connector.enabled)
+        self.assertFalse(connector.activated)
 
     @patch("builtins.open")
     @patch("yaml.load")
@@ -61,7 +61,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         }
 
         connector = FlavorResourceExporterConnector("config.yml")
-        self.assertTrue(connector.enabled)
+        self.assertTrue(connector.activated)
         self.assertEqual(connector.username, "testuser")
         self.assertEqual(connector.password, "testpass")
         self.assertEqual(connector.endpoint_url, "http://example.com")
@@ -254,7 +254,7 @@ class TestFlavorResourceExporterConnector(unittest.TestCase):
         }
 
         connector = FlavorResourceExporterConnector("config.yml")
-        self.assertTrue(connector.enabled)
+        self.assertTrue(connector.activated)
         self.assertFalse(connector.use_basic_auth)
         self.assertTrue(connector.is_available())
 
