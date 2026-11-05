@@ -209,6 +209,8 @@ class TestBibigridConnector(unittest.TestCase):
     @patch("simple_vm_client.bibigrid_connector.bibigrid_connector.logger.info")
     def test_start_cluster(self, mock_logger_info, mock_post):
         public_key = "fake_public_key"
+        metadata_token = "fake_token"
+        metadata_endpoint = "http://fake_endpoint"
 
         # Mock the response from the requests.post call
         mock_post.return_value.json.return_value = {
@@ -222,6 +224,8 @@ class TestBibigridConnector(unittest.TestCase):
             master_instance=DEFAULT_MASTER_INSTANCE,
             worker_instances=DEFAULT_WORKER_INSTANCES,
             metadata=METADATA,
+            metadata_token=metadata_token,
+            metadata_endpoint=metadata_endpoint,
         )
         wI = []
         for wk in DEFAULT_WORKER_INSTANCES:
@@ -254,6 +258,16 @@ class TestBibigridConnector(unittest.TestCase):
                 "dontUploadCredentials": True,
                 "noAllPartition": True,
                 "gateway": {"ip": INTERNAL_GATEWAY_IP, "portFunction": PORT_FUNCTION},
+                "userRoles": [
+                    {
+                        "hosts": ["master"],
+                        "roles": [{"name": "simplevm_metadata"}],
+                        "vars": {
+                            "simplevm_metadata_token": metadata_token,
+                            "simplevm_metadata_info_endpoint": metadata_endpoint,
+                        },
+                    }
+                ],
                 "masterInstance": {
                     "type": master_instance["type"],
                     "image": master_instance["image"],

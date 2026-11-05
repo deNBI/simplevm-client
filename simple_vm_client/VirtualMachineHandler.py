@@ -621,6 +621,8 @@ class VirtualMachineHandler(Iface):
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata,
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> ClusterMessage:
 
         return self.bibigrid_connector.start_cluster(
@@ -628,6 +630,8 @@ class VirtualMachineHandler(Iface):
             master_instance=master_instance,
             worker_instances=worker_instances,
             metadata=metadata,
+            metadata_endpoint=metadata_endpoint,
+            metadata_token=metadata_token,
         )
 
     def terminate_cluster(self, cluster_id: str) -> dict[str, str]:
