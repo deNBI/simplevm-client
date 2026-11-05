@@ -15,7 +15,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run Python Audit
-        uses: denbi/portal-github-actions/python-audit@f9483e3f73a6c024777feb24610e3ae8cc674eff # main
+        uses: denbi/portal-github-actions/python-audit@2f190e1e6649b25ba31c6f56ad0c221a7e572b42 # main
         with:
           python_version: '3.14'
           requirements_files: 'requirements.txt'
