@@ -19,11 +19,18 @@ struct MetadataServerHomeUser {
 
 }
 
+struct MetadataServerInfluxConfig {
+  1: optional string host,
+  2: optional string org,
+  3: optional string bucket,
+}
+
 struct VirtualMachineServerMetadata {
   1: required string ip,
   2: required string hashed_auth_token,
   3: optional list<MetadataServerSSHUser> ssh_users,
   4: optional list<MetadataServerHomeUser> home_users,
+  5: optional MetadataServerInfluxConfig influx,
 }
 
 
