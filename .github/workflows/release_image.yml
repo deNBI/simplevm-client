@@ -6,7 +6,7 @@ on:
 
 jobs:
   release:
-    uses: denbi/portal-github-actions/.github/workflows/release-image.yml@9cfe2115ab4cd57ca0f5d97c5682a82cf2b00793 # main
+    uses: denbi/portal-github-actions/.github/workflows/release-image.yml@3df71e2c34a45ce42aa7063ae3be3b1eee88d70b # main
     with:
       image_name: oci.bi.denbi.de/simplevm/simplevm-client
       image_tag: ${{ github.ref_name }}
