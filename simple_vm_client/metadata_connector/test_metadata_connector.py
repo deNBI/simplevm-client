@@ -30,7 +30,7 @@ def connector_with_env(monkeypatch, dummy_config_file):
     monkeypatch.setenv("METADATA_WRITE_TOKEN", "secret-token")
 
     connector = MetadataConnector(dummy_config_file)
-    connector.ACTIVATED = True
+    connector.activated = True
     connector.METADATA_BASE_URL = "http://localhost:1234/"
     connector.METADATA_WRITE_TOKEN = "secret-token"
 
@@ -44,7 +44,7 @@ def test_load_config_and_env(dummy_config_file, monkeypatch):
     monkeypatch.setenv("METADATA_WRITE_TOKEN", "test-token")
     connector = MetadataConnector(dummy_config_file)
 
-    assert connector.ACTIVATED is True
+    assert connector.activated is True
     assert connector.METADATA_SERVER_HOST == "localhost"
     assert connector.METADATA_SERVER_PORT == 1234
     assert connector.METADATA_BASE_URL == "http://localhost:1234/"
