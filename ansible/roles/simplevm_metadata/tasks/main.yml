@@ -29,6 +29,7 @@
     mode: '0600'
     owner: root
     group: root
+  no_log: true
 
 - name: Set METADATA_INFO_ENDPOINT in config
   ansible.builtin.lineinfile:

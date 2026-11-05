@@ -298,7 +298,6 @@ class BibigridConnector:
             }
         ]
         full_body = {"configurations": body}
-        logger.info(full_body)
         response: dict[str, str] = self.session.post(
             url=self._BIBIGRID_EP + "/bibigrid/create",
             timeout=DEFAULT_TIMEOUT,
