@@ -160,3 +160,4 @@ clouds.yaml
 
 
 /thrift-0.22.0/
+simple_vm_client/config/*
