@@ -9,7 +9,7 @@ on:
 
 jobs:
   publish:
-    uses: denbi/portal-github-actions/.github/workflows/publish-branch-image.yml@f9483e3f73a6c024777feb24610e3ae8cc674eff # main
+    uses: denbi/portal-github-actions/.github/workflows/publish-branch-image.yml@2f190e1e6649b25ba31c6f56ad0c221a7e572b42 # main
     with:
       image_name: oci.bi.denbi.de/simplevm/simplevm-client
       dockerfile: Dockerfile
