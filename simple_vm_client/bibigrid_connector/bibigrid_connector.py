@@ -207,6 +207,8 @@ class BibigridConnector:
         master_instance: ClusterInstance,
         worker_instances: list[ClusterInstance],
         metadata: ClusterInstanceMetadata = None,
+        metadata_token: str = None,
+        metadata_endpoint: str = None,
     ) -> ClusterMessage:
         master_volumes = master_instance.volumes if master_instance.volumes else []
         logger.info(
@@ -249,6 +251,16 @@ class BibigridConnector:
                     "ip": self._GATEWAY_IP,
                     "portFunction": self._PORT_FUNCTION,
                 },
+                "userRoles": [
+                    {
+                        "hosts": ["master"],
+                        "roles": [{"name": "simplevm_metadata"}],
+                        "vars": {
+                            "simplevm_metadata_token": metadata_token,
+                            "simplevm_metadata_info_endpoint": metadata_endpoint,
+                        },
+                    }
+                ],
                 "masterInstance": {
                     "type": master_instance.type,
                     "image": master_instance.image,
@@ -286,7 +298,6 @@ class BibigridConnector:
             }
         ]
         full_body = {"configurations": body}
-        logger.info(full_body)
         response: dict[str, str] = self.session.post(
             url=self._BIBIGRID_EP + "/bibigrid/create",
             timeout=DEFAULT_TIMEOUT,
