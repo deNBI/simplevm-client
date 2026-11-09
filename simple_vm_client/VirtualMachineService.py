@@ -687,13 +687,23 @@ class Iface(object):
 
         """
 
-    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
+    def start_cluster(
+        self,
+        public_keys,
+        master_instance,
+        worker_instances,
+        metadata,
+        metadata_token,
+        metadata_endpoint,
+    ):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
          - metadata
+         - metadata_token
+         - metadata_endpoint
 
         """
 
@@ -3795,22 +3805,43 @@ class Client(Iface):
             "get_flavor_resources failed: unknown result",
         )
 
-    def start_cluster(self, public_keys, master_instance, worker_instances, metadata):
+    def start_cluster(
+        self,
+        public_keys,
+        master_instance,
+        worker_instances,
+        metadata,
+        metadata_token,
+        metadata_endpoint,
+    ):
         """
         Parameters:
          - public_keys
          - master_instance
          - worker_instances
          - metadata
+         - metadata_token
+         - metadata_endpoint
 
         """
         self.send_start_cluster(
-            public_keys, master_instance, worker_instances, metadata
+            public_keys,
+            master_instance,
+            worker_instances,
+            metadata,
+            metadata_token,
+            metadata_endpoint,
         )
         return self.recv_start_cluster()
 
     def send_start_cluster(
-        self, public_keys, master_instance, worker_instances, metadata
+        self,
+        public_keys,
+        master_instance,
+        worker_instances,
+        metadata,
+        metadata_token,
+        metadata_endpoint,
     ):
         self._oprot.writeMessageBegin("start_cluster", TMessageType.CALL, self._seqid)
         args = start_cluster_args()
@@ -3818,6 +3849,8 @@ class Client(Iface):
         args.master_instance = master_instance
         args.worker_instances = worker_instances
         args.metadata = metadata
+        args.metadata_token = metadata_token
+        args.metadata_endpoint = metadata_endpoint
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -6692,6 +6725,8 @@ class Processor(Iface, TProcessor):
                 args.master_instance,
                 args.worker_instances,
                 args.metadata,
+                args.metadata_token,
+                args.metadata_endpoint,
             )
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
@@ -21723,6 +21758,8 @@ class start_cluster_args(object):
      - master_instance
      - worker_instances
      - metadata
+     - metadata_token
+     - metadata_endpoint
 
     """
 
@@ -21734,11 +21771,15 @@ class start_cluster_args(object):
         master_instance=None,
         worker_instances=None,
         metadata=None,
+        metadata_token=None,
+        metadata_endpoint=None,
     ):
         self.public_keys = public_keys
         self.master_instance = master_instance
         self.worker_instances = worker_instances
         self.metadata = metadata
+        self.metadata_token = metadata_token
+        self.metadata_endpoint = metadata_endpoint
 
     def read(self, iprot):
         if (
@@ -21790,6 +21831,24 @@ class start_cluster_args(object):
                     self.metadata.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.metadata_token = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.metadata_endpoint = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -21826,6 +21885,22 @@ class start_cluster_args(object):
         if self.metadata is not None:
             oprot.writeFieldBegin("metadata", TType.STRUCT, 4)
             self.metadata.write(oprot)
+            oprot.writeFieldEnd()
+        if self.metadata_token is not None:
+            oprot.writeFieldBegin("metadata_token", TType.STRING, 5)
+            oprot.writeString(
+                self.metadata_token.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.metadata_token
+            )
+            oprot.writeFieldEnd()
+        if self.metadata_endpoint is not None:
+            oprot.writeFieldBegin("metadata_endpoint", TType.STRING, 6)
+            oprot.writeString(
+                self.metadata_endpoint.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.metadata_endpoint
+            )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -21875,6 +21950,20 @@ start_cluster_args.thrift_spec = (
         [ClusterInstanceMetadata, None],
         None,
     ),  # 4
+    (
+        5,
+        TType.STRING,
+        "metadata_token",
+        "UTF8",
+        None,
+    ),  # 5
+    (
+        6,
+        TType.STRING,
+        "metadata_endpoint",
+        "UTF8",
+        None,
+    ),  # 6
 )
 
 

@@ -1,0 +1,50 @@
+---
+- name: Validate required variables
+  ansible.builtin.fail:
+    msg: "Variable {{ item }} must be provided."
+  loop:
+    - simplevm_metadata_token
+    - simplevm_metadata_info_endpoint
+  when: vars[item] is undefined
+
+- name: Ensure jq is installed
+  ansible.builtin.package:
+    name: jq
+    state: present
+
+- name: Create configuration directory
+  ansible.builtin.file:
+    path: "{{ simplevm_metadata_config_dir }}"
+    state: directory
+    mode: '0700'
+    owner: root
+    group: root
+
+- name: Set METADATA_ACCESS_TOKEN in config
+  ansible.builtin.lineinfile:
+    path: "{{ simplevm_metadata_config_file }}"
+    regexp: '^METADATA_ACCESS_TOKEN='
+    line: "METADATA_ACCESS_TOKEN={{ simplevm_metadata_token }}"
+    create: true
+    mode: '0600'
+    owner: root
+    group: root
+  no_log: true
+
+- name: Set METADATA_INFO_ENDPOINT in config
+  ansible.builtin.lineinfile:
+    path: "{{ simplevm_metadata_config_file }}"
+    regexp: '^METADATA_INFO_ENDPOINT='
+    line: "METADATA_INFO_ENDPOINT={{ simplevm_metadata_info_endpoint }}"
+    create: true
+    mode: '0600'
+    owner: root
+    group: root
+
+- name: Create get_metadata script
+  ansible.builtin.template:
+    src: get_metadata.sh.j2
+    dest: "{{ simplevm_metadata_get_metadata_script }}"
+    mode: '0700'
+    owner: root
+    group: root
