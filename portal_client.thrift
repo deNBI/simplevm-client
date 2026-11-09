@@ -877,7 +877,7 @@ service VirtualMachineService {
      */
     list<FlavorResource> get_flavor_resources()
 
-     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:ClusterInstanceMetadata metadata)
+     ClusterMessage start_cluster(1:list<string> public_keys,2: ClusterInstance master_instance,3:list<ClusterInstance> worker_instances,4:ClusterInstanceMetadata metadata,5:optional string metadata_token,6:optional string metadata_endpoint)
 
      void terminate_cluster(1:string cluster_id) throws(1:ClusterNotFoundException c) /*TODO throe error*/
 
