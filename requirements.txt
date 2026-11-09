@@ -12,7 +12,7 @@ redis==8.1.0
 requests==2.34.2
 pyyaml==6.0.3
 pre-commit==4.7.0
-types-PyYAML==6.0.12.20261030
+types-PyYAML==6.0.12.20261103
 sympy==1.14.0
 colorama==0.4.6
 gevent==26.9.0
