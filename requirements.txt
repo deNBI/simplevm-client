@@ -2,7 +2,7 @@ setuptools==84.2.1
 thrift==0.25.0
 openstacksdk==4.22.0
 deprecated==3.0.1
-Click==8.5.0
+Click==8.5.1
 ansible==13.8.0
 flake8==7.5.0
 paramiko==5.1.0
