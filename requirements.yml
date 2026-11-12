@@ -6,3 +6,15 @@ roles:
     version: v4.0.0
 
   - name: andrewrothstein.conda-env
+
+  # Galaxy roles for the BiBiGrid cluster 'pulsar' userRole
+  # (ansible/roles/pulsar). Installed at build time so they are shipped to the
+  # master and available when the role runs; no network fetch at cluster start.
+  - name: galaxyproject.pulsar
+    version: 1.0.11
+  - name: galaxyproject.repos
+    version: 0.0.3
+  - name: galaxyproject.cvmfs
+    version: 0.5.2
+  - name: usegalaxy_eu.apptainer
+    version: 0.0.4

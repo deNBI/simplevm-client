@@ -1,0 +1,21 @@
+---
+# Galaxy roles required by the pulsar role.
+#
+# These are installed into the simplevm-client build image (see the repo
+# requirements.yml + Dockerfile `ansible-galaxy install -r /code/requirements.yml`)
+# and shipped to the BiBiGrid master, where this role references them by name.
+#
+# This file documents the dependency; the actual install is driven by the
+# client's top-level requirements.yml so the roles are present at build time
+# (Option A) rather than fetched on the master at every cluster start.
+roles:
+  - src: galaxyproject.pulsar
+    version: 1.0.11
+  - src: galaxyproject.repos
+    version: 0.0.3
+  - src: galaxyproject.cvmfs
+    version: 0.5.2
+  - src: usegalaxy_eu.apptainer
+    version: 0.0.4
+collections:
+  - name: ansible.posix

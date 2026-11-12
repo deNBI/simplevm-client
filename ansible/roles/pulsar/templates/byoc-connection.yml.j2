@@ -1,0 +1,23 @@
+# Values for usegalaxy.eu: User > Preferences > Manage information > byoc_pulsar
+# Passwords are not listed: use the one you chose for this Pulsar.
+transport: {{ pulsar_connection }}
+{% if pulsar_connection == 'mq' %}
+username: {{ pulsar_message_queue_url | urlsplit('username') }}
+{% else %}
+relay_placement: {{ pulsar_relay_placement }}
+{% if pulsar_relay_placement == 'own' %}
+relay_url: {{ pulsar_relay_url_final }}
+{% endif %}
+relay_username: {{ pulsar_relay_username_final }}
+{% if pulsar_relay_topic_prefix %}
+relay_topic_prefix: {{ pulsar_relay_topic_prefix }}
+{% endif %}
+{% endif %}
+jobs_directory: {{ pulsar_staging_dir }}
+max_accepted_cores: {{ (groups['workers'] | map('extract', hostvars, 'ansible_processor_vcpus') | list) | max }}
+max_accepted_mem: {{ ((groups['workers'] | map('extract', hostvars, 'ansible_memtotal_mb') | list) | max) * 0.9 / 1024 | int }}
+min_accepted_gpus: {{ pulsar_min_gpus }}
+max_accepted_gpus: {{ pulsar_max_gpus }}
+
+# Not a form field
+pulsar_connected: {{ pulsar_connected_state }}

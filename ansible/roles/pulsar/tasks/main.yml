@@ -1,0 +1,28 @@
+---
+# Pulsar BYOC role entry point.
+#
+# Runs as part of a BiBiGrid cluster's site.yaml (injected via userRoles),
+# after the core bibigrid role has brought up Slurm + NFS (/vol/spool).
+#
+# BiBiGrid's inventory already defines 'master' and 'workers' groups. The
+# Pulsar endpoint lives on the master (pulsar host); the compute nodes are
+# the BiBiGrid workers. We branch on group_names rather than a separate
+# pulsar/workers inventory.
+
+- name: Assert this role only runs on a BiBiGrid master or worker
+  ansible.builtin.assert:
+    that:
+      - "'master' in group_names or 'workers' in group_names"
+    fail_msg: >-
+      The pulsar role must run on a BiBiGrid master or worker host
+      (got group_names={{ group_names | join(', ') }}).
+
+# ---- Pulsar host (the BiBiGrid master) -------------------------------------
+- name: Configure the Pulsar endpoint on the master
+  ansible.builtin.import_tasks: master.yml
+  when: "'master' in group_names"
+
+# ---- Workers (BiBiGrid compute nodes) --------------------------------------
+- name: Configure Pulsar workers (CVMFS + Apptainer)
+  ansible.builtin.import_tasks: workers.yml
+  when: "'workers' in group_names"
