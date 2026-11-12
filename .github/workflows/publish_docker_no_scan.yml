@@ -1,0 +1,30 @@
+name: Publish Docker (No Scan)
+on:
+  workflow_dispatch:
+
+# ⚠️ NO-SCAN BYPASS ⚠️
+# Sister workflow of publish_docker.yml that SKIPS the Grype image scan.
+#
+# Use this when the scan would fail (image deemed "not safe") but you still
+# need the branch image in the registry to test it. It builds and publishes
+# the SAME image:tag as the scanned workflow, so it overwrites any previously
+# published image for that branch.
+#
+# It does NOT run the Grype scan and does NOT notify Matrix. Do not use this
+# for production releases - use publish_docker.yml for those.
+#
+# Trigger on demand only (workflow_dispatch), not on push.
+#
+# Pinned to portal-github-actions@02ae1f4 (first commit with the
+# publish-branch-image-no-scan.yml reusable workflow). The older SHA used by
+# publish_docker.yml predates the no-scan workflow.
+jobs:
+  publish:
+    uses: denbi/portal-github-actions/.github/workflows/publish-branch-image-no-scan.yml@02ae1f46b32e057557da1e90ec0e4c28b7c3754d
+    with:
+      image_name: oci.bi.denbi.de/simplevm/simplevm-client
+      dockerfile: Dockerfile
+      runs_on: '["ubuntu-latest"]'
+    secrets:
+      OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
+      OCI_TOKEN: ${{ secrets.OCI_TOKEN }}
