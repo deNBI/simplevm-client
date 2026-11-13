@@ -9,7 +9,7 @@ jobs:
             - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
             - name: Build and Scan Image
-              uses: denbi/portal-github-actions/build-and-scan-image@944ddd131cde0fcc9e340918516571d27e08be55 # main
+              uses: denbi/portal-github-actions/build-and-scan-image@02ae1f46b32e057557da1e90ec0e4c28b7c3754d # main
               with:
                 image: localbuild/simplevm-client:${{ github.sha }}
                 dockerfile: Dockerfile
