@@ -34,6 +34,10 @@ for id in "${volumes_new[@]}"; do
   sudo chmod 777 ${paths_new[ITER]}/
   sudo mount "$id" ${paths_new[ITER]}
   sudo chown -R ubuntu:ubuntu "${paths_new[ITER]}"
+  UUID=$(sudo blkid -s UUID -o value "/dev/disk/by-id/$id")
+  if [ -n "$UUID" ] && ! grep -q "UUID=$UUID" /etc/fstab; then
+    echo "UUID=$UUID ${paths_new[ITER]} auto defaults,nofail 0 2" | sudo tee -a /etc/fstab
+  fi
   ((ITER++))
 done
 ITER=0
@@ -64,5 +68,9 @@ for id in "${volumes_attach[@]}"; do
   sudo mkdir -p ${paths_attach[ITER]}
   sudo chmod 777 ${paths_attach[ITER]}/
   sudo mount "$id" ${paths_attach[ITER]}
+  UUID=$(sudo blkid -s UUID -o value "/dev/disk/by-id/$id")
+  if [ -n "$UUID" ] && ! grep -q "UUID=$UUID" /etc/fstab; then
+    echo "UUID=$UUID ${paths_attach[ITER]} auto defaults,nofail 0 2" | sudo tee -a /etc/fstab
+  fi
   ((ITER++))
 done

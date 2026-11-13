@@ -126,7 +126,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "--help":
     print("   get_limits()")
     print("   get_flavor_resources()")
     print(
-        "  ClusterMessage start_cluster( public_keys, ClusterInstance master_instance,  worker_instances, ClusterInstanceMetadata metadata)"
+        "  ClusterMessage start_cluster( public_keys, ClusterInstance master_instance,  worker_instances, ClusterInstanceMetadata metadata, string metadata_token, string metadata_endpoint)"
     )
     print("  void terminate_cluster(string cluster_id)")
     print("  void delete_image(string image_id)")
@@ -942,8 +942,8 @@ elif cmd == "get_flavor_resources":
     pp.pprint(client.get_flavor_resources())
 
 elif cmd == "start_cluster":
-    if len(args) != 4:
-        print("start_cluster requires 4 args")
+    if len(args) != 6:
+        print("start_cluster requires 6 args")
         sys.exit(1)
     pp.pprint(
         client.start_cluster(
@@ -951,6 +951,8 @@ elif cmd == "start_cluster":
             eval(args[1]),
             eval(args[2]),
             eval(args[3]),
+            args[4],
+            args[5],
         )
     )
 
