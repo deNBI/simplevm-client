@@ -87,6 +87,47 @@ def test_set_metadata_success(connector_with_env):
     assert kwargs["headers"]["Content-Type"] == "application/json"
 
 
+def test_set_metadata_with_location_url(connector_with_env):
+    """location_url is passed through unchanged to the metadata server JSON body."""
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    connector_with_env.session.post.return_value = mock_response
+
+    metadata = VirtualMachineServerMetadata(
+        ip="10.0.0.5",
+        hashed_auth_token="hashed-token",
+        location_url="/sub/path",
+    )
+    result = connector_with_env.set_metadata("10.0.0.5", metadata)
+
+    assert result is True
+    args, kwargs = connector_with_env.session.post.call_args
+    body = json.loads(kwargs["data"])
+    assert body["location_url"] == "/sub/path"
+    assert body["ip"] == "10.0.0.5"
+    assert body["hashed_auth_token"] == "hashed-token"
+
+
+def test_set_metadata_without_location_url_is_backward_compatible(connector_with_env):
+    """Metadata without location_url stays compatible: field is present but null."""
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    connector_with_env.session.post.return_value = mock_response
+
+    metadata = VirtualMachineServerMetadata(
+        ip="10.0.0.6",
+        hashed_auth_token="hashed-token",
+    )
+    result = connector_with_env.set_metadata("10.0.0.6", metadata)
+
+    assert result is True
+    args, kwargs = connector_with_env.session.post.call_args
+    body = json.loads(kwargs["data"])
+    assert body["location_url"] is None
+    assert body["ip"] == "10.0.0.6"
+    assert body["hashed_auth_token"] == "hashed-token"
+
+
 def test_set_metadata_failure(connector_with_env):
     connector_with_env.session.post.side_effect = requests.exceptions.Timeout("timeout")
 
