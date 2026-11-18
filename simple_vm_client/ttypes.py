@@ -385,6 +385,7 @@ class VirtualMachineServerMetadata(object):
      - ssh_users
      - home_users
      - influx
+     - location_url
 
     """
 
@@ -397,12 +398,14 @@ class VirtualMachineServerMetadata(object):
         ssh_users=None,
         home_users=None,
         influx=None,
+        location_url=None,
     ):
         self.ip = ip
         self.hashed_auth_token = hashed_auth_token
         self.ssh_users = ssh_users
         self.home_users = home_users
         self.influx = influx
+        self.location_url = location_url
 
     def read(self, iprot):
         if (
@@ -463,6 +466,15 @@ class VirtualMachineServerMetadata(object):
                     self.influx.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.location_url = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -507,6 +519,14 @@ class VirtualMachineServerMetadata(object):
         if self.influx is not None:
             oprot.writeFieldBegin("influx", TType.STRUCT, 5)
             self.influx.write(oprot)
+            oprot.writeFieldEnd()
+        if self.location_url is not None:
+            oprot.writeFieldBegin("location_url", TType.STRING, 6)
+            oprot.writeString(
+                self.location_url.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.location_url
+            )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -5937,6 +5957,13 @@ VirtualMachineServerMetadata.thrift_spec = (
         [MetadataServerInfluxConfig, None],
         None,
     ),  # 5
+    (
+        6,
+        TType.STRING,
+        "location_url",
+        "UTF8",
+        None,
+    ),  # 6
 )
 all_structs.append(Backend)
 Backend.thrift_spec = (

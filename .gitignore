@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 test-venv/
 # C extensions
+plans/
 *.so
 # Distribution / packaging
 .Python

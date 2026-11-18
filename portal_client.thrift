@@ -31,6 +31,7 @@ struct VirtualMachineServerMetadata {
   3: optional list<MetadataServerSSHUser> ssh_users,
   4: optional list<MetadataServerHomeUser> home_users,
   5: optional MetadataServerInfluxConfig influx,
+  6: optional string location_url,
 }
 
 
