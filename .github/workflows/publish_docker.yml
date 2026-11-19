@@ -33,7 +33,7 @@ jobs:
       image_name: oci.bi.denbi.de/simplevm/simplevm-client
       dockerfile: Dockerfile
       runs_on: '["ubuntu-latest"]'
-      fail_on_findings: ${{ inputs.fail_on_findings || true }}
+      fail_on_findings: ${{ github.event_name != 'workflow_dispatch' || inputs.fail_on_findings }}
     secrets:
       OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
       OCI_TOKEN: ${{ secrets.OCI_TOKEN }}
