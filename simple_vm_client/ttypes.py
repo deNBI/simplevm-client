@@ -271,9 +271,9 @@ class MetadataServerHomeUser(object):
 class MetadataServerInfluxConfig(object):
     """
     Attributes:
-     - host
-     - org
-     - bucket
+     - mon_influx_host
+     - mon_influx_org
+     - mon_influx_bucket
 
     """
 
@@ -281,13 +281,13 @@ class MetadataServerInfluxConfig(object):
 
     def __init__(
         self,
-        host=None,
-        org=None,
-        bucket=None,
+        mon_influx_host=None,
+        mon_influx_org=None,
+        mon_influx_bucket=None,
     ):
-        self.host = host
-        self.org = org
-        self.bucket = bucket
+        self.mon_influx_host = mon_influx_host
+        self.mon_influx_org = mon_influx_org
+        self.mon_influx_bucket = mon_influx_bucket
 
     def read(self, iprot):
         if (
@@ -304,7 +304,7 @@ class MetadataServerInfluxConfig(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.host = (
+                    self.mon_influx_host = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -313,7 +313,7 @@ class MetadataServerInfluxConfig(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.org = (
+                    self.mon_influx_org = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -322,7 +322,7 @@ class MetadataServerInfluxConfig(object):
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.STRING:
-                    self.bucket = (
+                    self.mon_influx_bucket = (
                         iprot.readString().decode("utf-8", errors="replace")
                         if sys.version_info[0] == 2
                         else iprot.readString()
@@ -342,22 +342,28 @@ class MetadataServerInfluxConfig(object):
             )
             return
         oprot.writeStructBegin("MetadataServerInfluxConfig")
-        if self.host is not None:
-            oprot.writeFieldBegin("host", TType.STRING, 1)
+        if self.mon_influx_host is not None:
+            oprot.writeFieldBegin("mon_influx_host", TType.STRING, 1)
             oprot.writeString(
-                self.host.encode("utf-8") if sys.version_info[0] == 2 else self.host
+                self.mon_influx_host.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_host
             )
             oprot.writeFieldEnd()
-        if self.org is not None:
-            oprot.writeFieldBegin("org", TType.STRING, 2)
+        if self.mon_influx_org is not None:
+            oprot.writeFieldBegin("mon_influx_org", TType.STRING, 2)
             oprot.writeString(
-                self.org.encode("utf-8") if sys.version_info[0] == 2 else self.org
+                self.mon_influx_org.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_org
             )
             oprot.writeFieldEnd()
-        if self.bucket is not None:
-            oprot.writeFieldBegin("bucket", TType.STRING, 3)
+        if self.mon_influx_bucket is not None:
+            oprot.writeFieldBegin("mon_influx_bucket", TType.STRING, 3)
             oprot.writeString(
-                self.bucket.encode("utf-8") if sys.version_info[0] == 2 else self.bucket
+                self.mon_influx_bucket.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_bucket
             )
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -384,7 +390,7 @@ class VirtualMachineServerMetadata(object):
      - hashed_auth_token
      - ssh_users
      - home_users
-     - influx
+     - mon_influx
      - location_url
 
     """
@@ -397,14 +403,14 @@ class VirtualMachineServerMetadata(object):
         hashed_auth_token=None,
         ssh_users=None,
         home_users=None,
-        influx=None,
+        mon_influx=None,
         location_url=None,
     ):
         self.ip = ip
         self.hashed_auth_token = hashed_auth_token
         self.ssh_users = ssh_users
         self.home_users = home_users
-        self.influx = influx
+        self.mon_influx = mon_influx
         self.location_url = location_url
 
     def read(self, iprot):
@@ -462,8 +468,8 @@ class VirtualMachineServerMetadata(object):
                     iprot.skip(ftype)
             elif fid == 5:
                 if ftype == TType.STRUCT:
-                    self.influx = MetadataServerInfluxConfig()
-                    self.influx.read(iprot)
+                    self.mon_influx = MetadataServerInfluxConfig()
+                    self.mon_influx.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 6:
@@ -516,9 +522,9 @@ class VirtualMachineServerMetadata(object):
                 iter27.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.influx is not None:
-            oprot.writeFieldBegin("influx", TType.STRUCT, 5)
-            self.influx.write(oprot)
+        if self.mon_influx is not None:
+            oprot.writeFieldBegin("mon_influx", TType.STRUCT, 5)
+            self.mon_influx.write(oprot)
             oprot.writeFieldEnd()
         if self.location_url is not None:
             oprot.writeFieldBegin("location_url", TType.STRING, 6)
@@ -5900,21 +5906,21 @@ MetadataServerInfluxConfig.thrift_spec = (
     (
         1,
         TType.STRING,
-        "host",
+        "mon_influx_host",
         "UTF8",
         None,
     ),  # 1
     (
         2,
         TType.STRING,
-        "org",
+        "mon_influx_org",
         "UTF8",
         None,
     ),  # 2
     (
         3,
         TType.STRING,
-        "bucket",
+        "mon_influx_bucket",
         "UTF8",
         None,
     ),  # 3
@@ -5953,7 +5959,7 @@ VirtualMachineServerMetadata.thrift_spec = (
     (
         5,
         TType.STRUCT,
-        "influx",
+        "mon_influx",
         [MetadataServerInfluxConfig, None],
         None,
     ),  # 5
