@@ -24,6 +24,7 @@ struct VirtualMachineServerMetadata {
   2: required string hashed_auth_token,
   3: optional list<MetadataServerSSHUser> ssh_users,
   4: optional list<MetadataServerHomeUser> home_users,
+  5: optional string location_url,
 }
 
 
