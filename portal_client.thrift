@@ -19,12 +19,19 @@ struct MetadataServerHomeUser {
 
 }
 
+struct MetadataServerInfluxConfig {
+  1: optional string mon_influx_host,
+  2: optional string mon_influx_org,
+  3: optional string mon_influx_bucket,
+}
+
 struct VirtualMachineServerMetadata {
   1: required string ip,
   2: required string hashed_auth_token,
   3: optional list<MetadataServerSSHUser> ssh_users,
   4: optional list<MetadataServerHomeUser> home_users,
-  5: optional string location_url,
+  5: optional MetadataServerInfluxConfig mon_influx,
+  6: optional string location_url,
 }
 
 
