@@ -1,0 +1,22 @@
+---
+# Pulsar workers = the BiBiGrid compute nodes.
+#
+# The shared /vol/spool directory (staging + deps) is already mounted here by
+# BiBiGrid's NFS, so no new mount is set up. We only install the job software:
+# the Galaxy CVMFS repositories (reference data, containers) and Apptainer.
+
+- name: Mount the Galaxy CVMFS repositories
+  ansible.builtin.include_role:
+    name: galaxyproject.cvmfs
+  when: pulsar_cvmfs | bool
+
+- name: Install Apptainer
+  ansible.builtin.include_role:
+    name: usegalaxy_eu.apptainer
+
+- name: Make CVMFS visible in every container
+  ansible.builtin.lineinfile:
+    path: /etc/apptainer/apptainer.conf
+    line: bind path = /cvmfs
+    insertafter: '^#?\s*bind path'
+  when: pulsar_cvmfs | bool

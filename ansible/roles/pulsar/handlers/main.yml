@@ -1,0 +1,11 @@
+---
+# Restart handler for the Pulsar endpoint.
+#
+# galaxyproject.pulsar ships its own restart handler, but (per pulsar-byoc's
+# note) that one never actually restarts systemd because two handlers share a
+# name. Defining it in the role's handlers/main.yml gives us a proper handler
+# that the role's notify can flush before we write the connection summary.
+- name: Restart Pulsar
+  ansible.builtin.systemd:
+    name: "{{ pulsar_systemd_service_name }}.service"
+    state: restarted
