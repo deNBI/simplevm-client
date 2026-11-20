@@ -264,10 +264,9 @@ class BibigridConnector:
             pulsar_byoc_name = "simplevm_test"
             pulsar_mq_user = f"galaxy_{pulsar_byoc_name}_byoc"
             pulsar_mq_password = secrets.token_urlsafe(16)
-            # TODO: point at the real RabbitMQ host/port/vhost for the test.
             pulsar_mq_url = (
                 f"pyamqp://{pulsar_mq_user}:{pulsar_mq_password}"
-                f"@{self._BIBIGRID_HOST}:5671//{pulsar_byoc_name}?ssl=1"
+                f"@mq.galaxyproject.eu:5671//{pulsar_byoc_name}?ssl=1"
             )
             logger.info(
                 f"Pulsar cluster detected (master image "
