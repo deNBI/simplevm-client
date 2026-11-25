@@ -268,6 +268,121 @@ class MetadataServerHomeUser(object):
         return not (self == other)
 
 
+class MetadataServerInfluxConfig(object):
+    """
+    Attributes:
+     - mon_influx_host
+     - mon_influx_org
+     - mon_influx_bucket
+
+    """
+
+    thrift_spec = None
+
+    def __init__(
+        self,
+        mon_influx_host=None,
+        mon_influx_org=None,
+        mon_influx_bucket=None,
+    ):
+        self.mon_influx_host = mon_influx_host
+        self.mon_influx_org = mon_influx_org
+        self.mon_influx_bucket = mon_influx_bucket
+
+    def read(self, iprot):
+        if (
+            iprot._fast_decode is not None
+            and isinstance(iprot.trans, TTransport.CReadableTransport)
+            and self.thrift_spec is not None
+        ):
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            fname, ftype, fid = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.mon_influx_host = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.mon_influx_org = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.mon_influx_bucket = (
+                        iprot.readString().decode("utf-8", errors="replace")
+                        if sys.version_info[0] == 2
+                        else iprot.readString()
+                    )
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        self.validate()
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(
+                oprot._fast_encode(self, [self.__class__, self.thrift_spec])
+            )
+            return
+        oprot.writeStructBegin("MetadataServerInfluxConfig")
+        if self.mon_influx_host is not None:
+            oprot.writeFieldBegin("mon_influx_host", TType.STRING, 1)
+            oprot.writeString(
+                self.mon_influx_host.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_host
+            )
+            oprot.writeFieldEnd()
+        if self.mon_influx_org is not None:
+            oprot.writeFieldBegin("mon_influx_org", TType.STRING, 2)
+            oprot.writeString(
+                self.mon_influx_org.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_org
+            )
+            oprot.writeFieldEnd()
+        if self.mon_influx_bucket is not None:
+            oprot.writeFieldBegin("mon_influx_bucket", TType.STRING, 3)
+            oprot.writeString(
+                self.mon_influx_bucket.encode("utf-8")
+                if sys.version_info[0] == 2
+                else self.mon_influx_bucket
+            )
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ["%s=%r" % (key, value) for key, value in self.__dict__.items()]
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class VirtualMachineServerMetadata(object):
     """
     Attributes:
@@ -275,6 +390,7 @@ class VirtualMachineServerMetadata(object):
      - hashed_auth_token
      - ssh_users
      - home_users
+     - mon_influx
      - location_url
 
     """
@@ -287,12 +403,14 @@ class VirtualMachineServerMetadata(object):
         hashed_auth_token=None,
         ssh_users=None,
         home_users=None,
+        mon_influx=None,
         location_url=None,
     ):
         self.ip = ip
         self.hashed_auth_token = hashed_auth_token
         self.ssh_users = ssh_users
         self.home_users = home_users
+        self.mon_influx = mon_influx
         self.location_url = location_url
 
     def read(self, iprot):
@@ -349,6 +467,12 @@ class VirtualMachineServerMetadata(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.mon_influx = MetadataServerInfluxConfig()
+                    self.mon_influx.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
                 if ftype == TType.STRING:
                     self.location_url = (
                         iprot.readString().decode("utf-8", errors="replace")
@@ -398,8 +522,12 @@ class VirtualMachineServerMetadata(object):
                 iter27.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
+        if self.mon_influx is not None:
+            oprot.writeFieldBegin("mon_influx", TType.STRUCT, 5)
+            self.mon_influx.write(oprot)
+            oprot.writeFieldEnd()
         if self.location_url is not None:
-            oprot.writeFieldBegin("location_url", TType.STRING, 5)
+            oprot.writeFieldBegin("location_url", TType.STRING, 6)
             oprot.writeString(
                 self.location_url.encode("utf-8")
                 if sys.version_info[0] == 2
@@ -5772,6 +5900,31 @@ MetadataServerHomeUser.thrift_spec = (
         None,
     ),  # 3
 )
+all_structs.append(MetadataServerInfluxConfig)
+MetadataServerInfluxConfig.thrift_spec = (
+    None,  # 0
+    (
+        1,
+        TType.STRING,
+        "mon_influx_host",
+        "UTF8",
+        None,
+    ),  # 1
+    (
+        2,
+        TType.STRING,
+        "mon_influx_org",
+        "UTF8",
+        None,
+    ),  # 2
+    (
+        3,
+        TType.STRING,
+        "mon_influx_bucket",
+        "UTF8",
+        None,
+    ),  # 3
+)
 all_structs.append(VirtualMachineServerMetadata)
 VirtualMachineServerMetadata.thrift_spec = (
     None,  # 0
@@ -5805,11 +5958,18 @@ VirtualMachineServerMetadata.thrift_spec = (
     ),  # 4
     (
         5,
+        TType.STRUCT,
+        "mon_influx",
+        [MetadataServerInfluxConfig, None],
+        None,
+    ),  # 5
+    (
+        6,
         TType.STRING,
         "location_url",
         "UTF8",
         None,
-    ),  # 5
+    ),  # 6
 )
 all_structs.append(Backend)
 Backend.thrift_spec = (
