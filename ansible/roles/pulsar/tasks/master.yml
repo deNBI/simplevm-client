@@ -48,23 +48,33 @@
     - "{{ pulsar_dependencies_dir }}"
 
 # ---- Pulsar endpoint -------------------------------------------------------
-# On running BiBiGrid masters an in-flight unattended-upgrade can hold the
-# dpkg frontend lock, making any apt call fail. Wait for a free lock first...
-- name: Wait for the dpkg lock to become free
-  ansible.builtin.wait_for:
-    path: /var/lib/dpkg/lock-frontend
-    state: absent
-    timeout: "{{ pulsar_dpkg_lock_timeout }}"
+# On running BiBiGrid masters unattended-upgrades can hold the dpkg frontend
+# lock, making any apt call fail; a stuck instance can hold it forever. So the
+# services are stopped first and re-enabled after the apt work is done. fuser
+# checks actual lock *holders*, not the lock file, which exists whenever dpkg
+# is idle.
+- name: Stop unattended-upgrades services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - unattended-upgrades
+    - apt-daily
+    - apt-daily.timer
+    - apt-daily-upgrade
+    - apt-daily-upgrade.timer
   when: ansible_os_family == 'Debian'
-  # ...and retry the install with backoff if apt still hits the lock.
+
+- name: Wait for the dpkg frontend lock to be released
+  ansible.builtin.shell: while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 1; done
+  changed_when: false
+  timeout: "{{ pulsar_dpkg_lock_timeout }}"
+  when: ansible_os_family == 'Debian'
+
 - name: Install build dependencies for Pulsar
   ansible.builtin.package:
     name: "{{ pulsar_build_packages[ansible_os_family] }}"
     state: present
-  until: _pulsar_build_deps is succeeded
-  retries: 5
-  delay: 15
-  register: _pulsar_build_deps
 
 - name: Add the package source for the SLURM DRMAA library
   ansible.builtin.include_role:
@@ -76,6 +86,17 @@
     name: "{{ pulsar_slurm_drmaa_package[ansible_os_family] }}"
     state: present
   when: pulsar_scheduler == 'slurm'
+
+- name: Re-enable unattended-upgrades services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - unattended-upgrades
+    - apt-daily.timer
+    - apt-daily-upgrade.timer
+  when: ansible_os_family == 'Debian'
 
 - name: Install and configure the Pulsar endpoint
   ansible.builtin.include_role:
