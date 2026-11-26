@@ -94,6 +94,10 @@ pulsar_build_packages:
   Debian: [build-essential, python3-venv, python3-dev, libcurl4-gnutls-dev, libgnutls28-dev]
   RedHat: [gcc, python3-devel, libcurl-devel, openssl-devel]
 
+# Max seconds to wait for the dpkg frontend lock before failing (Debian only;
+# running BiBiGrid masters can have unattended-upgrades hold it for a while).
+pulsar_dpkg_lock_timeout: 900
+
 # slurm-drmaa package (from the Galaxy PPA added by galaxyproject.repos).
 pulsar_slurm_drmaa_package:
   Debian: slurm-drmaa1

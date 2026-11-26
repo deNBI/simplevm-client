@@ -48,10 +48,23 @@
     - "{{ pulsar_dependencies_dir }}"
 
 # ---- Pulsar endpoint -------------------------------------------------------
+# On running BiBiGrid masters an in-flight unattended-upgrade can hold the
+# dpkg frontend lock, making any apt call fail. Wait for a free lock first...
+- name: Wait for the dpkg lock to become free
+  ansible.builtin.wait_for:
+    path: /var/lib/dpkg/lock-frontend
+    state: absent
+    timeout: "{{ pulsar_dpkg_lock_timeout }}"
+  when: ansible_os_family == 'Debian'
+  # ...and retry the install with backoff if apt still hits the lock.
 - name: Install build dependencies for Pulsar
   ansible.builtin.package:
     name: "{{ pulsar_build_packages[ansible_os_family] }}"
     state: present
+  until: _pulsar_build_deps is succeeded
+  retries: 5
+  delay: 15
+  register: _pulsar_build_deps
 
 - name: Add the package source for the SLURM DRMAA library
   ansible.builtin.include_role:
