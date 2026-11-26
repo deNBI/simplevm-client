@@ -98,6 +98,9 @@ pulsar_build_packages:
 # running BiBiGrid masters can have unattended-upgrades hold it for a while).
 pulsar_dpkg_lock_timeout: 900
 
+# SLURM DRMAA PPA (launchpad ppa:galaxyproject/slurm-drmaa) signing key.
+pulsar_slurm_drmaa_key_id: "8DE68488997C5C6BA19021136F2CC56412788738"
+
 # slurm-drmaa package (from the Galaxy PPA added by galaxyproject.repos).
 pulsar_slurm_drmaa_package:
   Debian: slurm-drmaa1
