@@ -76,18 +76,20 @@
     name: "{{ pulsar_build_packages[ansible_os_family] }}"
     state: present
 
-# ---- SLURM DRMAA library (needs the Galaxy PPA, added by galaxyproject.repos) ----
-# On BiBiGrid masters /etc/resolv.conf may be missing (DNS works via
-# systemd-resolved at 127.0.0.53), so apt-key's GPG subprocess fails with
-# "DNS is not properly configured" + "No such file or directory". Fetch the
-# PPA key via HTTPS before galaxyproject.repos runs; the role's apt-key step
-# then finds the key already in trusted.gpg.d and skips the HKP fetch.
 - name: Install the SLURM DRMAA PPA key
   ansible.builtin.shell: |
+    set -euo pipefail
+    tmp=$(mktemp)
+    trap 'rm -f "$tmp"' EXIT
     curl -sSf --retry 3 \
-      "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ pulsar_slurm_drmaa_key_id }}&fingerprint=on" \
-      | gpg --no-tty --keyring /etc/apt/trusted.gpg.d/galaxy-slurm-drmaa.gpg --import
+      "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ pulsar_slurm_drmaa_key_id }}" \
+      | gpg --batch --yes --dearmor -o "$tmp"
+    # make sure we got the expected key, not an HTML error page or another key
+    gpg --batch --show-keys --with-colons "$tmp" \
+      | grep -qi "^fpr:.*:{{ pulsar_slurm_drmaa_key_id }}:"
+    install -m 0644 -o root -g root "$tmp" /etc/apt/trusted.gpg.d/galaxy-slurm-drmaa.gpg
   args:
+    executable: /bin/bash
     creates: /etc/apt/trusted.gpg.d/galaxy-slurm-drmaa.gpg
   when: pulsar_scheduler == 'slurm'
 
