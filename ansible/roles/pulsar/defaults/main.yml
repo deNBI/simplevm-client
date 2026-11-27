@@ -42,6 +42,10 @@ pulsar_config_dir: "{{ pulsar_server_dir }}/config"
 pulsar_persistence_dir: "{{ pulsar_server_dir }}/files/persisted_data"
 
 pulsar_systemd: true
+# Service name for our Restart Pulsar handler (handlers/main.yml). Mirrors
+# galaxyproject.pulsar's default (pulsar.service); the included role's defaults
+# are not loaded when the handler runs, so it must be defined here.
+pulsar_systemd_service_name: pulsar
 # Tell galaxyproject.pulsar to notify our "Restart Pulsar" handler (defined in
 # handlers/main.yml). The role ships its own same-named handler that never
 # actually restarts systemd, so we point it at ours via this var.
