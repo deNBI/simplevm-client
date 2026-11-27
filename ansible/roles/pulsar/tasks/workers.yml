@@ -8,6 +8,12 @@
 - name: Mount the Galaxy CVMFS repositories
   ansible.builtin.include_role:
     name: galaxyproject.cvmfs
+    # The included role's own defaults (cvmfs_role: "", galaxy_cvmfs_repos_enabled:
+    # false) take precedence over this role's defaults for its tasks. Pass the
+    # wrapper values explicitly so they win.
+    vars:
+      cvmfs_role: "{{ cvmfs_role }}"
+      galaxy_cvmfs_repos_enabled: "{{ galaxy_cvmfs_repos_enabled }}"
   when: pulsar_cvmfs | bool
 
 - name: Install Apptainer
